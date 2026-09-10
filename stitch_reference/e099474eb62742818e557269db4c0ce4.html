@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="es"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>NEO-THREAD - Poleras Técnicas Personalizadas</title>
+<!-- Google Fonts & Icons -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@500&amp;family=Space+Grotesk:wght@500;600;700&amp;family=Geist:wght@400&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "secondary-fixed-dim": "#b1cade",
+                      "outline": "#8e9194",
+                      "error": "#ffb4ab",
+                      "surface-container-lowest": "#0a0e14",
+                      "surface-container-highest": "#31353c",
+                      "on-error-container": "#ffdad6",
+                      "on-tertiary-fixed-variant": "#36485b",
+                      "primary-container": "#bdc3c7",
+                      "error-container": "#93000a",
+                      "primary-fixed": "#dde3e7",
+                      "tertiary-fixed": "#d1e4fb",
+                      "surface-container-low": "#181c22",
+                      "on-primary-container": "#4a5054",
+                      "on-secondary-fixed": "#021e2d",
+                      "on-tertiary-fixed": "#091d2e",
+                      "outline-variant": "#434749",
+                      "secondary-container": "#31495b",
+                      "on-tertiary-container": "#3f5164",
+                      "on-primary-fixed": "#161c20",
+                      "on-error": "#690005",
+                      "secondary": "#b1cade",
+                      "surface-container-high": "#262a31",
+                      "surface-tint": "#c1c7cb",
+                      "background": "#10141a",
+                      "surface-dim": "#10141a",
+                      "on-primary-fixed-variant": "#41484b",
+                      "tertiary-container": "#b1c4da",
+                      "tertiary-fixed-dim": "#b5c8df",
+                      "inverse-surface": "#dfe2eb",
+                      "on-tertiary": "#203243",
+                      "on-primary": "#2b3135",
+                      "on-background": "#dfe2eb",
+                      "inverse-on-surface": "#2d3137",
+                      "surface-bright": "#353940",
+                      "on-secondary": "#1a3343",
+                      "on-surface-variant": "#c4c7c9",
+                      "primary": "#d9dfe3",
+                      "primary-fixed-dim": "#c1c7cb",
+                      "surface-variant": "#31353c",
+                      "tertiary": "#cde0f7",
+                      "on-secondary-fixed-variant": "#31495b",
+                      "surface": "#10141a",
+                      "on-surface": "#dfe2eb",
+                      "inverse-primary": "#595f63",
+                      "on-secondary-container": "#9fb8cd",
+                      "secondary-fixed": "#cce6fb",
+                      "surface-container": "#1c2026"
+              },
+              "borderRadius": {
+                      "DEFAULT": "0.25rem",
+                      "lg": "0.5rem",
+                      "xl": "0.75rem",
+                      "full": "9999px"
+              },
+              "spacing": {
+                      "unit": "8px",
+                      "margin-desktop": "64px",
+                      "container-max": "1440px",
+                      "gutter": "24px",
+                      "glass-padding": "32px",
+                      "margin-mobile": "20px"
+              },
+              "fontFamily": {
+                      "price-display": [
+                              "Space Grotesk"
+                      ],
+                      "label-caps": [
+                              "JetBrains Mono"
+                      ],
+                      "body-md": [
+                              "Geist"
+                      ],
+                      "headline-xl": [
+                              "Space Grotesk"
+                      ],
+                      "headline-lg": [
+                              "Space Grotesk"
+                      ],
+                      "headline-lg-mobile": [
+                              "Space Grotesk"
+                      ]
+              },
+              "fontSize": {
+                      "price-display": [
+                              "24px",
+                              {
+                                      "lineHeight": "1.0",
+                                      "fontWeight": "500"
+                              }
+                      ],
+                      "label-caps": [
+                              "12px",
+                              {
+                                      "lineHeight": "1.0",
+                                      "letterSpacing": "0.1em",
+                                      "fontWeight": "500"
+                              }
+                      ],
+                      "body-md": [
+                              "16px",
+                              {
+                                      "lineHeight": "1.6",
+                                      "fontWeight": "400"
+                              }
+                      ],
+                      "headline-xl": [
+                              "80px",
+                              {
+                                      "lineHeight": "1.0",
+                                      "letterSpacing": "-0.04em",
+                                      "fontWeight": "700"
+                              }
+                      ],
+                      "headline-lg": [
+                              "48px",
+                              {
+                                      "lineHeight": "1.1",
+                                      "letterSpacing": "-0.02em",
+                                      "fontWeight": "600"
+                              }
+                      ],
+                      "headline-lg-mobile": [
+                              "32px",
+                              {
+                                      "lineHeight": "1.2",
+                                      "fontWeight": "600"
+                              }
+                      ]
+              }
+            }
+          }
+        }
+    </script>
+<style>
+        .glass-panel {
+            background: rgba(49, 53, 60, 0.4);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(177, 202, 222, 0.2);
+        }
+        .glass-panel-active {
+            background: rgba(49, 53, 60, 0.6);
+            backdrop-filter: blur(40px);
+            -webkit-backdrop-filter: blur(40px);
+            border: 1px solid rgba(177, 202, 222, 0.4);
+            box-shadow: inset 0 0 20px rgba(177, 202, 222, 0.1);
+        }
+        .hero-bg-gradient {
+            background: radial-gradient(circle at 50% 50%, rgba(49, 73, 91, 0.2) 0%, rgba(16, 20, 26, 1) 100%);
+        }
+    </style>
+</head>
+<body class="bg-background text-on-background font-body-md min-h-screen selection:bg-secondary selection:text-on-secondary">
+<!-- Navigation (TopNavBar Component) -->
+<nav class="fixed top-0 w-full z-50 h-20 border-b border-secondary/20 bg-surface/40 backdrop-blur-xl flex justify-between items-center px-margin-mobile md:px-margin-desktop max-w-container-max mx-auto transition-all duration-300">
+<!-- Brand Logo -->
+<a class="font-headline-lg-mobile md:font-headline-lg text-headline-lg-mobile md:text-headline-lg font-bold tracking-tighter text-primary" href="#">
+            NEO-THREAD
+        </a>
+<!-- Desktop Navigation Links -->
+<div class="hidden md:flex items-center gap-8">
+<a class="font-label-caps text-label-caps text-outline hover:text-primary transition-colors duration-300" href="#">CATALOG</a>
+<a class="font-label-caps text-label-caps text-outline hover:text-primary transition-colors duration-300" href="#">SERIES_01</a>
+<a class="font-label-caps text-label-caps text-primary border-b-2 border-primary pb-1 hover:bg-secondary-container/30 hover:text-primary transition-all duration-300" href="#">CUSTOMIZE</a>
+<a class="font-label-caps text-label-caps text-outline hover:text-primary transition-colors duration-300" href="#">LAB</a>
+<a class="font-label-caps text-label-caps text-outline hover:text-primary transition-colors duration-300" href="#">ARCHIVE</a>
+</div>
+<!-- Trailing Actions -->
+<div class="flex items-center gap-4">
+<button aria-label="Search" class="text-outline hover:text-primary transition-colors duration-300 hover:bg-secondary-container/30 p-2 rounded-full">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 0;">search</span>
+</button>
+<button aria-label="Profile" class="text-outline hover:text-primary transition-colors duration-300 hover:bg-secondary-container/30 p-2 rounded-full">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 0;">person</span>
+</button>
+<button class="hidden md:flex items-center justify-center bg-primary-container text-on-primary-container px-4 py-2 rounded-sm font-label-caps text-label-caps hover:bg-secondary hover:text-on-secondary transition-all duration-300 active:scale-95 ease-in-out">
+                CART
+            </button>
+</div>
+</nav>
+<!-- Main Content -->
+<main>
+<!-- Hero Section -->
+<section class="relative min-h-screen flex items-center justify-center pt-20 px-margin-mobile md:px-margin-desktop overflow-hidden hero-bg-gradient">
+<!-- Atmospheric Background Image -->
+<div class="absolute inset-0 z-0 opacity-40">
+<img alt="Techwear Aesthetic Background" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuD6eBlAPllrhOtM6gpXpe38l1W-8zLKpRxhcRS97CXE7fVvTrpVwsRh8gt5s4Y9dCbdMMX449XgvfkZMczVpbUrA91xItp9ZsrMgQnUc8gsZP8VVwKfAyqKBciTtoIAdYkJKuJ1lk36h9MazBMLsHcXfwG2LYi8_hwY9lpiD03i4h4JOEMM9sgNO3pjubBawfviVm2K9hsByzW3qQpvhDD_9fyWipDj13qYWMmC7r1cF3Kmv58zEFMNtRV_eh90AF5SDzA"/>
+</div>
+<!-- Foreground Content -->
+<div class="relative z-10 w-full max-w-container-max mx-auto flex flex-col items-center md:items-start text-center md:text-left gap-8 glass-padding">
+<div class="glass-panel p-6 md:p-10 rounded-xl inline-flex flex-col gap-4 border-l-4 border-l-secondary">
+<span class="font-label-caps text-label-caps text-secondary tracking-[0.2em]">IDENTIDAD MODULAR // SYS.ON</span>
+<h1 class="font-headline-xl text-headline-xl text-primary max-w-3xl leading-tight">
+                        VISTE TU <br/><span class="text-secondary">IDENTIDAD</span>
+</h1>
+<p class="font-body-md text-body-md text-on-surface-variant max-w-xl">
+                        Poleras personalizadas con diseños técnicos únicos y exclusivos. Desarrolladas con materiales de alto rendimiento para el entorno urbano.
+                    </p>
+<div class="flex flex-col sm:flex-row gap-4 mt-4">
+<button class="bg-primary-container text-on-primary-container font-label-caps text-label-caps px-8 py-4 rounded-sm hover:bg-inverse-primary hover:text-primary transition-all duration-300 active:scale-95">
+                            PERSONALIZAR AHORA
+                        </button>
+<button class="glass-panel text-primary font-label-caps text-label-caps px-8 py-4 rounded-sm hover:bg-surface-bright hover:text-secondary transition-all duration-300 active:scale-95">
+                            VER COLECCIONES
+                        </button>
+</div>
+</div>
+</div>
+</section>
+<!-- Featured Collection -->
+<section class="py-24 px-margin-mobile md:px-margin-desktop max-w-container-max mx-auto">
+<div class="flex justify-between items-end mb-12 border-b border-surface-container-highest pb-4">
+<div>
+<h2 class="font-headline-lg text-headline-lg text-primary">NEW ARRIVALS</h2>
+<p class="font-label-caps text-label-caps text-outline mt-2">SYS.VER.01 // TECHNICAL KNIT</p>
+</div>
+<button class="font-label-caps text-label-caps text-secondary hover:text-primary transition-colors">VIEW ALL --&gt;</button>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-gutter">
+<!-- Product Card 1 -->
+<div class="glass-panel group rounded-lg overflow-hidden flex flex-col relative">
+<div class="absolute top-4 left-4 z-10">
+<span class="font-label-caps text-label-caps text-primary border border-secondary/30 bg-surface/50 backdrop-blur-md px-2 py-1 rounded-sm">SERIES_01</span>
+</div>
+<div class="h-[400px] w-full overflow-hidden bg-surface-container-low relative">
+<img class="w-full h-full object-cover filter grayscale group-hover:grayscale-0 transition-all duration-500 transform group-hover:scale-105" data-alt="A highly detailed studio shot of a futuristic techwear t-shirt in dark charcoal grey, featuring geometric paneling and subtle silver reflective accents. The shirt is displayed on an invisible mannequin against a dark, moody background with cool blue rim lighting. The aesthetic is cyber-industrial and premium." src="https://lh3.googleusercontent.com/aida-public/AB6AXuB6DSmeatwvzYoL0v55oJGtXlKDc1JKROnPIUXzYMTmmEuPNYdqE_QiNQ-oyv3nb20hliYU-QeesGcM7zXn8VhYcg_h5aImvcrQHilIvMu6SsjUY7lHrYpRNteFtmL6A4EN6wkpTLNOTNiRd-VUw9RY-MI4pvilYQyVSdI_4kAj38E0bWPGtt5YbPAonbcsnBpVqsJxigHT0tXRC-gHSZ2xrfkkT8tjjvECa20nq20POgAIQ2cwqP7r5A"/>
+</div>
+<div class="p-6 flex flex-col gap-2 border-t border-secondary/10 bg-surface-container/50">
+<div class="flex justify-between items-start">
+<div>
+<h3 class="font-label-caps text-label-caps text-primary">AERO-MESH CORE TEE</h3>
+<p class="text-xs text-outline mt-1 font-mono">CLR: OBSIDIAN</p>
+</div>
+<span class="font-price-display text-price-display text-secondary">$89.00</span>
+</div>
+</div>
+</div>
+<!-- Product Card 2 -->
+<div class="glass-panel group rounded-lg overflow-hidden flex flex-col relative">
+<div class="absolute top-4 left-4 z-10">
+<span class="font-label-caps text-label-caps text-primary border border-secondary/30 bg-surface/50 backdrop-blur-md px-2 py-1 rounded-sm">LIMITED</span>
+</div>
+<div class="h-[400px] w-full overflow-hidden bg-surface-container-low relative">
+<img class="w-full h-full object-cover filter grayscale group-hover:grayscale-0 transition-all duration-500 transform group-hover:scale-105" data-alt="A premium techwear t-shirt in stark white with asymmetric black technical zippers and nylon cargo pockets. Photographed in a stark, minimalist studio setting with harsh, directional lighting creating sharp shadows. The style is utilitarian, sterile, and highly modern." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBLwdeIQgphvx49LsSpNq_xpsrxUOH-gLKD6QpmLkfaTrrP6JDNreY2fx59nbNVyfNajCtW28tKne6yyWJ7URduzMVRLOPmIpMvao8XLG1BK8fHhKWYjx6qUfk28XyxzXrb0LOyUeioKRPW8lODrs2MGRkI2uactKaFF_4XoUPuXDibnvnNpyI7Q1dbluhFrj8msEJwtzes7RQTykq1nsFTAaiDAx8vWsjrZ_HAu3DI1jGfOgUX_Tpjkw"/>
+</div>
+<div class="p-6 flex flex-col gap-2 border-t border-secondary/10 bg-surface-container/50">
+<div class="flex justify-between items-start">
+<div>
+<h3 class="font-label-caps text-label-caps text-primary">STRATA UTILITY TEE</h3>
+<p class="text-xs text-outline mt-1 font-mono">CLR: GLACIER</p>
+</div>
+<span class="font-price-display text-price-display text-secondary">$110.00</span>
+</div>
+</div>
+</div>
+<!-- Product Card 3 -->
+<div class="glass-panel group rounded-lg overflow-hidden flex flex-col relative">
+<div class="h-[400px] w-full overflow-hidden bg-surface-container-low relative">
+<img class="w-full h-full object-cover filter grayscale group-hover:grayscale-0 transition-all duration-500 transform group-hover:scale-105" data-alt="A sleek, long-sleeve technical top featuring gradient heat-mapped graphics in neon blue and silver over a deep navy base fabric. The garment has seamless construction details. Set against a dark industrial backdrop illuminated by soft, diffused neon light, highlighting the fabric's technical texture." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAJAzINPDLVOnnCkBAvtgbtZUiEOpghGlz0iTzjXB1U5ihylh10i_VPsYnCQesbDeymOdpW2RgKUuiolfC2NDYxdfxY0cMZ8EkcvovSfdR6BXCkmxx9V5rXw1Y7-DKieyWyyoMnGIAJjS9hCVrsWq5c7x1m0JIdKqyRZZaOb--ATJeA3Y22C0wO7rU5PcGAw3w-g1YdW5fhJYtYgV0zmf3hFDTSrYvd32O1t8v3cPUPdToMAVGo1N2GOw"/>
+</div>
+<div class="p-6 flex flex-col gap-2 border-t border-secondary/10 bg-surface-container/50">
+<div class="flex justify-between items-start">
+<div>
+<h3 class="font-label-caps text-label-caps text-primary">THERMAL MATRIX L/S</h3>
+<p class="text-xs text-outline mt-1 font-mono">CLR: NEON/NAVY</p>
+</div>
+<span class="font-price-display text-price-display text-secondary">$135.00</span>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- Process Section -->
+<section class="py-24 px-margin-mobile md:px-margin-desktop bg-surface-container-lowest relative overflow-hidden">
+<!-- Background detail -->
+<div class="absolute inset-0 z-0 opacity-10 pointer-events-none" style="background-image: repeating-linear-gradient(45deg, transparent, transparent 10px, rgba(177, 202, 222, 0.1) 10px, rgba(177, 202, 222, 0.1) 11px);"></div>
+<div class="max-w-container-max mx-auto relative z-10">
+<div class="text-center mb-16">
+<h2 class="font-headline-lg text-headline-lg text-primary">THE PROTOCOL</h2>
+<p class="font-label-caps text-label-caps text-outline mt-4">CUSTOM FABRICATION SEQUENCE</p>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+<!-- Step 1 -->
+<div class="glass-panel p-8 rounded-xl flex flex-col items-center text-center hover:glass-panel-active transition-all duration-300">
+<div class="w-16 h-16 rounded-full border border-secondary flex items-center justify-center mb-6 bg-surface-container">
+<span class="material-symbols-outlined text-secondary" style="font-size: 32px;">design_services</span>
+</div>
+<h3 class="font-label-caps text-label-caps text-primary mb-4 text-lg">01. DISEÑA</h3>
+<p class="font-body-md text-body-md text-on-surface-variant">Selecciona la base modular y aplica gráficos o modificaciones estructurales en nuestro LAB virtual.</p>
+</div>
+<!-- Step 2 -->
+<div class="glass-panel p-8 rounded-xl flex flex-col items-center text-center hover:glass-panel-active transition-all duration-300">
+<div class="w-16 h-16 rounded-full border border-secondary flex items-center justify-center mb-6 bg-surface-container">
+<span class="material-symbols-outlined text-secondary" style="font-size: 32px;">architecture</span>
+</div>
+<h3 class="font-label-caps text-label-caps text-primary mb-4 text-lg">02. AJUSTA</h3>
+<p class="font-body-md text-body-md text-on-surface-variant">Define las especificaciones de talla precisas. Nuestro sistema asegura un calce técnico perfecto para la movilidad urbana.</p>
+</div>
+<!-- Step 3 -->
+<div class="glass-panel p-8 rounded-xl flex flex-col items-center text-center hover:glass-panel-active transition-all duration-300">
+<div class="w-16 h-16 rounded-full border border-secondary flex items-center justify-center mb-6 bg-surface-container">
+<span class="material-symbols-outlined text-secondary" style="font-size: 32px;">local_shipping</span>
+</div>
+<h3 class="font-label-caps text-label-caps text-primary mb-4 text-lg">03. RECIBE</h3>
+<p class="font-body-md text-body-md text-on-surface-variant">Producción de alta fidelidad y despliegue logístico directo a tu locación. Embalaje industrial seguro.</p>
+</div>
+</div>
+</div>
+</section>
+</main>
+<!-- Footer Component -->
+<footer class="w-full py-12 px-margin-mobile md:px-margin-desktop border-t border-secondary/10 bg-background flex flex-col md:flex-row justify-between items-center gap-gutter max-w-container-max mx-auto">
+<div class="font-label-caps text-label-caps text-primary">
+            NEO-THREAD
+        </div>
+<div class="flex flex-wrap justify-center gap-6">
+<a class="font-label-caps text-label-caps text-outline hover:text-tertiary transition-colors duration-200 focus:underline focus:decoration-secondary" href="#">PRIVACY</a>
+<a class="font-label-caps text-label-caps text-outline hover:text-tertiary transition-colors duration-200 focus:underline focus:decoration-secondary" href="#">TERMS</a>
+<a class="font-label-caps text-label-caps text-outline hover:text-tertiary transition-colors duration-200 focus:underline focus:decoration-secondary" href="#">SHIPPING</a>
+<a class="font-label-caps text-label-caps text-outline hover:text-tertiary transition-colors duration-200 focus:underline focus:decoration-secondary" href="#">CONTACT</a>
+</div>
+<div class="font-body-md text-body-md text-outline text-sm">
+            © 2024 NEO-THREAD INDUSTRIAL DIV. ALL RIGHTS RESERVED.
+        </div>
+</footer>
+</body></html>

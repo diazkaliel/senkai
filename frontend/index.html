@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="es" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SEIKO // ESTUDIO TEXTIL DTF - Poleras & Polerones Estampados de Alta Gama</title>
+  <meta name="description" content="Estudio de personalización textil especializado en técnica DTF (Direct to Film) para poleras heavyweight y polerones. Calidad industrial, durabilidad +50 lavados y despacho express.">
+
+  <link rel="icon" type="image/png" href="/static/assets/logo.png">
+  <!-- Tipografías: Space Grotesk (Display & Títulos), Geist (Cuerpo), JetBrains Mono (Datos técnicos) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;600;700;800;900&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
+
+  <!-- Hojas de Estilos Modulares Glassmorphic -->
+  <link rel="stylesheet" href="/static/css/variables.css">
+  <link rel="stylesheet" href="/static/css/base.css">
+  <link rel="stylesheet" href="/static/css/components.css">
+  <link rel="stylesheet" href="/static/css/customizer.css">
+  <link rel="stylesheet" href="/static/css/admin.css">
+</head>
+<body>
+
+  <!-- =========================================================================
+       ESCENA AMBIENTAL DINÁMICA (ORBES DE LUZ FLOTANTES)
+       ========================================================================= -->
+  <div class="ambient-scene" aria-hidden="true">
+    <div class="ambient-orb orb-1"></div>
+    <div class="ambient-orb orb-2"></div>
+    <div class="ambient-orb orb-3"></div>
+    <div class="ambient-orb orb-4"></div>
+  </div>
+
+  <!-- =========================================================================
+       BARRA DE NAVEGACIÓN FLOTANTE GLASSMORPHIC
+       ========================================================================= -->
+  <header class="navbar">
+    <div class="container navbar-inner">
+      <a href="#inicio" class="brand-logo" aria-label="Senkai Estudio Textil DTF">
+        <img src="/static/assets/logo.png" alt="Senkai Estudio Textil DTF" class="brand-logo-img-full">
+      </a>
+
+      <nav>
+        <ul class="nav-links">
+          <li><a href="#inicio" class="nav-link active">Inicio</a></li>
+          <li><a href="#personalizador" class="nav-link">Diseñar</a></li>
+          <li><a href="#catalogo" class="nav-link">Colecciones</a></li>
+          <li><a href="#protocolo" class="nav-link">Nosotros</a></li>
+        </ul>
+      </nav>
+
+      <div class="nav-actions">
+        <div class="nav-search-wrap">
+          <span class="material-symbols-outlined" style="font-size: 16px; color: var(--text-muted);">search</span>
+          <input type="text" placeholder="Buscar..." class="nav-search-input" id="globalSearchInput">
+        </div>
+
+        <button class="cart-btn" id="cartTriggerBtn" aria-label="Abrir Carrito">
+          <span class="material-symbols-outlined" style="font-size: 18px;">shopping_bag</span>
+          <span>CARRITO</span>
+          <span class="cart-counter" id="cartCounter" style="display: none;">0</span>
+        </button>
+
+        <button class="admin-switch-btn" id="adminToggleBtn" title="Panel de Taller">
+          ⚡ Taller
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- =========================================================================
+       VISTA PÚBLICA (TIENDA Y ESTUDIO)
+       ========================================================================= -->
+  <main id="storefrontView">
+    
+    <!-- 1. HERO SECTION ASIMÉTRICO (ESTILO DE LA REFERENCIA) -->
+    <section class="hero" id="inicio">
+      <div class="container hero-grid-ref">
+        
+        <!-- Tarjeta Principal Izquierda -->
+        <div class="hero-main-glass-card">
+          <div class="hero-mockup-wrap">
+            <img src="/static/assets/hero_main_tshirt.png" alt="Personaliza tu estilo" style="width: 100%; height: auto; object-fit: contain; filter: drop-shadow(0 20px 40px rgba(0, 0, 0, 0.85));">
+          </div>
+
+          <div class="hero-content-side">
+            <h1 class="hero-ref-title">
+              PERSONALIZA<br>TU ESTILO
+            </h1>
+            <p class="hero-ref-subtitle">
+              Crea tu polera única con nuestro diseñador online.
+            </p>
+            <a href="#personalizador" class="hero-ref-cta-btn">
+              Personalizar Ahora
+            </a>
+          </div>
+        </div>
+
+        <!-- Tarjetas Apiladas Derecha -->
+        <div class="hero-stacked-column">
+          <!-- Tarjeta Superior: Modelo Minimalista Azul -->
+          <a href="#personalizador" class="hero-side-card" title="Personalizar Modelo Minimalista">
+            <div class="hero-side-mockup">
+              <img src="/static/assets/hero_side_top.png" alt="Modelo Minimalista Azul" style="width: 100%; height: auto; object-fit: contain; filter: drop-shadow(0 15px 28px rgba(0, 0, 0, 0.75));">
+            </div>
+          </a>
+
+          <!-- Tarjeta Inferior: Modelo Urbana Blanco -->
+          <a href="#personalizador" class="hero-side-card" title="Personalizar Modelo Urbana">
+            <div class="hero-side-mockup">
+              <img src="/static/assets/hero_side_bottom.png" alt="Modelo Urbana Blanco" style="width: 100%; height: auto; object-fit: contain; filter: drop-shadow(0 15px 28px rgba(0, 0, 0, 0.75));">
+            </div>
+          </a>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- 2. MARQUEE / TICKER CONTINUO INDUSTRIAL -->
+    <div class="marquee-container" aria-hidden="true">
+      <div class="marquee-content">
+        <div class="marquee-item">✦ <span class="highlight">ESTAMPADO TEXTIL DTF 300 DPI</span></div>
+        <div class="marquee-item">✦ ALGODÓN PEINADO HEAVYWEIGHT 240G</div>
+        <div class="marquee-item">✦ <span class="highlight">CERO PEDIDO MÍNIMO</span></div>
+        <div class="marquee-item">✦ RESISTENCIA COMPROBADA +50 LAVADOS</div>
+        <div class="marquee-item">✦ <span class="highlight">TERMOFIJADO A 160°C</span></div>
+        <div class="marquee-item">✦ TALLER INDUSTRIAL SEIKO</div>
+        <div class="marquee-item">✦ <span class="highlight">DESPACHOS A TODO CHILE</span></div>
+        <!-- Duplicado para loop infinito -->
+        <div class="marquee-item">✦ <span class="highlight">ESTAMPADO TEXTIL DTF 300 DPI</span></div>
+        <div class="marquee-item">✦ ALGODÓN PEINADO HEAVYWEIGHT 240G</div>
+        <div class="marquee-item">✦ <span class="highlight">CERO PEDIDO MÍNIMO</span></div>
+        <div class="marquee-item">✦ RESISTENCIA COMPROBADA +50 LAVADOS</div>
+        <div class="marquee-item">✦ <span class="highlight">TERMOFIJADO A 160°C</span></div>
+        <div class="marquee-item">✦ TALLER INDUSTRIAL SEIKO</div>
+        <div class="marquee-item">✦ <span class="highlight">DESPACHOS A TODO CHILE</span></div>
+      </div>
+    </div>
+
+    <!-- 3. ESTUDIO DE PERSONALIZACIÓN DTF EN VIVO -->
+    <section class="customizer-section" id="personalizador">
+      <div class="container">
+        <div class="section-header">
+          <div>
+            <span class="badge badge-cyan" style="margin-bottom: 0.5rem;">
+              <span class="pulse-indicator"></span> SIMULADOR TEXTIL 3D / VECTOR PRO
+            </span>
+            <h2 class="section-title">Estudio de Creación Senkai DTF</h2>
+            <p class="section-desc">Selecciona tu prenda streetwear, aplica colores en tiempo real, ubica la estampa y cotiza al instante</p>
+          </div>
+        </div>
+
+        <div id="customizerContainer"></div>
+      </div>
+    </section>
+
+    <!-- 4. CATÁLOGO DE PRENDAS TEXTILES BASE -->
+    <section class="section" id="catalogo">
+      <div class="container" id="catalogContainer"></div>
+    </section>
+
+    <!-- 5. EL PROTOCOLO DE TALLER (3 PASOS TÉCNICOS) -->
+    <section class="section protocol-section" id="protocolo">
+      <div class="container">
+        <div class="section-header" style="justify-content: center; text-align: center;">
+          <div>
+            <span class="badge badge-lime" style="margin-bottom: 0.5rem;">FLUJO DE PRODUCCIÓN</span>
+            <h2 class="section-title">El Protocolo de Taller</h2>
+            <p class="section-desc">Secuencia de fabricación industrial de alta precisión</p>
+          </div>
+        </div>
+
+        <div class="protocol-grid">
+          <!-- Paso 1 -->
+          <div class="protocol-card">
+            <div class="protocol-icon-wrap">
+              <span class="material-symbols-outlined" style="font-size: 32px;">palette</span>
+            </div>
+            <h3 class="protocol-step-title">01. Configura & Diseña</h3>
+            <p class="protocol-step-desc">
+              Elige tu prenda base (180g a 320g) y sube tus artes vectoriales o PNG transparente a 300 DPI en nuestro simulador en tiempo real.
+            </p>
+          </div>
+
+          <!-- Paso 2 -->
+          <div class="protocol-card">
+            <div class="protocol-icon-wrap">
+              <span class="material-symbols-outlined" style="font-size: 32px;">precision_manufacturing</span>
+            </div>
+            <h3 class="protocol-step-title">02. Impresión & Termofijado</h3>
+            <p class="protocol-step-desc">
+              Imprimimos sobre film transfer con tintas CMYK+W y curamos con polvo de poliamida elastomérico a 160°C en prensa de calor industrial.
+            </p>
+          </div>
+
+          <!-- Paso 3 -->
+          <div class="protocol-card">
+            <div class="protocol-icon-wrap">
+              <span class="material-symbols-outlined" style="font-size: 32px;">local_shipping</span>
+            </div>
+            <h3 class="protocol-step-title">03. Control & Despacho</h3>
+            <p class="protocol-step-desc">
+              Inspección óptica de adherencia y elasticidad. Empaque industrial protegido listo para retiro en taller o envío express a tu puerta.
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- FOOTER -->
+    <footer style="padding: 4.5rem 0 2.5rem; border-top: 1px solid var(--glass-border); background: var(--bg-surface-dim);">
+      <div class="container" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 2rem;">
+        <div>
+          <div class="brand-logo" style="margin-bottom: 0.75rem;">
+            <img src="/static/assets/logo.png" alt="Senkai Estudio Textil" class="brand-logo-img-full" style="height: 58px;">
+          </div>
+          <p style="font-size: 0.85rem; font-family: var(--font-mono); color: var(--text-muted);">
+            Estudio de Estampado Textil de Precisión • Santiago, Chile
+          </p>
+        </div>
+        <div style="display: flex; gap: 1.5rem; font-family: var(--font-mono); font-size: 0.775rem; color: var(--text-muted);">
+          <span>PRIVACIDAD</span>
+          <span>TÉRMINOS</span>
+          <span>ENVÍOS</span>
+          <span>FASTAPI + CLOUDFLARE</span>
+        </div>
+      </div>
+    </footer>
+  </main>
+
+  <!-- =========================================================================
+       VISTA DE ADMINISTRACIÓN / TALLER (KANBAN PORTAL)
+       ========================================================================= -->
+  <div id="adminView" style="display: none;">
+    <div id="adminViewContainer"></div>
+  </div>
+
+  <!-- =========================================================================
+       DRAWER DEL CARRITO DE COMPRAS
+       ========================================================================= -->
+  <div class="drawer-backdrop" id="drawerBackdrop"></div>
+  <aside class="cart-drawer" id="cartDrawer">
+    <div class="drawer-header">
+      <div class="drawer-title">Carrito de Taller</div>
+      <button class="drawer-close-btn" id="closeCartDrawerBtn" aria-label="Cerrar">&times;</button>
+    </div>
+
+    <div class="cart-items-list" id="cartItemsList"></div>
+
+    <div class="drawer-footer">
+      <div class="drawer-summary-row">
+        <span>SUBTOTAL PRENDA + DTF</span>
+        <span id="drawerSubtotal" style="font-family: var(--font-mono); font-weight: 700; color: var(--text-primary);">$0 CLP</span>
+      </div>
+      <div class="drawer-summary-row">
+        <span>DESPACHO</span>
+        <span style="font-family: var(--font-mono);">DESDE $3.990 CLP</span>
+      </div>
+      <div class="drawer-total-row">
+        <span>TOTAL ESTIMADO</span>
+        <span class="total-amount" id="drawerTotal">$0 CLP</span>
+      </div>
+      <button class="btn btn-primary" id="goToCheckoutBtn" style="width: 100%;">
+        CONTINUAR AL CHECKOUT
+      </button>
+    </div>
+  </aside>
+
+  <!-- =========================================================================
+       MODAL DE CHECKOUT Y DATOS DE ENVÍO
+       ========================================================================= -->
+  <div class="modal-backdrop" id="checkoutModal">
+    <div class="modal-card">
+      <div style="margin-bottom: 2rem; text-align: center;">
+        <span class="badge badge-cyan" style="margin-bottom: 0.5rem;">FINALIZAR PEDIDO DTF</span>
+        <h2 style="font-size: 1.85rem;">Datos de Entrega y Facturación</h2>
+        <p style="font-size: 0.875rem; color: var(--text-secondary); margin-top: 0.25rem;">
+          Tu pedido ingresará directo al pipeline de impresión y curado térmico de nuestro taller.
+        </p>
+      </div>
+
+      <div style="background: var(--bg-surface-elevated); padding: 1.35rem; border-radius: var(--radius-xs); margin-bottom: 1.75rem; border: 1px solid var(--glass-border);">
+        <div style="font-size: 0.75rem; font-family: var(--font-mono); color: var(--text-muted); text-transform: uppercase; margin-bottom: 0.5rem;">
+          Resumen de Producción:
+        </div>
+        <div id="checkoutItemsSummary"></div>
+        <div style="display: flex; justify-content: space-between; font-size: 0.85rem; font-family: var(--font-mono); color: var(--text-secondary); margin-top: 0.6rem; border-top: 1px dashed var(--glass-border); padding-top: 0.6rem;">
+          <span>Costo de Envío:</span>
+          <span id="checkoutShippingVal" style="font-weight: 700;">$3.990 CLP</span>
+        </div>
+        <div style="display: flex; justify-content: space-between; font-size: 1.35rem; font-weight: 800; font-family: var(--font-display); color: var(--accent-cyan); margin-top: 0.6rem;">
+          <span>Total a Pagar:</span>
+          <span id="checkoutTotalVal">$0 CLP</span>
+        </div>
+      </div>
+
+      <form id="checkoutForm">
+        <div class="form-group">
+          <label class="form-label">Nombre y Apellido *</label>
+          <input type="text" name="fullName" class="form-input" placeholder="Ej: Ignacio Valenzuela" required>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Correo Electrónico *</label>
+            <input type="email" name="email" class="form-input" placeholder="tu@correo.com" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Teléfono / WhatsApp *</label>
+            <input type="tel" name="phone" class="form-input" placeholder="+56 9 8765 4321" required>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Método de Despacho</label>
+          <select name="deliveryMethod" id="deliveryMethodSelect" class="form-select">
+            <option value="shipping">Envío a Domicilio Express (Starken / Chilexpress - $3.990 CLP)</option>
+            <option value="pickup">Retiro en Taller Seiko (Providencia, Santiago - Gratis)</option>
+          </select>
+        </div>
+
+        <div id="shippingAddressGroup">
+          <div class="form-group">
+            <label class="form-label">Dirección de Despacho *</label>
+            <input type="text" name="shippingAddress" class="form-input" placeholder="Calle, número, departamento u oficina">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Comuna / Ciudad *</label>
+            <input type="text" name="shippingCity" class="form-input" placeholder="Ej: Providencia, Santiago">
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Instrucciones Especiales para el Taller (Opcional)</label>
+          <textarea name="notes" class="form-textarea" rows="2" placeholder="Ej: Centrar estampa 3cm bajo la costura de cuello"></textarea>
+        </div>
+
+        <div style="display: flex; gap: 1rem; margin-top: 2.25rem;">
+          <button type="button" class="btn btn-secondary" id="closeCheckoutModalBtn" style="flex: 1;">CANCELAR</button>
+          <button type="submit" class="btn btn-accent" id="confirmOrderBtn" style="flex: 2;">
+            CONFIRMAR PEDIDO Y PASAR A TALLER
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- =========================================================================
+       MODAL DE CONFIRMACIÓN DE PEDIDO INGRESADO
+       ========================================================================= -->
+  <div class="modal-backdrop" id="orderSuccessModal">
+    <div class="modal-card" style="text-align: center;">
+      <div style="width: 68px; height: 68px; border-radius: 50%; background: rgba(0, 255, 136, 0.15); border: 2px solid var(--accent-lime); display: flex; align-items: center; justify-content: center; margin: 0 auto 1.5rem; color: var(--accent-lime);">
+        <span class="material-symbols-outlined" style="font-size: 38px;">check_circle</span>
+      </div>
+
+      <span class="badge badge-lime" style="margin-bottom: 0.5rem;">¡ORDEN GENERADA CON ÉXITO!</span>
+      <h2 style="font-size: 1.85rem; margin-bottom: 0.5rem;">Pedido en Cola de Taller</h2>
+      <p style="font-size: 0.925rem; color: var(--text-secondary);">
+        Tu orden ha sido registrada con el código de seguimiento:
+      </p>
+      
+      <div style="font-size: 2.25rem; font-weight: 800; font-family: var(--font-mono); color: var(--accent-cyan); margin: 0.85rem 0;" id="successOrderNumber">
+        SKO-2026-0001
+      </div>
+
+      <div id="successOrderDetails"></div>
+
+      <div style="margin-top: 2rem;">
+        <button class="btn btn-primary" id="closeSuccessModalBtn" style="width: 100%;">
+          SEGUIR EXPLORANDO
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Container -->
+  <div class="toast-container" id="toastContainer"></div>
+
+  <!-- Script Principal -->
+  <script type="module" src="/static/js/app.js"></script>
+</body>
+</html>

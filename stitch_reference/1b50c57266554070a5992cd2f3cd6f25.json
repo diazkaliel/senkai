@@ -1,0 +1,20 @@
+{
+  "screenshot": {
+    "name": "projects/13326850608578728203/screens/1b50c57266554070a5992cd2f3cd6f25/fileEntries/screenshot",
+    "downloadUrl": "https://lh3.googleusercontent.com/aida/AEtjO1VGVfzUahOPTZTn4_8voNgiZFvSIZj8M85lX-_LkcKFtaL0pN4l7XQgO32Xl1Je_RHd8fwgDumYfd1l-mqlqA5nS5ToTtOYnahHnVkJF1S7XLjqhpbsZrJGSa6_Qkv_XSJOgGsSkHTi6U2XKnQiHdTm0usslL40Z8kHlRSoTOthKOVBfKdYRS8F6DNI9KCgZr8VJzX45VOgepTItf1QwCG-pb-9_5P_Rj7JMpWseDCg3Afk01Gr48liK8Ff"
+  },
+  "id": "1b50c57266554070a5992cd2f3cd6f25",
+  "generatedBy": "image_space_edit_agent",
+  "width": "768",
+  "height": "1376",
+  "title": "Inicio Tienda Poleras Personalizadas",
+  "prompt": "Title: Inicio Tienda Poleras - Dark Glass Edition\nContext: Custom t-shirt e-commerce store with glassmorphism effects for the Chilean market in dark mode.\nEdit request: Actualizar la página de inicio a una paleta de colores oscura. El fondo debe ser un gradiente profundo de azul medianoche o carbón con formas orgánicas difuminadas. Los paneles de 'glassmorphism' deben ser oscuros y translúcidos, con bordes sutilmente iluminados para resaltar sobre el fondo oscuro. Mantener los precios en Pesos Chilenos (CLP) y el contenido en español. La estética debe ser premium y nocturna, haciendo que las poleras y los botones de acción (como 'Personalizar Ahora') resalten con colores vibrantes o blancos puros.\nPlatform: web\nForm factor: desktop",
+  "name": "projects/13326850608578728203/screens/1b50c57266554070a5992cd2f3cd6f25",
+  "theme": {},
+  "deviceType": "DESKTOP",
+  "screenType": "DESIGN",
+  "screenMetadata": {
+    "agentType": "IMAGE_PRO_AGENT",
+    "status": "COMPLETE"
+  }
+}

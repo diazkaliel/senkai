@@ -1,0 +1,871 @@
+/* ==========================================================================
+   SEIKO // ESTUDIO DE PERSONALIZACIÓN DTF INTERACTIVO - V2 PRO
+   ========================================================================== */
+
+.customizer-section {
+  padding: 5rem 0 7rem;
+  position: relative;
+}
+
+.customizer-layout {
+  display: grid;
+  grid-template-columns: 1.15fr 0.85fr;
+  gap: 2.75rem;
+  align-items: start;
+}
+
+@media (max-width: 1024px) {
+  .customizer-layout {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   1. VISUALIZADOR CANVAS
+   -------------------------------------------------------------------------- */
+.visualizer-card {
+  background: var(--glass-bg);
+  backdrop-filter: var(--glass-blur-lg);
+  -webkit-backdrop-filter: var(--glass-blur-lg);
+  border: 1px solid var(--glass-border-light);
+  /* Borde superior rojo como marco de estudio fotográfico */
+  border-top: 2px solid rgba(229, 29, 36, 0.55);
+  border-radius: var(--radius-lg);
+  padding: 2rem;
+  position: sticky;
+  top: 105px;
+  box-shadow: var(--shadow-glass), 0 0 40px rgba(229, 29, 36, 0.06);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.visualizer-toolbar {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.25rem;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+.view-toggle-group {
+  display: flex;
+  background: rgba(0, 0, 0, 0.5);
+  padding: 3px;
+  border-radius: var(--radius-xs);
+  border: 1px solid var(--glass-border);
+}
+
+.view-toggle-btn {
+  padding: 0.5rem 1.35rem;
+  border-radius: var(--radius-xs);
+  font-size: 0.75rem;
+  font-weight: 700;
+  font-family: var(--font-mono);
+  letter-spacing: 0.1em;
+  color: var(--text-muted);
+  transition: all var(--transition-fast);
+}
+
+.view-toggle-btn:hover {
+  color: var(--text-primary);
+}
+
+.view-toggle-btn.active {
+  background: var(--accent-cyan);
+  color: #000000;
+  box-shadow: 0 0 15px var(--accent-cyan-glow);
+}
+
+.canvas-viewport {
+  width: 100%;
+  max-width: 540px;
+  aspect-ratio: 1 / 1.08;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  user-select: none;
+
+  /* Estudio fotográfico: spotlight cenital dramático + acento rojo de marca */
+  background:
+    radial-gradient(ellipse 65% 55% at 50% 20%, rgba(255, 255, 255, 0.07) 0%, transparent 55%),
+    radial-gradient(ellipse 60% 50% at 50% 45%, rgba(229, 29, 36, 0.06) 0%, transparent 60%),
+    radial-gradient(ellipse 70% 60% at 50% 50%, rgba(0, 240, 255, 0.04) 0%, transparent 70%),
+    radial-gradient(circle at center, #121820 0%, #050709 100%);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: inset 0 0 80px rgba(0, 0, 0, 0.85), 0 24px 50px rgba(0, 0, 0, 0.65);
+}
+
+/* Grilla sutil de referencia milimétrica de taller */
+.canvas-viewport::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(to right, rgba(255, 255, 255, 0.025) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(255, 255, 255, 0.025) 1px, transparent 1px);
+  background-size: 28px 28px;
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* Acento láser inferior — ahora rojo-cyan más intenso */
+.canvas-viewport::after {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(90deg,
+    transparent 0%,
+    rgba(229, 29, 36, 0.8) 25%,
+    rgba(0, 240, 255, 0.6) 75%,
+    transparent 100%);
+  pointer-events: none;
+  z-index: 3;
+}
+
+.garment-svg-wrapper {
+  width: 94%;
+  height: 94%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  z-index: 2;
+
+  /* Transición fluida entre prendas y vistas */
+  animation: garment-enter 0.45s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@keyframes garment-enter {
+  from {
+    opacity: 0.4;
+    transform: scale(0.96) translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+/* ==========================================================================
+   ESCENARIO FOTOGRÁFICO MULTICAPA (GHOST MANNEQUIN STUDIO)
+   ========================================================================== */
+.photorealistic-garment-stage {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  user-select: none;
+  pointer-events: none;
+}
+
+/* Sombra de contacto en el piso del estudio */
+.garment-floor-shadow {
+  position: absolute;
+  bottom: 3%;
+  left: 14%;
+  right: 14%;
+  height: 32px;
+  background: radial-gradient(ellipse at center, rgba(0, 0, 0, 0.8) 0%, rgba(0, 0, 0, 0.35) 55%, transparent 75%);
+  filter: blur(10px);
+  z-index: 1;
+  pointer-events: none;
+}
+
+/* Capa 1: Color Textil Dinámico con Máscara Alfa */
+.garment-color-base {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  -webkit-mask-size: contain;
+  mask-size: contain;
+  -webkit-mask-position: center;
+  mask-position: center;
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  z-index: 2;
+  transition: background-color 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+  filter: drop-shadow(0 20px 40px rgba(0, 0, 0, 0.85));
+}
+
+/* Capas Fotográficas Base (Multiply y Screen) */
+.garment-photo-layer {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  pointer-events: none;
+  user-select: none;
+}
+
+/* Capa 2: Sombras y Pliegues Fotográficos (Multiply) */
+.garment-photo-layer.garment-multiply {
+  z-index: 3;
+  mix-blend-mode: multiply;
+  filter: contrast(1.16) brightness(0.96);
+  opacity: 0.96;
+}
+
+/* Capa 3: Iluminación de Estudio y Softbox (Screen) */
+.garment-photo-layer.garment-screen {
+  z-index: 4;
+  mix-blend-mode: screen;
+  filter: grayscale(100%) contrast(1.4) brightness(0.24);
+  opacity: 0.82;
+}
+
+/* --------------------------------------------------------------------------
+   ESTAMPA DTF CON ACABADO TEXTIL TERMOFIJADO
+   -------------------------------------------------------------------------- */
+.dtf-print-overlay {
+  position: absolute;
+  pointer-events: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10;
+  transition: top 0.25s ease, left 0.25s ease, width 0.25s ease, height 0.25s ease;
+
+  /* Animación suave de aparición */
+  animation: stamp-appear 0.35s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@keyframes stamp-appear {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.85);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(var(--stamp-scale, 1));
+  }
+}
+
+.dtf-print-overlay img {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+  /* Relieve sutil y brillo satinado de poliamida DTF termofijada a 160°C */
+  filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.5)) contrast(105%);
+}
+
+.dtf-print-overlay svg {
+  width: 100%;
+  height: 100%;
+  filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.5));
+}
+
+.canvas-badge-info {
+  position: absolute;
+  bottom: 0.85rem;
+  left: 0.85rem;
+  right: 0.85rem;
+  font-size: 0.7rem;
+  font-family: var(--font-mono);
+  background: rgba(9, 11, 14, 0.92);
+  backdrop-filter: blur(16px);
+  padding: 0.6rem 1.1rem;
+  border-radius: var(--radius-xs);
+  border: 1px solid var(--glass-border);
+  color: var(--text-secondary);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  z-index: 5;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
+}
+
+/* --------------------------------------------------------------------------
+   2. PANEL DE CONTROLES
+   -------------------------------------------------------------------------- */
+.controls-card {
+  background: var(--glass-bg);
+  backdrop-filter: var(--glass-blur-lg);
+  -webkit-backdrop-filter: var(--glass-blur-lg);
+  border: 1px solid var(--glass-border-light);
+  border-radius: var(--radius-lg);
+  padding: 2.5rem;
+  box-shadow: var(--shadow-glass);
+  position: relative;
+}
+
+.control-group {
+  margin-bottom: 2rem;
+  padding-bottom: 1.5rem;
+  border-bottom: 1px solid var(--glass-border);
+}
+
+.control-group:last-child {
+  border-bottom: none;
+  margin-bottom: 0;
+  padding-bottom: 0;
+}
+
+.control-label-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.control-step-num {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: rgba(0, 240, 255, 0.12);
+  border: 1px solid rgba(0, 240, 255, 0.4);
+  font-family: var(--font-mono);
+  font-weight: 800;
+  font-size: 0.7rem;
+  color: var(--accent-cyan);
+  flex-shrink: 0;
+}
+
+.control-title {
+  font-family: var(--font-display);
+  font-size: 0.95rem;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  color: var(--text-primary);
+  text-transform: uppercase;
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+}
+
+.control-badge-val {
+  font-family: var(--font-mono);
+  font-size: 0.725rem;
+  color: var(--accent-cyan);
+  letter-spacing: 0.04em;
+}
+
+/* --------------------------------------------------------------------------
+   SELECTOR DE PRENDA CON MINIATURA SVG
+   -------------------------------------------------------------------------- */
+.garment-grid-options {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.75rem;
+}
+
+.garment-opt-btn {
+  background: rgba(255, 255, 255, 0.025);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-sm);
+  padding: 0.9rem;
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  text-align: left;
+  transition: all var(--transition-fast);
+  cursor: pointer;
+}
+
+.garment-opt-btn:hover {
+  border-color: rgba(0, 240, 255, 0.4);
+  background: rgba(0, 240, 255, 0.04);
+  transform: translateY(-2px);
+}
+
+.garment-opt-btn.active {
+  border-color: var(--accent-cyan);
+  background: rgba(0, 240, 255, 0.08);
+  box-shadow: 0 0 22px rgba(0, 240, 255, 0.12), inset 0 0 0 1px rgba(0, 240, 255, 0.15);
+}
+
+.garment-opt-thumb {
+  width: 48px;
+  height: 48px;
+  flex-shrink: 0;
+  opacity: 0.7;
+  transition: opacity var(--transition-fast);
+}
+
+.garment-opt-btn:hover .garment-opt-thumb,
+.garment-opt-btn.active .garment-opt-thumb {
+  opacity: 1;
+}
+
+.garment-opt-info {
+  flex-grow: 1;
+  min-width: 0;
+}
+
+.garment-opt-name {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 0.85rem;
+  color: var(--text-primary);
+  margin-bottom: 0.15rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.garment-opt-meta {
+  font-size: 0.7rem;
+  color: var(--text-muted);
+  font-family: var(--font-mono);
+}
+
+/* --------------------------------------------------------------------------
+   PALETA DE COLORES
+   -------------------------------------------------------------------------- */
+.color-swatches-row {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.color-swatch-btn {
+  width: 44px;
+  height: 44px;
+  border-radius: var(--radius-sm);
+  border: 2px solid transparent;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  position: relative;
+}
+
+/* Borde blanco para colores oscuros */
+.color-swatch-btn::after {
+  content: "";
+  position: absolute;
+  inset: -1px;
+  border-radius: inherit;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  pointer-events: none;
+}
+
+.color-swatch-btn:hover {
+  transform: scale(1.15);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+}
+
+.color-swatch-btn.active {
+  border-color: var(--accent-cyan);
+  box-shadow: 0 0 0 3px var(--accent-cyan-glow), 0 4px 15px rgba(0, 0, 0, 0.5);
+  transform: scale(1.1);
+}
+
+/* Color name tooltip */
+.color-swatch-btn[title]:hover::before {
+  content: attr(title);
+  position: absolute;
+  bottom: calc(100% + 6px);
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(9, 11, 14, 0.95);
+  backdrop-filter: blur(8px);
+  color: var(--text-primary);
+  font-family: var(--font-mono);
+  font-size: 0.65rem;
+  font-weight: 600;
+  padding: 3px 8px;
+  border-radius: var(--radius-xs);
+  border: 1px solid var(--glass-border);
+  white-space: nowrap;
+  pointer-events: none;
+  z-index: 20;
+}
+
+/* --------------------------------------------------------------------------
+   TALLAS
+   -------------------------------------------------------------------------- */
+.size-pills-row {
+  display: flex;
+  gap: 0.65rem;
+  flex-wrap: wrap;
+}
+
+.size-pill-btn {
+  width: 54px;
+  height: 46px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-sm);
+  font-weight: 700;
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  transition: all var(--transition-fast);
+}
+
+.size-pill-btn:hover {
+  color: var(--text-primary);
+  border-color: rgba(0, 240, 255, 0.4);
+  background: rgba(0, 240, 255, 0.04);
+}
+
+.size-pill-btn.active {
+  background: var(--accent-cyan);
+  color: #000000;
+  border-color: var(--accent-cyan);
+  box-shadow: 0 0 18px var(--accent-cyan-glow);
+  font-weight: 800;
+}
+
+/* --------------------------------------------------------------------------
+   UBICACIÓN DTF
+   -------------------------------------------------------------------------- */
+.position-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.75rem;
+}
+
+.position-btn {
+  background: rgba(255, 255, 255, 0.025);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-sm);
+  padding: 0.85rem 1rem;
+  text-align: left;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  position: relative;
+  overflow: hidden;
+}
+
+.position-btn::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 3px;
+  height: 100%;
+  background: transparent;
+  transition: background var(--transition-fast);
+}
+
+.position-btn:hover {
+  border-color: rgba(255, 51, 102, 0.4);
+  background: rgba(255, 51, 102, 0.03);
+}
+
+.position-btn:hover::before {
+  background: var(--accent-crimson);
+}
+
+.position-btn.active {
+  border-color: var(--accent-red);
+  background: rgba(229, 29, 36, 0.08);
+  box-shadow: 0 0 24px rgba(229, 29, 36, 0.18);
+}
+
+.position-btn.active::before {
+  background: var(--accent-red);
+  box-shadow: 0 0 10px var(--accent-red);
+}
+
+.position-btn-title {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 0.825rem;
+  text-transform: uppercase;
+  color: var(--text-primary);
+  margin-bottom: 0.15rem;
+}
+
+.position-btn-sub {
+  font-size: 0.7rem;
+  font-family: var(--font-mono);
+  color: var(--text-muted);
+}
+
+/* --------------------------------------------------------------------------
+   PRESETS DE ARTE Y CARGA DE ARCHIVOS
+   -------------------------------------------------------------------------- */
+.preset-art-row {
+  display: flex;
+  gap: 0.75rem;
+  overflow-x: auto;
+  padding-bottom: 0.5rem;
+  margin-bottom: 1rem;
+  scrollbar-width: thin;
+}
+
+.preset-art-thumb {
+  width: 74px;
+  height: 74px;
+  border-radius: var(--radius-sm);
+  background: rgba(8, 10, 13, 0.9);
+  border: 1.5px solid var(--glass-border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  flex-shrink: 0;
+  padding: 8px;
+  transition: all var(--transition-fast);
+  position: relative;
+  overflow: hidden;
+}
+
+.preset-art-thumb::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at center, transparent 40%, rgba(0, 0, 0, 0.4) 100%);
+  pointer-events: none;
+  opacity: 1;
+  transition: opacity var(--transition-fast);
+}
+
+.preset-art-thumb:hover {
+  border-color: rgba(0, 240, 255, 0.5);
+  transform: scale(1.06);
+}
+
+.preset-art-thumb:hover::after {
+  opacity: 0;
+}
+
+.preset-art-thumb.active {
+  border-color: var(--accent-cyan);
+  box-shadow: 0 0 18px var(--accent-cyan-glow);
+}
+
+.preset-art-thumb.active::after {
+  opacity: 0;
+}
+
+.preset-art-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.4));
+  transition: transform var(--transition-fast);
+}
+
+.preset-art-thumb:hover img {
+  transform: scale(1.08);
+}
+
+.upload-dropzone {
+  border: 1.5px dashed rgba(255, 255, 255, 0.12);
+  border-radius: var(--radius-sm);
+  padding: 1.5rem;
+  text-align: center;
+  cursor: pointer;
+  background: rgba(255, 255, 255, 0.015);
+  transition: all var(--transition-normal);
+  position: relative;
+  overflow: hidden;
+}
+
+.upload-dropzone::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at center, rgba(0, 240, 255, 0.03) 0%, transparent 70%);
+  opacity: 0;
+  transition: opacity var(--transition-normal);
+  pointer-events: none;
+}
+
+.upload-dropzone:hover {
+  border-color: var(--accent-cyan);
+  background: rgba(0, 240, 255, 0.03);
+}
+
+.upload-dropzone:hover::before {
+  opacity: 1;
+}
+
+.upload-dropzone.dragging {
+  border-color: var(--accent-cyan);
+  background: rgba(0, 240, 255, 0.06);
+  box-shadow: inset 0 0 30px rgba(0, 240, 255, 0.08);
+}
+
+/* --------------------------------------------------------------------------
+   RANGO SLIDER PERSONALIZADO
+   -------------------------------------------------------------------------- */
+.scale-slider-wrap {
+  position: relative;
+  padding: 0.5rem 0;
+}
+
+.scale-slider-wrap input[type="range"] {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  height: 6px;
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 3px;
+  outline: none;
+  cursor: pointer;
+}
+
+.scale-slider-wrap input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: var(--accent-cyan);
+  box-shadow: 0 0 12px var(--accent-cyan-glow);
+  cursor: pointer;
+  transition: box-shadow 0.2s ease;
+}
+
+.scale-slider-wrap input[type="range"]::-webkit-slider-thumb:hover {
+  box-shadow: 0 0 20px var(--accent-cyan-glow);
+}
+
+.scale-slider-wrap input[type="range"]::-moz-range-thumb {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: var(--accent-cyan);
+  box-shadow: 0 0 12px var(--accent-cyan-glow);
+  cursor: pointer;
+  border: none;
+}
+
+/* --------------------------------------------------------------------------
+   CANTIDAD CON BOTONES +/-
+   -------------------------------------------------------------------------- */
+.qty-stepper {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  width: fit-content;
+}
+
+.qty-stepper-btn {
+  width: 42px;
+  height: 42px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--text-primary);
+  font-size: 1.25rem;
+  font-weight: 700;
+  transition: all var(--transition-fast);
+  cursor: pointer;
+}
+
+.qty-stepper-btn:hover {
+  background: rgba(0, 240, 255, 0.12);
+  color: var(--accent-cyan);
+}
+
+.qty-stepper-btn:active {
+  background: rgba(0, 240, 255, 0.2);
+}
+
+.qty-stepper-val {
+  width: 58px;
+  height: 42px;
+  text-align: center;
+  background: transparent;
+  color: var(--text-primary);
+  font-family: var(--font-mono);
+  font-weight: 800;
+  font-size: 1rem;
+  border-left: 1px solid var(--glass-border);
+  border-right: 1px solid var(--glass-border);
+}
+
+/* --------------------------------------------------------------------------
+   COTIZACIÓN EN VIVO
+   -------------------------------------------------------------------------- */
+.live-quote-box {
+  background: linear-gradient(135deg,
+    rgba(229, 29, 36, 0.06) 0%,
+    rgba(0, 240, 255, 0.03) 100%);
+  border: 1px solid rgba(229, 29, 36, 0.25);
+  border-radius: var(--radius-sm);
+  padding: 1.75rem;
+  margin-top: 1.5rem;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Línea decorativa superior */
+.live-quote-box::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 10%;
+  right: 10%;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(0, 240, 255, 0.3), transparent);
+  pointer-events: none;
+}
+
+.quote-row {
+  display: flex;
+  justify-content: space-between;
+  font-family: var(--font-mono);
+  font-size: 0.825rem;
+  color: var(--text-secondary);
+  margin-bottom: 0.45rem;
+}
+
+.quote-discount-row {
+  color: var(--accent-lime);
+}
+
+.quote-total {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 1.25rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--glass-border);
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.quote-total-label {
+  font-size: 0.7rem;
+  font-family: var(--font-mono);
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+
+.quote-total-price {
+  font-size: 2.15rem;
+  font-weight: 800;
+  font-family: var(--font-display);
+  color: var(--accent-cyan);
+  text-shadow: 0 0 28px var(--accent-cyan-glow);
+  letter-spacing: -0.02em;
+
+  /* Animación sutil al cambiar precio */
+  animation: price-flash 0.35s ease;
+}
+
+@keyframes price-flash {
+  0% { opacity: 0.5; transform: scale(0.96); }
+  50% { opacity: 1; transform: scale(1.02); }
+  100% { opacity: 1; transform: scale(1); }
+}

@@ -1,0 +1,280 @@
+/* ==========================================================================
+   SEIKO // PORTAL ADMINISTRATIVO DE TALLER (KANBAN INDUSTRIAL)
+   ========================================================================== */
+
+.admin-portal {
+  padding: 130px 0 80px;
+}
+
+.admin-header-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 3rem;
+  border-bottom: 1px solid var(--glass-border);
+  padding-bottom: 1.5rem;
+  flex-wrap: wrap;
+  gap: 1.5rem;
+}
+
+.admin-title-badge h2 {
+  font-size: 2.25rem;
+  text-transform: uppercase;
+  letter-spacing: -0.03em;
+  color: var(--text-primary);
+  margin-top: 0.35rem;
+}
+
+.admin-kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 3.5rem;
+}
+
+.kpi-card {
+  background: var(--glass-bg);
+  backdrop-filter: var(--glass-blur-md);
+  -webkit-backdrop-filter: var(--glass-blur-md);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-md);
+  padding: 1.75rem;
+  position: relative;
+  overflow: hidden;
+  box-shadow: var(--shadow-glass);
+}
+
+.kpi-card::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 3px;
+  height: 100%;
+  background: var(--accent-cyan);
+}
+
+.kpi-card.crimson::before { background: var(--accent-crimson); }
+.kpi-card.lime::before { background: var(--accent-lime); }
+.kpi-card.amber::before { background: var(--accent-amber); }
+
+.kpi-label {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--text-muted);
+  font-family: var(--font-mono);
+  margin-bottom: 0.5rem;
+}
+
+.kpi-value {
+  font-size: 2.25rem;
+  font-weight: 800;
+  font-family: var(--font-display);
+  color: var(--text-primary);
+}
+
+.kpi-sub {
+  font-size: 0.775rem;
+  font-family: var(--font-mono);
+  color: var(--text-secondary);
+  margin-top: 0.5rem;
+}
+
+/* --------------------------------------------------------------------------
+   TABLERO KANBAN
+   -------------------------------------------------------------------------- */
+.kanban-board-wrap {
+  margin-bottom: 4rem;
+}
+
+.kanban-section-title {
+  font-size: 1.5rem;
+  text-transform: uppercase;
+  color: var(--text-primary);
+  margin-bottom: 1.5rem;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.kanban-board {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(290px, 1fr));
+  gap: 1.25rem;
+  overflow-x: auto;
+  padding-bottom: 1.25rem;
+}
+
+.kanban-col {
+  background: var(--glass-bg);
+  backdrop-filter: var(--glass-blur-md);
+  -webkit-backdrop-filter: var(--glass-blur-md);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-md);
+  display: flex;
+  flex-direction: column;
+  min-height: 560px;
+}
+
+.kanban-col-header {
+  padding: 1.25rem;
+  border-bottom: 1px solid var(--glass-border);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: rgba(14, 18, 24, 0.6);
+  border-top-left-radius: var(--radius-md);
+  border-top-right-radius: var(--radius-md);
+}
+
+.kanban-col-title {
+  font-size: 0.85rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+}
+
+.kanban-col-count {
+  padding: 3px 9px;
+  border-radius: var(--radius-xs);
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid var(--glass-border);
+  font-size: 0.75rem;
+  font-family: var(--font-mono);
+  color: var(--text-primary);
+}
+
+.kanban-col-body {
+  padding: 1.1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  flex-grow: 1;
+  overflow-y: auto;
+}
+
+/* Tarjeta de Pedido en Kanban */
+.order-card {
+  background: rgba(14, 18, 24, 0.7);
+  border: 1px solid var(--glass-border-light);
+  border-radius: var(--radius-xs);
+  padding: 1.25rem;
+  box-shadow: var(--shadow-glass);
+  transition: all var(--transition-fast);
+}
+
+.order-card:hover {
+  border-color: var(--accent-cyan);
+  transform: translateY(-3px);
+  box-shadow: 0 10px 30px rgba(0, 240, 255, 0.15);
+}
+
+.order-card-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.75rem;
+}
+
+.order-number {
+  font-family: var(--font-mono);
+  font-weight: 700;
+  font-size: 0.85rem;
+  color: var(--accent-cyan);
+}
+
+.order-customer-name {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 0.95rem;
+  color: var(--text-primary);
+  margin-bottom: 0.25rem;
+}
+
+.order-item-chip {
+  background: rgba(0, 0, 0, 0.4);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-xs);
+  padding: 0.55rem 0.75rem;
+  font-size: 0.775rem;
+  font-family: var(--font-mono);
+  margin-bottom: 0.75rem;
+  border-left: 2px solid var(--accent-crimson);
+}
+
+.order-card-actions {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 1rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid var(--glass-border);
+}
+
+.order-action-btn {
+  flex-grow: 1;
+  padding: 0.55rem;
+  font-size: 0.75rem;
+  font-weight: 700;
+  font-family: var(--font-mono);
+  border-radius: var(--radius-xs);
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--text-primary);
+  border: 1px solid var(--glass-border);
+  text-align: center;
+  transition: all var(--transition-fast);
+}
+
+.order-action-btn:hover {
+  background: var(--accent-cyan);
+  color: #000000;
+  border-color: var(--accent-cyan);
+  box-shadow: 0 0 15px var(--accent-cyan-glow);
+}
+
+/* --------------------------------------------------------------------------
+   TABLA DE INVENTARIO
+   -------------------------------------------------------------------------- */
+.inventory-card {
+  background: var(--glass-bg);
+  backdrop-filter: var(--glass-blur-md);
+  -webkit-backdrop-filter: var(--glass-blur-md);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-md);
+  padding: 2.5rem;
+  box-shadow: var(--shadow-glass);
+}
+
+.table-responsive {
+  overflow-x: auto;
+  margin-top: 1.75rem;
+}
+
+.admin-table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+  font-size: 0.9rem;
+}
+
+.admin-table th {
+  padding: 1rem;
+  background: rgba(14, 18, 24, 0.7);
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  border-bottom: 1px solid var(--glass-border);
+}
+
+.admin-table td {
+  padding: 1.25rem 1rem;
+  border-bottom: 1px solid var(--glass-border);
+  color: var(--text-secondary);
+}
+
+.admin-table tr:hover td {
+  background: rgba(255, 255, 255, 0.03);
+  color: var(--text-primary);
+}

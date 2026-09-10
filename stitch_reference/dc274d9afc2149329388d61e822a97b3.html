@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>NEO-THREAD - Artic Collection</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<style data-purpose="custom-config">
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['"Space Grotesk"', 'sans-serif'],
+          },
+          colors: {
+            surface: '#5c7385', /* Adapting from reference image */
+            'surface-dim': '#4b6070',
+            'surface-container': '#6a8296',
+            'surface-container-low': 'rgba(255, 255, 255, 0.1)',
+            'surface-container-high': 'rgba(255, 255, 255, 0.2)',
+            primary: '#e2e8f0',
+            'primary-container': '#94a3b8',
+            'on-primary': '#0f172a',
+            'on-surface': '#f8fafc',
+            'on-surface-variant': '#cbd5e1',
+            outline: 'rgba(255, 255, 255, 0.3)',
+          },
+          backgroundImage: {
+            'hero-gradient': 'radial-gradient(circle at center, rgba(148, 163, 184, 0.4) 0%, rgba(75, 96, 112, 1) 100%)',
+          }
+        }
+      }
+    }
+  </style>
+<style data-purpose="utilities">
+    body {
+      background-color: #5c7385; /* Base color matching reference */
+      color: #f8fafc;
+      font-family: 'Space Grotesk', sans-serif;
+      overflow-x: hidden;
+    }
+    .glass-panel {
+      background: rgba(255, 255, 255, 0.05);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    .text-outline {
+      color: transparent;
+      -webkit-text-stroke: 1px rgba(255,255,255,0.8);
+    }
+  </style>
+</head>
+<body class="antialiased min-h-screen flex flex-col">
+<!-- BEGIN: MainHeader -->
+<header class="fixed w-full top-0 z-50 flex items-center justify-between px-8 py-6 mix-blend-difference text-white">
+<!-- Brand -->
+<div class="text-2xl font-bold tracking-widest uppercase">
+      NEO-THREAD
+    </div>
+<!-- Navigation -->
+<nav class="hidden md:flex space-x-8 text-xs font-medium tracking-[0.2em] uppercase">
+<a class="hover:text-primary-container transition-colors" href="#">[ CATALOG ]</a>
+<a class="hover:text-primary-container transition-colors" href="#">[ SERIES_01 ]</a>
+<a class="hover:text-primary-container transition-colors" href="#">[ CUSTOMIZE ]</a>
+<a class="hover:text-primary-container transition-colors" href="#">[ LAB ]</a>
+<a class="hover:text-primary-container transition-colors" href="#">[ ARCHIVE ]</a>
+</nav>
+<!-- Icons -->
+<div class="flex items-center space-x-4">
+<button class="w-8 h-8 rounded-full bg-white text-black flex items-center justify-center hover:bg-gray-200 transition">
+<svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+<path d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+</button>
+<button class="w-8 h-8 rounded-full bg-white text-black flex items-center justify-center hover:bg-gray-200 transition">
+<svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+<path d="M15.75 10.5V6a3.75 3.75 0 10-7.5 0v4.5m11.356-1.993l1.263 12c.07.665-.45 1.243-1.119 1.243H4.25a1.125 1.125 0 01-1.12-1.243l1.264-12A1.125 1.125 0 015.513 7.5h12.974c.576 0 1.059.435 1.119 1.007zM8.625 10.5a.375.375 0 11-.75 0 .375.375 0 01.75 0zm7.5 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+</button>
+</div>
+</header>
+<!-- END: MainHeader -->
+<!-- BEGIN: HeroSection -->
+<section class="relative min-h-[90vh] w-full flex items-center justify-center overflow-hidden bg-surface-dim">
+<!-- Hero Background Image (Placeholder for the large model image) -->
+<div class="absolute inset-0 z-0 flex justify-center items-end">
+<!-- Using a placeholder that resembles a model shot -->
+<img alt="Model wearing collection" class="h-full object-cover opacity-80 mix-blend-luminosity" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDy3i_fL5RvnzKwROvond8icx7FFFtJ9KSQYyUzyBgAYR99k1morGnOSCi5X8W1PGejNjxfFvTWqQtNkM6-ePqZA9qcOA7Mh1h1MxaICLVMqPXO4k18SWB9jTTqEgsuH1o9EZUFCwUTW28yMxWmt7B6qZCKIP5o3SeIrlH9bdRmicLP-WN0EAyzoj5Gsw5n6P2HISFY_I4u-0n3W9bLYNb98IM6_wTo0uxZsHhPQpWA_2fw0vemvhjUVw"/>
+</div>
+<!-- Background Gradient Overlay -->
+<div class="absolute inset-0 bg-hero-gradient mix-blend-overlay z-0 pointer-events-none"></div>
+<!-- UI Overlay Elements -->
+<div class="absolute inset-0 z-10 px-12 py-32 flex flex-col justify-between pointer-events-none">
+<!-- Top Left Text -->
+<div class="space-y-1 pt-12">
+<p class="text-[10px] tracking-[0.3em] uppercase text-on-surface-variant">[ SERIES: STASIS MK.I ] [ SERIES ]</p>
+<h1 class="text-6xl md:text-8xl font-bold uppercase leading-none tracking-tighter w-1/2">
+          Collection<br/>
+          Artic 01™
+        </h1>
+</div>
+<!-- Left Side Product Details -->
+<div class="flex flex-col space-y-8 mt-auto mb-12 pointer-events-auto">
+<!-- Selectors -->
+<div class="flex space-x-16 text-xs uppercase tracking-widest">
+<div class="space-y-4">
+<span class="text-on-surface-variant block">Size</span>
+<div class="flex space-x-6">
+<button class="hover:text-white line-through text-on-surface-variant">S</button>
+<button class="text-white font-bold border-b border-white">M</button>
+<button class="hover:text-white text-on-surface-variant">L</button>
+<button class="hover:text-white text-on-surface-variant">XL</button>
+</div>
+</div>
+<div class="space-y-4">
+<span class="text-on-surface-variant block">Colour</span>
+<div class="flex space-x-6">
+<button class="text-white font-bold border-b border-white">White</button>
+<button class="hover:text-white text-on-surface-variant">Silver</button>
+</div>
+</div>
+</div>
+<!-- Add to Cart Action -->
+<div class="flex items-center space-x-6">
+<button class="w-16 h-16 rounded-full border border-outline flex items-center justify-center hover:bg-white hover:text-black transition-all group">
+<svg class="w-6 h-6 transform group-hover:rotate-45 transition-transform" fill="none" stroke="currentColor" stroke-width="1.5" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+<path d="M4.5 19.5l15-15m0 0H8.25m11.25 0v11.25" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+</button>
+<div>
+<span class="block text-xs uppercase tracking-widest text-on-surface-variant mb-1">Add to Cart</span>
+<span class="block text-2xl font-bold">$899.99</span>
+</div>
+</div>
+</div>
+<!-- Right Side Thumbnails -->
+<div class="absolute right-12 top-1/2 -translate-y-1/2 flex space-x-4 pointer-events-auto">
+<div class="glass-panel p-2 rounded-sm w-32 h-40">
+<img alt="Thumbnail 1" class="w-full h-full object-cover mix-blend-luminosity" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDbmBU50o-LZmS3RU7monWHBP9RGI5XhJ9csJvMXd43WIGTfmgX8d7Obp14Jz-W88TfI7nXN4g89v9eQ7ur0i9QC2qx8k4BMzLasArmlfQcktwCnkN8VECUreMJwwVI_38JzD1_FxxBoKyPCPBCX1whMeAGmBGNS80eDBGF4ZHQFNe4GZXjggBNDt0hjEJt4uBGQB1H65dpdJyTwzK8QWC2Oxvu0SGGPzB1Bpw2W1KrT2RAQrqe0tBl0w"/>
+</div>
+<div class="glass-panel p-2 rounded-sm w-32 h-40 opacity-50 hover:opacity-100 transition-opacity">
+<img alt="Thumbnail 2" class="w-full h-full object-cover mix-blend-luminosity" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBvXRVrI5m8PPOA-WtWaZQKcWT2-I2-sa7UXncY0hsPB2Ps_AxbgJS-2zk9xvwcgweXDM7fJ6jsj9zfRfMIzC3PCyTqlO619nFc_tKVuqRM89f2zJgvqiUkcsl608MqbPDYuOZLplW0gp3XjLF0AE9w3T-x1MK7a41Mh2U7ELYK00P5QOo8tucpitqNfsvbI1mwC4RZS_I7B7bvI_IjdrTigZIL9z0npcGc6e58EDr-WPYVPR7WiJgQkA"/>
+</div>
+<div class="absolute -bottom-8 right-0 text-xs tracking-widest text-on-surface-variant">
+           01 <span class="mx-2 w-8 inline-block h-px bg-on-surface-variant align-middle"></span> 07
+         </div>
+</div>
+<!-- Social Icons Bottom Right -->
+<div class="absolute bottom-12 right-12 flex space-x-3 pointer-events-auto">
+<a class="w-8 h-8 flex items-center justify-center border border-outline rounded-sm hover:bg-white hover:text-black transition" href="#">
+<svg aria-hidden="true" class="w-4 h-4" fill="currentColor" viewbox="0 0 24 24"><path clip-rule="evenodd" d="M12.315 2c2.43 0 2.784.013 3.808.06 1.064.049 1.791.218 2.427.465a4.902 4.902 0 011.772 1.153 4.902 4.902 0 011.153 1.772c.247.636.416 1.363.465 2.427.048 1.067.06 1.407.06 4.123v.08c0 2.643-.012 2.987-.06 4.043-.049 1.064-.218 1.791-.465 2.427a4.902 4.902 0 01-1.153 1.772 4.902 4.902 0 01-1.772 1.153c-.636.247-1.363.416-2.427.465-1.067.048-1.407.06-4.123.06h-.08c-2.643 0-2.987-.012-4.043-.06-1.064-.049-1.791-.218-2.427-.465a4.902 4.902 0 01-1.772-1.153 4.902 4.902 0 01-1.153-1.772c-.247-.636-.416-1.363-.465-2.427-.047-1.024-.06-1.379-.06-3.808v-.63c0-2.43.013-2.784.06-3.808.049-1.064.218-1.791.465-2.427a4.902 4.902 0 011.153-1.772A4.902 4.902 0 015.45 2.525c.636-.247 1.363-.416 2.427-.465C8.901 2.013 9.256 2 11.685 2h.63zm-.081 1.802h-.468c-2.456 0-2.784.011-3.807.058-.975.045-1.504.207-1.857.344-.467.182-.8.398-1.15.748-.35.35-.566.683-.748 1.15-.137.353-.3.882-.344 1.857-.047 1.023-.058 1.351-.058 3.807v.468c0 2.456.011 2.784.058 3.807.045.975.207 1.504.344 1.857.182.466.399.8.748 1.15.35.35.683.566 1.15.748.353.137.882.3 1.857.344 1.054.048 1.37.058 4.041.058h.08c2.597 0 2.917-.01 3.96-.058.976-.045 1.505-.207 1.858-.344.466-.182.8-.398 1.15-.748.35-.35.566-.683.748-1.15.137-.353.3-.882.344-1.857.048-1.055.058-1.37.058-4.041v-.08c0-2.597-.01-2.917-.058-3.96-.045-.976-.207-1.505-.344-1.858a3.097 3.097 0 00-.748-1.15 3.098 3.098 0 00-1.15-.748c-.353-.137-.882-.3-1.857-.344-1.023-.047-1.351-.058-3.807-.058zM12 6.865a5.135 5.135 0 110 10.27 5.135 5.135 0 010-10.27zm0 1.802a3.333 3.333 0 100 6.666 3.333 3.333 0 000-6.666zm5.338-3.205a1.2 1.2 0 110 2.4 1.2 1.2 0 010-2.4z" fill-rule="evenodd"></path></svg>
+</a>
+<a class="w-8 h-8 flex items-center justify-center border border-outline rounded-sm hover:bg-white hover:text-black transition" href="#">
+<svg aria-hidden="true" class="w-4 h-4" fill="currentColor" viewbox="0 0 24 24"><path clip-rule="evenodd" d="M22 12c0-5.523-4.477-10-10-10S2 6.477 2 12c0 4.991 3.657 9.128 8.438 9.878v-6.987h-2.54V12h2.54V9.797c0-2.506 1.492-3.89 3.777-3.89 1.094 0 2.238.195 2.238.195v2.46h-1.26c-1.243 0-1.63.771-1.63 1.562V12h2.773l-.443 2.89h-2.33v6.988C18.343 21.128 22 16.991 22 12z" fill-rule="evenodd"></path></svg>
+</a>
+<a class="w-8 h-8 flex items-center justify-center border border-outline rounded-sm hover:bg-white hover:text-black transition" href="#">
+<svg aria-hidden="true" class="w-4 h-4" fill="currentColor" viewbox="0 0 24 24"><path d="M8.29 20.251c7.547 0 11.675-6.253 11.675-11.675 0-.178 0-.355-.012-.53A8.348 8.348 0 0022 5.92a8.19 8.19 0 01-2.357.646 4.118 4.118 0 001.804-2.27 8.224 8.224 0 01-2.605.996 4.107 4.107 0 00-6.993 3.743 11.65 11.65 0 01-8.457-4.287 4.106 4.106 0 001.27 5.477A4.072 4.072 0 012.8 9.713v.052a4.105 4.105 0 003.292 4.022 4.095 4.095 0 01-1.853.07 4.108 4.108 0 003.834 2.85A8.233 8.233 0 012 18.407a11.616 11.616 0 006.29 1.84"></path></svg>
+</a>
+</div>
+</div>
+</section>
+<!-- END: HeroSection -->
+<!-- BEGIN: CollectionGridSection -->
+<section class="py-24 px-8 max-w-[1600px] mx-auto w-full relative z-20">
+<!-- Section Header -->
+<div class="flex flex-col md:flex-row justify-between items-end mb-12">
+<div>
+<h2 class="text-4xl md:text-5xl font-bold uppercase tracking-tight mb-4">New Collection</h2>
+</div>
+<!-- Meta Information -->
+<div class="hidden md:flex space-x-16 text-[10px] tracking-widest text-on-surface-variant uppercase">
+<ul class="space-y-1">
+<li>[ NEW COLLECTION ]</li>
+<li>[ SERIES_01 ]</li>
+<li>[ T-SHIRTS ]</li>
+</ul>
+<ul class="space-y-1">
+<li>TECHNICAL KNIT</li>
+<li>MODULAR SYSTEM</li>
+<li>HIGH-PERFORMANCE</li>
+<li>URBAN MOBILITY</li>
+</ul>
+</div>
+<!-- Filters Button -->
+<div>
+<button class="bg-white text-black px-6 py-2 rounded-full text-xs font-bold tracking-widest uppercase hover:bg-gray-200 transition">
+          Filters
+        </button>
+</div>
+</div>
+<!-- Product Grid -->
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+<!-- Product Card 1 -->
+<article class="glass-panel p-4 flex flex-col group relative">
+<div class="aspect-[3/4] mb-4 bg-surface-container relative overflow-hidden flex items-center justify-center">
+<img alt="AERO-MESH CORE TEE" class="object-cover w-full h-full mix-blend-luminosity group-hover:scale-105 transition-transform duration-700" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBgcd8vDOB6SvoHWgzOi6vN1Tw8BS1i6t74rDiLxMCmvrzAbi1LpVkh3lbMjvfnfHxreL9RQQkibeYu-JcJXAduL_VLgEyQ1Gm0lNgz45SxfkQvKb75EdJBpAkFspJMiNHKKnU3F8WSc-g_e1jQIEGiV27am2cGUrXPuotkx8YJ8Qy8vVo5W1H1eCsjgjcF51QXZO_Jk3Kxm0xyv16JXRMrX_yWY3LDPHtsHEE99FPV9tCpiyJxDCk9gQ"/>
+</div>
+<div class="flex justify-between items-start mt-auto">
+<div>
+<h3 class="text-xs font-bold uppercase tracking-wider mb-1">Aero-Mesh Core Tee</h3>
+<p class="text-[10px] text-on-surface-variant uppercase tracking-widest mb-2">Technical Knit T-Shirt</p>
+<div class="flex items-center space-x-2 text-[10px]">
+<span class="w-2 h-2 rounded-full bg-slate-800"></span> <span class="text-on-surface-variant uppercase">Obsidian</span>
+</div>
+</div>
+<p class="text-sm font-bold">$89.00</p>
+</div>
+</article>
+<!-- Product Card 2 -->
+<article class="glass-panel p-4 flex flex-col group relative">
+<div class="absolute top-6 left-6 z-10 px-2 py-1 bg-black/50 text-[10px] tracking-widest uppercase border border-outline backdrop-blur-md">
+          Limited
+        </div>
+<div class="aspect-[3/4] mb-4 bg-surface-container relative overflow-hidden flex items-center justify-center">
+<img alt="STRATA UTILITY TEE" class="object-cover w-full h-full mix-blend-luminosity group-hover:scale-105 transition-transform duration-700" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCLPr1VfrFmhn7KAAZ1hULEYus1bVzTV1JG-fg7PDIrmGC9wQ90npXTsL4nfawYFabQ6PMwGNX5x14RVa_3wmGvOuQHj2GQAsEbgng-UO7fEI_oWJJxO6bCek2WjEBBoj3QIrzSaKKk8IImVwX33tNhJJfVKU_L5EzJMo8G2JMX7557NcGU09wamZC-5sCUVkMR8M_x7SHTyzxs5Z2YlMLRJXULlI4ZFM40T-_F60U4_nIXmkAJsKt17A"/>
+</div>
+<div class="flex justify-between items-start mt-auto">
+<div>
+<h3 class="text-xs font-bold uppercase tracking-wider mb-1">Strata Utility Tee</h3>
+<p class="text-[10px] text-on-surface-variant uppercase tracking-widest mb-2">Modular Pocket System</p>
+<div class="flex items-center space-x-2 text-[10px]">
+<span class="w-2 h-2 rounded-full bg-slate-200"></span> <span class="text-on-surface-variant uppercase">Glacier</span>
+</div>
+</div>
+<p class="text-sm font-bold">$110.00</p>
+</div>
+</article>
+<!-- Product Card 3 -->
+<article class="glass-panel p-4 flex flex-col group relative">
+<div class="aspect-[3/4] mb-4 bg-surface-container relative overflow-hidden flex items-center justify-center">
+<img alt="THERMAL MATRIX L/S" class="object-cover w-full h-full mix-blend-luminosity group-hover:scale-105 transition-transform duration-700" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCxdcP5EizW0xBd5K9QuO0sGdZR9ocIlVRlFtaIxsPz1ash8plwNs5xDqC-dKJmofRD--cQNwEdZcUqRyV-nVtnOIulKCbf5j8UfRMZav6cPeromcjUhMP6BkoOyDNU7teurhfcjnU6lRHMbnkvyuWKxeOEDfvjK_XFydBD01lmliolNO-gDvdz3CZDWNbTiBtYIz9zJGYm38SpVYvE40SVQWDcXKdd7yKyqK1afXJs2uZ0FSC-oaN_KQ"/>
+</div>
+<div class="flex justify-between items-start mt-auto">
+<div>
+<h3 class="text-xs font-bold uppercase tracking-wider mb-1">Thermal Matrix L/S</h3>
+<p class="text-[10px] text-on-surface-variant uppercase tracking-widest mb-2">Base Layer Longsleeve</p>
+<div class="flex items-center space-x-2 text-[10px]">
+<span class="w-2 h-2 rounded-full bg-blue-500"></span> <span class="text-on-surface-variant uppercase">Neon/Navy</span>
+</div>
+</div>
+<p class="text-sm font-bold">$135.00</p>
+</div>
+</article>
+<!-- Product Card 4 -->
+<article class="glass-panel p-4 flex flex-col group relative">
+<div class="aspect-[3/4] mb-4 bg-surface-container relative overflow-hidden flex items-center justify-center">
+<img alt="NEXUS OVERSIZED TEE" class="object-cover w-full h-full mix-blend-luminosity group-hover:scale-105 transition-transform duration-700" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAsFiMIOrYpfio7VTBrhrUEvkpgo3PI_6Wu3uJ9kcuOTgOxVHSlDo1s3xRZWIKOQUn5xsf3f6BGULKnBvzbVM7bv1lHZwaUoNNhbtdcSXjhVYTANo_f4YjuLaTvK5L4M9z3Y0NKpcbY8nF1PdmDsFQeS4VVNyyqQjWwdsR3nZdmia7eeGVm--fhZjUZo7v0g-YV1L1zkQw7hn7jxBIrB1_ZTexuVN5kTfQ8Eb9jGiZFdpsqIJbP3hsk-g"/>
+</div>
+<div class="flex justify-between items-start mt-auto">
+<div>
+<h3 class="text-xs font-bold uppercase tracking-wider mb-1">Nexus Oversized</h3>
+<p class="text-[10px] text-on-surface-variant uppercase tracking-widest mb-2">Heavyweight Cotton Blnd</p>
+<div class="flex items-center space-x-2 text-[10px]">
+<span class="w-2 h-2 rounded-full bg-slate-400"></span> <span class="text-on-surface-variant uppercase">Ash</span>
+<span class="w-2 h-2 rounded-full bg-slate-900 ml-2"></span> <span class="text-on-surface-variant uppercase">Void</span>
+</div>
+</div>
+<p class="text-sm font-bold">$75.00</p>
+</div>
+</article>
+</div>
+</section>
+<!-- END: CollectionGridSection -->
+</body></html>
