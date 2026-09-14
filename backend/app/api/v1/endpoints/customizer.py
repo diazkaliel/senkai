@@ -3,19 +3,31 @@ Endpoints para el configurador interactivo y cotizador DTF.
 """
 
 from fastapi import APIRouter, Query
-from app.schemas.domain import DTFPrintPosition, DTFPrintSize
-from app.services.store_service import store_service
+from app.schemas.domain import (
+    DTFPrintPosition, DTFPrintSize,
+    MultiPrintQuoteRequest, MultiPrintQuoteResponse
+)
+from app.services.pricing_service import pricing_service
 
 router = APIRouter(prefix="/customizer", tags=["Configurador y Cotizador DTF"])
 
 
-@router.get("/quote", summary="Cotización en tiempo real de estampa DTF por tamaño y volumen")
+@router.post("/quote-multi", response_model=MultiPrintQuoteResponse, summary="Cotización autoritativa multi-estampa libre por volumen")
+def get_multi_prints_quote(payload: MultiPrintQuoteRequest):
+    """Calcula el costo total para N estampas simultáneas en la prenda aplicando descuentos por volumen."""
+    return pricing_service.calculate_multi_prints_price(
+        prints=payload.prints,
+        quantity=payload.quantity
+    )
+
+
+@router.get("/quote", summary="Cotización en tiempo real de estampa DTF por tamaño y volumen (legado)")
 def get_dtf_quote(
     position: DTFPrintPosition = Query(..., description="Ubicación de la estampa en la prenda"),
     print_size: DTFPrintSize = Query(..., description="Dimensión del transfer DTF (A6, A5, A4, A3)"),
     quantity: int = Query(1, ge=1, description="Cantidad de unidades a estampar")
 ):
-    return store_service.calculate_dtf_price(position=position, print_size=print_size, quantity=quantity)
+    return pricing_service.calculate_single_print_price(position=position, print_size=print_size, quantity=quantity)
 
 
 @router.get("/presets", summary="Presets y especificaciones de impresión DTF")

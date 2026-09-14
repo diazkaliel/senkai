@@ -45,3 +45,9 @@ Desktop.ini
 
 # Logs
 *.log
+
+# SQLite Local Databases & Pytest cache
+*.db
+*.sqlite
+*.sqlite3
+.pytest_cache/

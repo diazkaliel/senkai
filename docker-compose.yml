@@ -1,0 +1,20 @@
+services:
+  senkai-api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: senkai_dtf_studio
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    environment:
+      - DATABASE_URL=sqlite+aiosqlite:///./senkai_studio.db
+      - WORKSHOP_SECRET_KEY=senkai-taller-secret-key-2026
+    volumes:
+      # Persistencia de base de datos local SQLite
+      - ./senkai_studio.db:/app/senkai_studio.db
+    healthcheck:
+      test: ["CMD-SHELL", "python -c \"import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/health')\""]
+      interval: 30s
+      timeout: 5s
+      retries: 3

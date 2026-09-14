@@ -79,16 +79,64 @@ class DTFConfiguration(BaseModel):
     scale_factor: float = Field(default=1.0, ge=0.5, le=2.0)
     offset_x_pct: float = Field(default=50.0, description="Posición X porcentual en la prenda")
     offset_y_pct: float = Field(default=40.0, description="Posición Y porcentual en la prenda")
-    calculated_dtf_cost: int = Field(..., description="Costo agregado por la impresión DTF")
+    calculated_dtf_cost: Optional[int] = Field(default=0, description="Costo calculado por el servidor para el transfer DTF")
+
+
+class DTFPrintItem(BaseModel):
+    """
+    Especificación de una estampa individual sobre la prenda.
+    Permite posicionamiento libre porcentual en ambas caras textiles y formatos normalizados.
+    """
+    id: Optional[str] = None
+    view: str = Field(default="front", description="'front' (frontal) o 'back' (trasera)")
+    print_size: DTFPrintSize = Field(default=DTFPrintSize.A4, description="Formato industrial de transfer (A6, A5, A4, A3)")
+    design_name: Optional[str] = "Estampa Personalizada"
+    design_image_url: Optional[str] = None
+    design_preview_base64: Optional[str] = None
+    offset_x_pct: float = Field(default=50.0, ge=5.0, le=95.0, description="Posición X libre porcentual (5% a 95%)")
+    offset_y_pct: float = Field(default=40.0, ge=5.0, le=95.0, description="Posición Y libre porcentual (5% a 95%)")
+    scale_factor: float = Field(default=1.0, ge=0.4, le=2.5, description="Factor de escala visual")
+    rotation_deg: float = Field(default=0.0, description="Ángulo de rotación en grados")
+    calculated_dtf_cost: Optional[int] = Field(default=0, description="Costo unitario calculado por el servidor")
+
+
+class MultiPrintQuoteRequest(BaseModel):
+    prints: List[DTFPrintItem]
+    quantity: int = Field(default=1, ge=1)
+
+
+class MultiPrintQuoteResponse(BaseModel):
+    prints: List[DTFPrintItem]
+    quantity: int
+    unit_dtf_total: int
+    discount_percentage: int
+    total_dtf_cost: int
+    linear_meters_estimated: float
 
 
 class OrderItemCreate(BaseModel):
+    """Contrato de entrada para ítems de orden enviados por el cliente."""
+    garment_id: str
+    garment_name: Optional[str] = None
+    selected_color: ColorVariant
+    selected_size: GarmentSize
+    prints: List[DTFPrintItem] = Field(default_factory=list, description="Lista de estampados personalizados sobre la prenda")
+    dtf_config: Optional[DTFConfiguration] = Field(default=None, description="Compatibilidad hacia atrás con estampas únicas")
+    quantity: int = Field(default=1, ge=1)
+    # Campos opcionales del cliente: el servidor siempre recalcula los montos oficiales
+    unit_price: Optional[int] = None
+    subtotal: Optional[int] = None
+
+
+class OrderItemResponse(BaseModel):
+    """Snapshot inmutable y verificado de un ítem producido en taller."""
     garment_id: str
     garment_name: str
     selected_color: ColorVariant
     selected_size: GarmentSize
+    prints: List[DTFPrintItem] = Field(default_factory=list)
     dtf_config: Optional[DTFConfiguration] = None
-    quantity: int = Field(default=1, ge=1)
+    quantity: int
     unit_price: int
     subtotal: int
 
@@ -104,17 +152,18 @@ class CustomerInfo(BaseModel):
 
 
 class OrderCreate(BaseModel):
+    """Payload de creación de orden. Los montos finales son determinados por el backend."""
     customer: CustomerInfo
     items: List[OrderItemCreate]
-    total_amount: int
-    shipping_cost: int = 0
+    total_amount: Optional[int] = None
+    shipping_cost: Optional[int] = None
 
 
 class OrderResponse(BaseModel):
     id: str
     order_number: str
     customer: CustomerInfo
-    items: List[OrderItemCreate]
+    items: List[OrderItemResponse]
     total_amount: int
     shipping_cost: int
     status: OrderProductionStatus

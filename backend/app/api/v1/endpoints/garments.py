@@ -3,25 +3,33 @@ Endpoints para catálogo de prendas textiles base.
 """
 
 from typing import List
-from fastapi import APIRouter, HTTPException, status
+from fastapi import APIRouter, HTTPException, status, Depends
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.schemas.domain import GarmentBase
-from app.services.store_service import store_service
+from app.services.catalog_service import catalog_service, CatalogService
+from app.core.exceptions import EntityNotFoundException
+from app.db.session import get_db
 
 router = APIRouter(prefix="/garments", tags=["Catálogo Textil"])
 
 
 @router.get("/", response_model=List[GarmentBase], summary="Listar todas las prendas disponibles")
-def list_garments():
-    return store_service.get_all_garments()
+async def list_garments(
+    session: AsyncSession = Depends(get_db)
+):
+    return await catalog_service.get_all_garments_async(session)
 
 
 @router.get("/{garment_id}", response_model=GarmentBase, summary="Obtener detalle de una prenda base")
-def get_garment(garment_id: str):
-    garment = store_service.get_garment_by_id(garment_id)
-    if not garment:
+async def get_garment(
+    garment_id: str,
+    session: AsyncSession = Depends(get_db)
+):
+    try:
+        return await catalog_service.require_garment_async(session, garment_id)
+    except EntityNotFoundException as err:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"Prenda con ID '{garment_id}' no encontrada."
+            detail=str(err)
         )
-    return garment

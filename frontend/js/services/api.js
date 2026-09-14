@@ -1,11 +1,36 @@
 /**
  * SEIKO // DTF TEXTILE STUDIO - API CLIENT SERVICE
  * Conector asíncrono con el backend FastAPI (/api/v1)
+ * Gestión segura de tokens de taller mediante sessionStorage sin secretos en código fuente.
  */
 
 const API_BASE = "/api/v1";
 
+let workshopToken = sessionStorage.getItem("senkai_workshop_token") || "";
+
 export const apiService = {
+  // Autenticación y credenciales de taller
+  setWorkshopToken(token) {
+    workshopToken = token ? token.trim() : "";
+    if (workshopToken) {
+      sessionStorage.setItem("senkai_workshop_token", workshopToken);
+    } else {
+      sessionStorage.removeItem("senkai_workshop_token");
+    }
+  },
+
+  getWorkshopToken() {
+    return workshopToken;
+  },
+
+  hasWorkshopToken() {
+    return Boolean(workshopToken);
+  },
+
+  _getAuthHeaders() {
+    return workshopToken ? { "X-Workshop-Token": workshopToken } : {};
+  },
+
   // Catálogo de Prendas
   async getGarments() {
     try {
@@ -36,6 +61,16 @@ export const apiService = {
     return await res.json();
   },
 
+  async getMultiDTFQuote(prints, quantity = 1) {
+    const res = await fetch(`${API_BASE}/customizer/quote-multi`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ prints, quantity })
+    });
+    if (!res.ok) throw new Error("Error al cotizar multi-estampa DTF");
+    return await res.json();
+  },
+
   // Pedidos
   async createOrder(orderPayload) {
     const res = await fetch(`${API_BASE}/orders/`, {
@@ -51,8 +86,13 @@ export const apiService = {
     const url = statusFilter 
       ? `${API_BASE}/orders/?status=${statusFilter}` 
       : `${API_BASE}/orders/`;
-    const res = await fetch(url);
-    if (!res.ok) throw new Error("Error al obtener pedidos");
+    const res = await fetch(url, {
+      headers: this._getAuthHeaders()
+    });
+    if (!res.ok) {
+      if (res.status === 401) throw new Error("UNAUTHORIZED");
+      throw new Error("Error al obtener pedidos");
+    }
     return await res.json();
   },
 
@@ -64,21 +104,32 @@ export const apiService = {
 
   // Admin / Taller
   async getWorkshopMetrics() {
-    const res = await fetch(`${API_BASE}/admin/metrics`);
-    if (!res.ok) throw new Error("Error al obtener métricas de taller");
+    const res = await fetch(`${API_BASE}/admin/metrics`, {
+      headers: this._getAuthHeaders()
+    });
+    if (!res.ok) {
+      if (res.status === 401) throw new Error("UNAUTHORIZED");
+      throw new Error("Error al obtener métricas de taller");
+    }
     return await res.json();
   },
 
   async updateOrderStatus(orderId, newStatus, trackingCode = null) {
     const res = await fetch(`${API_BASE}/admin/orders/${orderId}/status`, {
       method: "PATCH",
-      headers: { "Content-Type": "application/json" },
+      headers: { 
+        "Content-Type": "application/json",
+        ...this._getAuthHeaders()
+      },
       body: JSON.stringify({
         status: newStatus,
         tracking_code: trackingCode
       })
     });
-    if (!res.ok) throw new Error("Error al actualizar estado del pedido");
+    if (!res.ok) {
+      if (res.status === 401) throw new Error("UNAUTHORIZED");
+      throw new Error("Error al actualizar estado del pedido");
+    }
     return await res.json();
   }
 };

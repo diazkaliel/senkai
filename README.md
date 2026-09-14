@@ -77,9 +77,9 @@ uvicorn app.main:app --app-dir backend --host 127.0.0.1 --port 8000 --reload
 ---
 
 ## 🧪 Pruebas Automatizadas
-Para ejecutar la suite de integración de endpoints:
+Para ejecutar la suite de integración de endpoints (sin requerir servidor activo):
 ```bash
-python backend/tests/test_api.py
+pytest backend/tests/test_endpoints.py -v
 ```
 
 ---
@@ -91,11 +91,13 @@ senkai/
 ├── backend/
 │   ├── app/
 │   │   ├── api/v1/          # Endpoints REST (garments, customizer, orders, admin)
-│   │   ├── core/            # Configuración global y parámetros de taller
-│   │   ├── schemas/         # Contratos y modelos de dominio Pydantic v2
+│   │   ├── core/            # Configuración dinámica con pydantic-settings
+│   │   ├── db/              # Persistencia relacional SQLite con SQLAlchemy 2.0
+│   │   ├── schemas/         # Contratos Pydantic v2 autoritativos
 │   │   ├── services/        # Lógica de cotización DTF, catálogo y pedidos
 │   │   └── main.py          # FastAPI application & SPA static server
-│   └── tests/               # Pruebas automatizadas de integración
+│   └── tests/               # Pruebas automatizadas con Pytest & TestClient
+
 ├── frontend/
 │   ├── assets/              # Gráficos, templates SVG y recursos multimedia
 │   ├── css/                 # Hojas de estilo modulares (glassmorphism, tokens)

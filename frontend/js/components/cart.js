@@ -112,7 +112,7 @@ export class CartController {
             <div class="cart-item-title">${item.garment_name}</div>
             <div class="cart-item-specs">
               Color: <strong>${item.selected_color.name}</strong> • Talla: <strong>${item.selected_size}</strong><br>
-              ${item.dtf_config ? `Estampa: <strong>${item.dtf_config.position.toUpperCase()} [${item.dtf_config.print_size}]</strong>` : 'Prenda Lisa'}
+              ${this.formatItemPrintsSpecs(item)}
             </div>
             <div style="display: flex; justify-content: space-between; align-items: center;">
               <span style="font-size: 0.8rem; font-family: var(--font-mono); color: var(--text-muted);">${item.quantity} un. x $${item.unit_price.toLocaleString('es-CL')}</span>
@@ -137,18 +137,45 @@ export class CartController {
     if (drawerTotal) drawerTotal.textContent = `$${this.getTotal().toLocaleString('es-CL')} CLP`;
   }
 
+  /**
+   * Resumen conciso para el operario y cliente de las estampas aplicadas a la prenda.
+   * Maneja tanto el nuevo modelo multi-estampa libre como el formato legado de estampa única.
+   */
+  formatItemPrintsSpecs(item) {
+    if (item.prints && item.prints.length > 0) {
+      const printsSummary = item.prints.map(p => {
+        const sideLabel = p.view === 'back' ? 'Espalda' : 'Frontal';
+        return `${sideLabel} [${p.print_size}]`;
+      }).join(' + ');
+      return `Estampas DTF (${item.prints.length}): <strong>${printsSummary}</strong>`;
+    }
+    if (item.dtf_config) {
+      return `Estampa: <strong>${item.dtf_config.position.toUpperCase()} [${item.dtf_config.print_size}]</strong>`;
+    }
+    return 'Prenda Lisa (Sin estampa)';
+  }
+
   renderCheckoutSummary() {
     const summaryEl = document.getElementById('checkoutItemsSummary');
     const totalEl = document.getElementById('checkoutTotalVal');
     const shippingEl = document.getElementById('checkoutShippingVal');
 
     if (summaryEl) {
-      summaryEl.innerHTML = this.items.map(i => `
-        <div style="display: flex; justify-content: space-between; font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 0.4rem;">
-          <span>${i.quantity}x ${i.garment_name} (${i.selected_size}) [DTF: ${i.dtf_config ? i.dtf_config.print_size : 'Lisa'}]</span>
-          <span style="font-family: var(--font-mono); font-weight: 600;">$${i.subtotal.toLocaleString('es-CL')} CLP</span>
-        </div>
-      `).join('');
+      summaryEl.innerHTML = this.items.map(i => {
+        let printBadge = 'Lisa';
+        if (i.prints && i.prints.length > 0) {
+          printBadge = i.prints.map(p => `${p.view === 'back' ? 'Espalda' : 'Front'} ${p.print_size}`).join('+');
+        } else if (i.dtf_config) {
+          printBadge = i.dtf_config.print_size;
+        }
+
+        return `
+          <div style="display: flex; justify-content: space-between; font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 0.4rem;">
+            <span>${i.quantity}x ${i.garment_name} (${i.selected_size}) [DTF: ${printBadge}]</span>
+            <span style="font-family: var(--font-mono); font-weight: 600;">$${i.subtotal.toLocaleString('es-CL')} CLP</span>
+          </div>
+        `;
+      }).join('');
     }
 
     const shipping = this.deliveryMethod === "pickup" ? 0 : this.shippingCost;

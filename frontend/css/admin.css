@@ -278,3 +278,454 @@
   background: rgba(255, 255, 255, 0.03);
   color: var(--text-primary);
 }
+
+/* ==========================================================================
+   MODAL DE FICHA TÉCNICA Y MOCKUP DE PRODUCCIÓN (TALLER DTF)
+   ========================================================================== */
+
+.modal-card.modal-card-xl {
+  max-width: 1060px;
+  width: 95%;
+  max-height: 92vh;
+  padding: 2.25rem;
+  background: var(--bg-surface);
+  border: 1px solid var(--glass-border-light);
+  box-shadow: 0 25px 60px rgba(0, 0, 0, 0.8), 0 0 50px rgba(0, 240, 255, 0.1);
+}
+
+.mockup-modal-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  border-bottom: 1px solid var(--glass-border);
+  padding-bottom: 1.25rem;
+  margin-bottom: 1.75rem;
+  gap: 1rem;
+}
+
+.mockup-modal-top h2 {
+  font-size: 1.6rem;
+  text-transform: uppercase;
+  letter-spacing: -0.02em;
+  color: var(--text-primary);
+  margin-top: 0.25rem;
+}
+
+.mockup-modal-close-btn {
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid var(--glass-border);
+  color: var(--text-muted);
+  width: 38px;
+  height: 38px;
+  border-radius: var(--radius-xs);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.35rem;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.mockup-modal-close-btn:hover {
+  background: var(--accent-crimson);
+  color: #fff;
+  border-color: var(--accent-crimson);
+}
+
+.mockup-modal-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2rem;
+  align-items: start;
+}
+
+@media (max-width: 900px) {
+  .mockup-modal-grid {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
+}
+
+/* Columna Izquierda: Simulador visual del producto */
+.mockup-stage-box {
+  background: rgba(14, 18, 24, 0.6);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-md);
+  padding: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.mockup-stage-controls {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.mockup-view-toggle {
+  display: flex;
+  background: rgba(0, 0, 0, 0.5);
+  padding: 3px;
+  border-radius: var(--radius-xs);
+  border: 1px solid var(--glass-border);
+  gap: 3px;
+}
+
+.mockup-view-btn {
+  padding: 0.35rem 0.85rem;
+  font-size: 0.75rem;
+  font-family: var(--font-mono);
+  font-weight: 700;
+  border-radius: var(--radius-xs);
+  background: transparent;
+  color: var(--text-muted);
+  border: none;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.mockup-view-btn.active {
+  background: var(--accent-cyan);
+  color: #000;
+  box-shadow: 0 0 10px rgba(0, 240, 255, 0.4);
+}
+
+.mockup-item-selector {
+  font-size: 0.775rem;
+  font-family: var(--font-mono);
+  padding: 0.35rem 0.75rem;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--glass-border);
+  color: var(--text-primary);
+  border-radius: var(--radius-xs);
+}
+
+/* Canvas del Mockup de Producción */
+.mockup-stage-viewport {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  max-width: 440px;
+  background: radial-gradient(circle at 50% 40%, rgba(255, 255, 255, 0.04) 0%, rgba(8, 11, 16, 0.95) 85%);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--glass-border);
+  overflow: hidden;
+  box-shadow: inset 0 0 35px rgba(0, 0, 0, 0.8);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.mockup-stage-viewport > svg {
+  width: 90%;
+  height: 90%;
+  object-fit: contain;
+  filter: drop-shadow(0 15px 30px rgba(0, 0, 0, 0.7));
+  z-index: 2;
+  position: relative;
+}
+
+/* Plataforma 3D iluminada del tocadiscos de estudio */
+.mockup-turntable-pedestal {
+  position: absolute;
+  bottom: 12px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 82%;
+  height: 38px;
+  border-radius: 50%;
+  background: radial-gradient(ellipse at center, rgba(0, 240, 255, 0.18) 0%, rgba(0, 240, 255, 0.03) 55%, transparent 75%);
+  border: 1px solid rgba(0, 240, 255, 0.25);
+  box-shadow: 0 0 25px rgba(0, 240, 255, 0.2), inset 0 0 15px rgba(0, 240, 255, 0.12);
+  pointer-events: none;
+  z-index: 1;
+}
+
+.mockup-turntable-pedestal::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 48%;
+  height: 52%;
+  border-radius: 50%;
+  border: 1px dashed rgba(0, 240, 255, 0.3);
+}
+
+/* Retícula HUD de calibración central de plato térmico */
+.mockup-center-reticle {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 20px;
+  height: 20px;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+  z-index: 4;
+  opacity: 0.5;
+}
+
+.mockup-center-reticle::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: -20px;
+  right: -20px;
+  height: 1px;
+  transform: translateY(-50%);
+  background: linear-gradient(90deg, transparent, var(--accent-cyan), transparent);
+}
+
+.mockup-center-reticle::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  top: -20px;
+  bottom: -20px;
+  width: 1px;
+  transform: translateX(-50%);
+  background: linear-gradient(180deg, transparent, var(--accent-cyan), transparent);
+}
+
+/* Retícula de centro óptico de cada estampa registrada */
+.mockup-reticle-crosshair {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 16px;
+  height: 16px;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+  z-index: 12;
+  opacity: 0.65;
+}
+
+.mockup-reticle-crosshair::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 0;
+  width: 100%;
+  height: 1px;
+  background: var(--accent-cyan);
+  transform: translateY(-50%);
+}
+
+.mockup-reticle-crosshair::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  top: 0;
+  width: 1px;
+  height: 100%;
+  background: var(--accent-cyan);
+  transform: translateX(-50%);
+}
+
+.mockup-print-overlay {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  outline: 1.5px dashed var(--accent-cyan);
+  outline-offset: 2px;
+  background: rgba(0, 240, 255, 0.04);
+}
+
+.mockup-print-badge {
+  position: absolute;
+  top: -24px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #000;
+  border: 1px solid var(--accent-cyan);
+  color: var(--accent-cyan);
+  font-size: 0.65rem;
+  font-family: var(--font-mono);
+  font-weight: 800;
+  padding: 2px 7px;
+  border-radius: 3px;
+  white-space: nowrap;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.6);
+  z-index: 15;
+}
+
+.mockup-print-art {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.mockup-print-art img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  filter: drop-shadow(0 2px 8px rgba(0, 0, 0, 0.5));
+}
+
+.mockup-print-art svg {
+  width: 100%;
+  height: 100%;
+  filter: drop-shadow(0 2px 8px rgba(0, 0, 0, 0.5));
+}
+
+/* Columna Derecha: Ficha Técnica de Taller */
+.mockup-specs-box {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.mockup-spec-card {
+  background: rgba(14, 18, 24, 0.7);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-xs);
+  padding: 1.25rem;
+}
+
+.mockup-spec-card-title {
+  font-size: 0.75rem;
+  font-family: var(--font-mono);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--accent-cyan);
+  margin-bottom: 0.75rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.mockup-garment-summary {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.mockup-color-chip {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: 2px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 0 0 10px rgba(0,0,0,0.5);
+  flex-shrink: 0;
+}
+
+.mockup-prints-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.775rem;
+  font-family: var(--font-mono);
+  margin-top: 0.5rem;
+}
+
+.mockup-prints-table th {
+  padding: 0.5rem;
+  color: var(--text-muted);
+  border-bottom: 1px solid var(--glass-border);
+  text-align: left;
+  font-size: 0.7rem;
+}
+
+.mockup-prints-table td {
+  padding: 0.6rem 0.5rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  color: var(--text-secondary);
+}
+
+.mockup-thermal-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.75rem;
+  margin-top: 0.5rem;
+}
+
+.mockup-thermal-item {
+  background: rgba(0, 0, 0, 0.35);
+  border: 1px solid var(--glass-border);
+  padding: 0.65rem 0.85rem;
+  border-radius: var(--radius-xs);
+}
+
+.mockup-thermal-item .param-label {
+  font-size: 0.65rem;
+  font-family: var(--font-mono);
+  color: var(--text-muted);
+  text-transform: uppercase;
+  margin-bottom: 2px;
+}
+
+.mockup-thermal-item .param-value {
+  font-size: 0.95rem;
+  font-weight: 800;
+  font-family: var(--font-display);
+  color: var(--accent-lime);
+}
+
+.mockup-modal-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 1rem;
+  margin-top: 2rem;
+  padding-top: 1.25rem;
+  border-top: 1px solid var(--glass-border);
+}
+
+/* Botón especial de Ver Mockup en tarjeta Kanban */
+.order-action-btn.view-mockup-btn {
+  background: rgba(0, 240, 255, 0.1);
+  border-color: rgba(0, 240, 255, 0.4);
+  color: var(--accent-cyan);
+}
+
+.order-action-btn.view-mockup-btn:hover {
+  background: var(--accent-cyan);
+  color: #000;
+  box-shadow: 0 0 15px rgba(0, 240, 255, 0.5);
+}
+
+/* --------------------------------------------------------------------------
+   ESTILOS DE IMPRESIÓN PARA HOJA DE TALLER (JOB TICKET)
+   -------------------------------------------------------------------------- */
+@media print {
+  body * {
+    visibility: hidden;
+  }
+  #adminMockupModal, #adminMockupModal * {
+    visibility: visible;
+  }
+  #adminMockupModal {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    background: #ffffff !important;
+    color: #000000 !important;
+    padding: 0;
+  }
+  .modal-card.modal-card-xl {
+    box-shadow: none !important;
+    border: 1px solid #ccc !important;
+    background: #fff !important;
+    color: #000 !important;
+    max-height: none !important;
+    max-width: 100% !important;
+    padding: 1cm !important;
+  }
+  .mockup-modal-close-btn, .mockup-modal-footer button {
+    display: none !important;
+  }
+}
+

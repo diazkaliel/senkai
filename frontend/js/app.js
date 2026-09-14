@@ -24,8 +24,8 @@ class SeikoApp {
     });
 
     this.catalog = new CatalogComponent('catalogContainer', {
-      onSelectForCustomizer: (garmentId) => {
-        this.customizer.setGarmentById(garmentId);
+      onSelectForCustomizer: (garmentId, options = {}) => {
+        this.customizer.setGarmentById(garmentId, options);
         const customizerSec = document.getElementById('personalizador');
         if (customizerSec) {
           customizerSec.scrollIntoView({ behavior: 'smooth' });

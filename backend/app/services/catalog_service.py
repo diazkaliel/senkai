@@ -1,0 +1,137 @@
+"""
+Servicio del catálogo textil para Senkai DTF Studio.
+Gestiona prendas base de alta gama, gramajes de confección y variantes disponibles desde la base de datos.
+"""
+
+from typing import List, Optional
+from sqlalchemy.ext.asyncio import AsyncSession
+
+from app.schemas.domain import (
+    GarmentBase, GarmentCategory, GarmentSize, ColorVariant
+)
+from app.repositories.catalog_repository import catalog_repository, CatalogRepository
+from app.core.exceptions import EntityNotFoundException
+
+
+class CatalogService:
+    """Gestiona la consulta y especificaciones del catálogo textil."""
+
+    def __init__(self, repository: CatalogRepository = catalog_repository):
+        self.repository = repository
+        self._fallback_catalog = self._build_fallback()
+
+    def _build_fallback(self) -> List[GarmentBase]:
+        """Catálogo de resguardo en caso de inicialización en frío."""
+        return [
+            GarmentBase(
+                id="garment-polera-heavyweight-240",
+                name="Polera Oversized Heavyweight 240g",
+                category=GarmentCategory.OVERSIZED_T_SHIRT,
+                description="Algodón peinado premium de 240g/m². Corte relajado drop-shoulder con cuello reforzado de 3cm.",
+                weight_gsm=240,
+                composition="100% Algodón Peinado Ringspun",
+                base_price=12990,
+                colors=[
+                    ColorVariant(name="Obsidian Black", hex_code="#121212", in_stock=True),
+                    ColorVariant(name="Vintage Chalk White", hex_code="#F4F4F0", in_stock=True),
+                    ColorVariant(name="Slate Washed Gray", hex_code="#3D404A", in_stock=True),
+                    ColorVariant(name="Forest Deep Green", hex_code="#1E3329", in_stock=True),
+                    ColorVariant(name="Raw Terracotta", hex_code="#8D4330", in_stock=True),
+                ],
+                sizes=[GarmentSize.S, GarmentSize.M, GarmentSize.L, GarmentSize.XL, GarmentSize.XXL],
+                image_front_template="/assets/templates/tshirt_front.svg",
+                image_back_template="/assets/templates/tshirt_back.svg",
+                is_active=True
+            ),
+            GarmentBase(
+                id="garment-polera-classic-180",
+                name="Polera Clásica Regular Fit 180g",
+                category=GarmentCategory.T_SHIRT,
+                description="Algodón 180g/m² suave y transpirable. Costuras laterales reforzadas.",
+                weight_gsm=180,
+                composition="100% Algodón Jersey",
+                base_price=8990,
+                colors=[
+                    ColorVariant(name="Obsidian Black", hex_code="#121212", in_stock=True),
+                    ColorVariant(name="Pure White", hex_code="#FFFFFF", in_stock=True),
+                    ColorVariant(name="Navy Deep Blue", hex_code="#101D2D", in_stock=True),
+                    ColorVariant(name="Burgundy Red", hex_code="#4A1521", in_stock=True),
+                ],
+                sizes=[GarmentSize.S, GarmentSize.M, GarmentSize.L, GarmentSize.XL],
+                image_front_template="/assets/templates/tshirt_front.svg",
+                image_back_template="/assets/templates/tshirt_back.svg",
+                is_active=True
+            ),
+            GarmentBase(
+                id="garment-poleron-hoodie-320",
+                name="Polerón Canguro Hoodie Heavy 320g",
+                category=GarmentCategory.HOODIE,
+                description="Polerón premium con interior afelpado (fleece) de 320g/m².",
+                weight_gsm=320,
+                composition="80% Algodón / 20% Poliéster Antipilling",
+                base_price=24990,
+                colors=[
+                    ColorVariant(name="Obsidian Black", hex_code="#121212", in_stock=True),
+                    ColorVariant(name="Cement Gray", hex_code="#7A7D84", in_stock=True),
+                    ColorVariant(name="Deep Olive Green", hex_code="#2B3629", in_stock=True),
+                    ColorVariant(name="Raw Bone", hex_code="#E8E4D9", in_stock=True),
+                ],
+                sizes=[GarmentSize.S, GarmentSize.M, GarmentSize.L, GarmentSize.XL, GarmentSize.XXL],
+                image_front_template="/assets/templates/hoodie_front.svg",
+                image_back_template="/assets/templates/hoodie_back.svg",
+                is_active=True
+            ),
+            GarmentBase(
+                id="garment-poleron-crewneck-300",
+                name="Polerón Crewneck Cuello Redondo 300g",
+                category=GarmentCategory.CREWNECK,
+                description="Corte minimalista sin capucha con puños y pretina en rib 1x1 con elastano.",
+                weight_gsm=300,
+                composition="80% Algodón / 20% Poliéster",
+                base_price=21990,
+                colors=[
+                    ColorVariant(name="Obsidian Black", hex_code="#121212", in_stock=True),
+                    ColorVariant(name="Heather Gray", hex_code="#61646B", in_stock=True),
+                    ColorVariant(name="Midnight Navy", hex_code="#141C2B", in_stock=True),
+                ],
+                sizes=[GarmentSize.S, GarmentSize.M, GarmentSize.L, GarmentSize.XL],
+                image_front_template="/assets/templates/crewneck_front.svg",
+                image_back_template="/assets/templates/crewneck_back.svg",
+                is_active=True
+            )
+        ]
+
+    async def get_all_garments_async(self, session: AsyncSession) -> List[GarmentBase]:
+        """Consulta el catálogo relacional desde la base de datos."""
+        models = await self.repository.list_active_garments(session)
+        if models:
+            return [self.repository.to_schema(m) for m in models]
+        return self._fallback_catalog
+
+    async def get_garment_by_id_async(self, session: AsyncSession, garment_id: str) -> Optional[GarmentBase]:
+        model = await self.repository.get_by_id(session, garment_id)
+        if model:
+            return self.repository.to_schema(model)
+        return next((g for g in self._fallback_catalog if g.id == garment_id), None)
+
+    async def require_garment_async(self, session: AsyncSession, garment_id: str) -> GarmentBase:
+        garment = await self.get_garment_by_id_async(session, garment_id)
+        if not garment:
+            raise EntityNotFoundException(f"Prenda con ID '{garment_id}' no existe en el catálogo.")
+        return garment
+
+    # Métodos sincrónicos compatibles
+    def get_all_garments(self) -> List[GarmentBase]:
+        return self._fallback_catalog
+
+    def get_garment_by_id(self, garment_id: str) -> Optional[GarmentBase]:
+        return next((g for g in self._fallback_catalog if g.id == garment_id), None)
+
+    def require_garment(self, garment_id: str) -> GarmentBase:
+        garment = self.get_garment_by_id(garment_id)
+        if not garment:
+            raise EntityNotFoundException(f"Prenda con ID '{garment_id}' no existe en el catálogo.")
+        return garment
+
+
+catalog_service = CatalogService()
