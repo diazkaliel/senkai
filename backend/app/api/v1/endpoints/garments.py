@@ -14,6 +14,7 @@ from app.db.session import get_db
 router = APIRouter(prefix="/garments", tags=["Catálogo Textil"])
 
 
+@router.get("", response_model=List[GarmentBase], include_in_schema=False)
 @router.get("/", response_model=List[GarmentBase], summary="Listar todas las prendas disponibles")
 async def list_garments(
     session: AsyncSession = Depends(get_db)

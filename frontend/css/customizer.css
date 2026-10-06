@@ -1,49 +1,70 @@
 /* ==========================================================================
-   SEIKO // ESTUDIO DE PERSONALIZACIÓN DTF INTERACTIVO - V2 PRO
+   SENKAI // ATELIER DE PERSONALIZACIÓN TEXTIL DTF
+   Studio Split Inmersivo (60% / 40%) con Flip 3D y Micro-Interacciones
+   Estética: Dark Luxury Streetwear Brutalist
    ========================================================================== */
 
 .customizer-section {
-  padding: 4rem 0 6rem;
+  padding: 3.5rem 0 6rem;
   position: relative;
+  overflow: hidden;
+}
+
+/* Option B: Halo Cenital Focalizado Estático - Iluminación Cenital de Estudio */
+.customizer-section::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: min(1200px, 96vw);
+  height: 520px;
+  background: radial-gradient(ellipse 60% 45% at 50% 0%, rgba(255, 255, 255, 0.05) 0%, rgba(255, 255, 255, 0.015) 50%, transparent 80%);
+  pointer-events: none;
+  z-index: 0;
 }
 
 .customizer-layout {
   display: grid;
-  grid-template-columns: minmax(0, 1.1fr) minmax(0, 0.9fr);
-  gap: 2.25rem;
+  grid-template-columns: 1fr;
+  gap: 2rem;
   align-items: start;
-}
-
-@media (max-width: 1024px) {
-  .customizer-layout {
-    grid-template-columns: 1fr;
-    gap: 1.75rem;
-  }
-}
-
-/* --------------------------------------------------------------------------
-   1. VISUALIZADOR TEXTIL (CANVAS)
-   -------------------------------------------------------------------------- */
-.visualizer-card {
-  background: var(--glass-bg);
-  backdrop-filter: var(--glass-blur-lg);
-  -webkit-backdrop-filter: var(--glass-blur-lg);
-  border: 1px solid var(--glass-border-light);
-  border-top: 2px solid rgba(229, 29, 36, 0.65);
-  border-radius: var(--radius-lg);
-  padding: 1.75rem;
-  box-shadow: var(--shadow-glass);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
   width: 100%;
 }
 
 @media (min-width: 1025px) {
-  .visualizer-card {
-    position: sticky;
-    top: 95px;
+  .customizer-layout {
+    grid-template-columns: 1.15fr 0.85fr;
+    gap: 2.5rem;
   }
+}
+
+/* --------------------------------------------------------------------------
+   1. COLUMNA IZQUIERDA: CANVAS TEXTIL STICKY CON FLIP 3D
+   -------------------------------------------------------------------------- */
+.customizer-stage-column,
+.customizer-inspector-column {
+  width: 100%;
+  min-width: 0;
+}
+
+@media (min-width: 1025px) {
+  .customizer-stage-column {
+    position: sticky;
+    top: 96px;
+  }
+}
+
+.visualizer-card {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  border-radius: 0;
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.7);
 }
 
 .visualizer-toolbar {
@@ -52,32 +73,30 @@
   justify-content: space-between;
   align-items: center;
   margin-bottom: 1.25rem;
-  flex-wrap: wrap;
   gap: 0.75rem;
 }
 
 .view-toggle-group {
   display: flex;
-  background: rgba(0, 0, 0, 0.45);
-  padding: 3px;
-  border-radius: var(--radius-xs);
-  border: 1px solid var(--glass-border);
+  background: #09090b;
+  border: 1px solid var(--border-subtle);
+  padding: 2px;
 }
 
 .view-toggle-btn {
   display: inline-flex;
   align-items: center;
-  gap: 0.45rem;
-  padding: 0.45rem 1.05rem;
-  border-radius: var(--radius-xs);
-  font-size: 0.75rem;
-  font-weight: 600;
-  font-family: var(--font-mono);
-  color: var(--text-muted);
-  transition: all var(--transition-fast);
-  border: none;
+  gap: 0.5rem;
+  padding: 0.5rem 1.15rem;
   background: transparent;
+  border: none;
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  color: var(--text-muted);
   cursor: pointer;
+  transition: all var(--transition-fast);
 }
 
 .view-toggle-btn:hover {
@@ -85,9 +104,9 @@
 }
 
 .view-toggle-btn.active {
-  background: rgba(255, 255, 255, 0.14);
+  background: var(--bg-surface-elevated);
   color: #ffffff;
-  border: 1px solid rgba(255, 255, 255, 0.15);
+  border: 1px solid var(--border-strong);
 }
 
 .view-count-pill {
@@ -96,17 +115,16 @@
   justify-content: center;
   min-width: 18px;
   height: 18px;
-  padding: 0 5px;
-  border-radius: 999px;
-  background: rgba(255, 255, 255, 0.1);
+  padding: 0 4px;
+  background: rgba(255, 255, 255, 0.08);
   color: var(--text-secondary);
   font-size: 0.65rem;
   font-weight: 700;
-  line-height: 1;
+  font-family: var(--font-mono);
 }
 
 .view-toggle-btn.active .view-count-pill {
-  background: var(--accent-red);
+  background: var(--accent-primary);
   color: #ffffff;
 }
 
@@ -114,84 +132,166 @@
   display: inline-flex;
   align-items: center;
   gap: 0.4rem;
-  background: rgba(255, 255, 255, 0.04);
-  border: 1px solid var(--glass-border);
-  border-radius: var(--radius-xs);
-  padding: 0.4rem 0.85rem;
-  font-size: 0.725rem;
-  font-family: var(--font-mono);
+  padding: 0.45rem 0.85rem;
+  background: #09090b;
+  border: 1px solid var(--border-subtle);
   color: var(--text-secondary);
+  font-family: var(--font-mono);
+  font-size: 0.725rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
   cursor: pointer;
   transition: all var(--transition-fast);
 }
 
 .canvas-action-btn:hover {
-  background: rgba(255, 255, 255, 0.09);
+  background: var(--bg-surface-elevated);
   color: var(--text-primary);
-  border-color: rgba(255, 255, 255, 0.25);
+  border-color: var(--border-strong);
 }
 
+/* Escenario Textil */
 .canvas-viewport {
   width: 100%;
-  max-width: 520px;
   aspect-ratio: 1 / 1.05;
   position: relative;
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: var(--radius-md);
   overflow: hidden;
   user-select: none;
-
-  /* Estudio textil: iluminación de taller y profundidad neutra */
   background:
-    radial-gradient(ellipse 65% 55% at 50% 20%, rgba(255, 255, 255, 0.06) 0%, transparent 55%),
-    radial-gradient(ellipse 60% 50% at 50% 45%, rgba(229, 29, 36, 0.05) 0%, transparent 60%),
-    radial-gradient(circle at center, #121820 0%, #06080b 100%);
-  border: 1px solid rgba(255, 255, 255, 0.09);
-  box-shadow: inset 0 0 60px rgba(0, 0, 0, 0.85), 0 16px 36px rgba(0, 0, 0, 0.55);
+    radial-gradient(ellipse 70% 55% at 50% 25%, rgba(255, 255, 255, 0.05) 0%, transparent 65%),
+    radial-gradient(circle at center, #111317 0%, #060709 100%);
+  border: 1px solid var(--border-subtle);
 }
 
-/* Grilla sutil de referencia milimétrica de taller */
 .canvas-viewport::before {
-  content: "";
+  content: '';
   position: absolute;
   inset: 0;
   background-image:
-    linear-gradient(to right, rgba(255, 255, 255, 0.02) 1px, transparent 1px),
-    linear-gradient(to bottom, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
-  background-size: 28px 28px;
+    linear-gradient(to right, rgba(255, 255, 255, 0.015) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(255, 255, 255, 0.015) 1px, transparent 1px);
+  background-size: 32px 32px;
   pointer-events: none;
   z-index: 1;
 }
 
+/* Option B: Halo Cenital Focalizado Estático - Rim Light de Estudio */
+.atelier-stage-halo {
+  position: absolute;
+  top: 48%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: min(440px, 86%);
+  height: min(480px, 90%);
+  border-radius: 50%;
+  background: radial-gradient(circle at center, rgba(255, 255, 255, 0.07) 0%, rgba(255, 255, 255, 0.02) 45%, transparent 70%);
+  pointer-events: none;
+  z-index: 1;
+}
+
+.garment-floor-shadow {
+  position: absolute;
+  bottom: 4%;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 58%;
+  height: 24px;
+  background: radial-gradient(ellipse at center, rgba(0, 0, 0, 0.85) 0%, rgba(0, 0, 0, 0.3) 40%, transparent 75%);
+  filter: blur(8px);
+  z-index: 1;
+  pointer-events: none;
+}
+
+/* Contenedor Flip 3D de la Prenda */
+.garment-flip-container {
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  inset: 0;
+  perspective: 1400px;
+  transform-style: preserve-3d;
+  transition: transform 0.65s var(--ease-editorial, cubic-bezier(0.19, 1, 0.22, 1));
+  z-index: 2;
+}
+
+.garment-flip-container.is-flipped {
+  transform: rotateY(180deg);
+}
+
+.garment-flip-face {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  transform-style: preserve-3d;
+}
+
+.garment-flip-face.face-front {
+  transform: rotateY(0deg);
+  z-index: 2;
+}
+
+.garment-flip-face.face-back {
+  transform: rotateY(180deg);
+  z-index: 1;
+}
+
 .garment-svg-wrapper {
-  width: 94%;
-  height: 94%;
+  width: 88%;
+  height: 88%;
+  max-width: 520px;
+  max-height: 520px;
   display: flex;
   align-items: center;
   justify-content: center;
   position: relative;
   z-index: 2;
-
-  /* Transición fluida entre prendas y vistas */
-  animation: garment-enter 0.45s cubic-bezier(0.16, 1, 0.3, 1) both;
+  pointer-events: none;
 }
 
-@keyframes garment-enter {
-  from {
-    opacity: 0.4;
-    transform: scale(0.96) translateY(8px);
-  }
-  to {
-    opacity: 1;
-    transform: scale(1) translateY(0);
-  }
+.garment-svg-wrapper svg {
+  width: 100%;
+  height: 100%;
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+  filter: drop-shadow(0 16px 36px rgba(0, 0, 0, 0.8)) drop-shadow(0 0 1px rgba(255, 255, 255, 0.16));
 }
 
-/* ==========================================================================
-   ESCENARIO FOTOGRÁFICO MULTICAPA (GHOST MANNEQUIN STUDIO)
-   ========================================================================== */
+/* Área máxima recomendada para termo-fijado */
+.safe-print-boundary {
+  position: absolute;
+  top: 18%;
+  left: 20%;
+  width: 60%;
+  height: 64%;
+  border: 1px dashed rgba(255, 255, 255, 0.16);
+  pointer-events: none;
+  z-index: 3;
+  transition: border-color var(--transition-fast);
+}
+
+.safe-print-boundary::before {
+  content: "ÁREA ÚTIL PLANCHA [40 × 50 CM]";
+  position: absolute;
+  top: -20px;
+  left: 0;
+  font-family: var(--font-mono);
+  font-size: 0.55rem;
+  letter-spacing: 0.08em;
+  color: var(--text-muted);
+  text-transform: uppercase;
+}
+
+/* Capa de Mockup Fotográfico Multicapa */
 .photorealistic-garment-stage {
   position: relative;
   width: 100%;
@@ -199,24 +299,20 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  user-select: none;
   pointer-events: none;
 }
 
-/* Sombra de contacto en el piso del estudio */
 .garment-floor-shadow {
   position: absolute;
-  bottom: 3%;
+  bottom: 2%;
   left: 14%;
   right: 14%;
-  height: 32px;
-  background: radial-gradient(ellipse at center, rgba(0, 0, 0, 0.8) 0%, rgba(0, 0, 0, 0.35) 55%, transparent 75%);
+  height: 30px;
+  background: radial-gradient(ellipse at center, rgba(0, 0, 0, 0.8) 0%, transparent 70%);
   filter: blur(10px);
   z-index: 1;
-  pointer-events: none;
 }
 
-/* Capa 1: Color Textil Dinámico con Máscara Alfa */
 .garment-color-base {
   position: absolute;
   inset: 0;
@@ -229,11 +325,10 @@
   -webkit-mask-repeat: no-repeat;
   mask-repeat: no-repeat;
   z-index: 2;
-  transition: background-color 0.22s cubic-bezier(0.16, 1, 0.3, 1);
-  filter: drop-shadow(0 20px 40px rgba(0, 0, 0, 0.85));
+  transition: background-color 0.2s ease;
+  filter: drop-shadow(0 15px 35px rgba(0, 0, 0, 0.85));
 }
 
-/* Capas Fotográficas Base (Multiply y Screen) */
 .garment-photo-layer {
   position: absolute;
   inset: 0;
@@ -241,725 +336,89 @@
   height: 100%;
   object-fit: contain;
   pointer-events: none;
-  user-select: none;
 }
 
-/* Capa 2: Sombras y Pliegues Fotográficos (Multiply) */
 .garment-photo-layer.garment-multiply {
   z-index: 3;
   mix-blend-mode: multiply;
-  filter: contrast(1.16) brightness(0.96);
-  opacity: 0.96;
+  filter: contrast(1.15) brightness(0.96);
+  opacity: 0.95;
 }
 
-/* Capa 3: Iluminación de Estudio y Softbox (Screen) */
 .garment-photo-layer.garment-screen {
   z-index: 4;
   mix-blend-mode: screen;
-  filter: grayscale(100%) contrast(1.4) brightness(0.24);
-  opacity: 0.82;
+  filter: grayscale(100%) contrast(1.3) brightness(0.22);
+  opacity: 0.8;
 }
 
-/* --------------------------------------------------------------------------
-   ESTAMPA DTF CON ACABADO TEXTIL TERMOFIJADO
-   -------------------------------------------------------------------------- */
-.dtf-print-overlay {
+/* Capa de Estampa Arrastrable */
+.dtf-print-draggable {
   position: absolute;
-  pointer-events: none;
+  cursor: grab;
+  user-select: none;
   display: flex;
   align-items: center;
   justify-content: center;
   z-index: 10;
-  transition: top 0.25s ease, left 0.25s ease, width 0.25s ease, height 0.25s ease;
-
-  /* Animación suave de aparición */
-  animation: stamp-appear 0.35s cubic-bezier(0.16, 1, 0.3, 1) both;
+  transition: transform 0.1s ease-out;
 }
 
-@keyframes stamp-appear {
-  from {
-    opacity: 0;
-    transform: translate(-50%, -50%) scale(0.85);
-  }
-  to {
-    opacity: 1;
-    transform: translate(-50%, -50%) scale(var(--stamp-scale, 1));
-  }
-}
-
-.dtf-print-overlay img {
-  max-width: 100%;
-  max-height: 100%;
-  object-fit: contain;
-  /* Relieve sutil y brillo satinado de poliamida DTF termofijada a 160°C */
-  filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.5)) contrast(105%);
-}
-
-.dtf-print-overlay svg {
-  width: 100%;
-  height: 100%;
-  filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.5));
-}
-
-.canvas-badge-info {
-  position: absolute;
-  bottom: 0.85rem;
-  left: 0.85rem;
-  right: 0.85rem;
-  font-size: 0.7rem;
-  font-family: var(--font-mono);
-  background: rgba(9, 11, 14, 0.92);
-  backdrop-filter: blur(16px);
-  padding: 0.6rem 1.1rem;
-  border-radius: var(--radius-xs);
-  border: 1px solid var(--glass-border);
-  color: var(--text-secondary);
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  z-index: 5;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
-}
-
-/* --------------------------------------------------------------------------
-   2. PANEL DE CONTROLES
-   -------------------------------------------------------------------------- */
-.controls-card {
-  background: var(--glass-bg);
-  backdrop-filter: var(--glass-blur-lg);
-  -webkit-backdrop-filter: var(--glass-blur-lg);
-  border: 1px solid var(--glass-border-light);
-  border-radius: var(--radius-lg);
-  padding: 1.75rem;
-  box-shadow: var(--shadow-glass);
-  position: relative;
-  width: 100%;
-}
-
-.control-group {
-  margin-bottom: 2rem;
-  padding-bottom: 1.5rem;
-  border-bottom: 1px solid var(--glass-border);
-}
-
-.control-group:last-child {
-  border-bottom: none;
-  margin-bottom: 0;
-  padding-bottom: 0;
-}
-
-.control-label-row {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 1rem;
-  flex-wrap: wrap;
-  gap: 0.5rem;
-}
-
-.control-step-num {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 26px;
-  height: 26px;
-  border-radius: 50%;
-  background: rgba(0, 240, 255, 0.12);
-  border: 1px solid rgba(0, 240, 255, 0.4);
-  font-family: var(--font-mono);
-  font-weight: 800;
-  font-size: 0.7rem;
-  color: var(--accent-cyan);
-  flex-shrink: 0;
-}
-
-.control-title {
-  font-family: var(--font-display);
-  font-size: 0.95rem;
-  font-weight: 700;
-  letter-spacing: -0.01em;
-  color: var(--text-primary);
-  text-transform: uppercase;
-  display: flex;
-  align-items: center;
-  gap: 0.65rem;
-}
-
-.control-badge-val {
-  font-family: var(--font-mono);
-  font-size: 0.725rem;
-  color: var(--accent-cyan);
-  letter-spacing: 0.04em;
-}
-
-/* --------------------------------------------------------------------------
-   SELECTOR DE PRENDA CON MINIATURA SVG
-   -------------------------------------------------------------------------- */
-.garment-grid-options {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 0.75rem;
-}
-
-.garment-opt-btn {
-  background: rgba(255, 255, 255, 0.025);
-  border: 1px solid var(--glass-border);
-  border-radius: var(--radius-sm);
-  padding: 0.9rem;
-  display: flex;
-  align-items: center;
-  gap: 0.85rem;
-  text-align: left;
-  transition: all var(--transition-fast);
-  cursor: pointer;
-}
-
-.garment-opt-btn:hover {
-  border-color: rgba(0, 240, 255, 0.4);
-  background: rgba(0, 240, 255, 0.04);
-  transform: translateY(-2px);
-}
-
-.garment-opt-btn.active {
-  border-color: var(--accent-cyan);
-  background: rgba(0, 240, 255, 0.08);
-  box-shadow: 0 0 22px rgba(0, 240, 255, 0.12), inset 0 0 0 1px rgba(0, 240, 255, 0.15);
-}
-
-.garment-opt-thumb {
-  width: 48px;
-  height: 48px;
-  flex-shrink: 0;
-  opacity: 0.7;
-  transition: opacity var(--transition-fast);
-}
-
-.garment-opt-btn:hover .garment-opt-thumb,
-.garment-opt-btn.active .garment-opt-thumb {
-  opacity: 1;
-}
-
-.garment-opt-info {
-  flex-grow: 1;
-  min-width: 0;
-}
-
-.garment-opt-name {
-  font-family: var(--font-display);
-  font-weight: 700;
-  font-size: 0.85rem;
-  color: var(--text-primary);
-  margin-bottom: 0.15rem;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.garment-opt-meta {
-  font-size: 0.7rem;
-  color: var(--text-muted);
-  font-family: var(--font-mono);
-}
-
-/* --------------------------------------------------------------------------
-   PALETA DE COLORES
-   -------------------------------------------------------------------------- */
-.color-swatches-row {
-  display: flex;
-  gap: 0.75rem;
-  flex-wrap: wrap;
-}
-
-.color-swatch-btn {
-  width: 44px;
-  height: 44px;
-  border-radius: var(--radius-sm);
-  border: 2px solid transparent;
-  cursor: pointer;
-  transition: all var(--transition-fast);
-  position: relative;
-}
-
-/* Borde blanco para colores oscuros */
-.color-swatch-btn::after {
-  content: "";
-  position: absolute;
-  inset: -1px;
-  border-radius: inherit;
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  pointer-events: none;
-}
-
-.color-swatch-btn:hover {
-  transform: scale(1.15);
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
-}
-
-.color-swatch-btn.active {
-  border-color: var(--accent-cyan);
-  box-shadow: 0 0 0 3px var(--accent-cyan-glow), 0 4px 15px rgba(0, 0, 0, 0.5);
-  transform: scale(1.1);
-}
-
-/* Color name tooltip */
-.color-swatch-btn[title]:hover::before {
-  content: attr(title);
-  position: absolute;
-  bottom: calc(100% + 6px);
-  left: 50%;
-  transform: translateX(-50%);
-  background: rgba(9, 11, 14, 0.95);
-  backdrop-filter: blur(8px);
-  color: var(--text-primary);
-  font-family: var(--font-mono);
-  font-size: 0.65rem;
-  font-weight: 600;
-  padding: 3px 8px;
-  border-radius: var(--radius-xs);
-  border: 1px solid var(--glass-border);
-  white-space: nowrap;
-  pointer-events: none;
+.dtf-print-draggable:active,
+.dtf-print-draggable.is-dragging {
+  cursor: grabbing;
   z-index: 20;
 }
 
-/* --------------------------------------------------------------------------
-   TALLAS
-   -------------------------------------------------------------------------- */
-.size-pills-row {
-  display: flex;
-  gap: 0.65rem;
-  flex-wrap: wrap;
-}
-
-.size-pill-btn {
-  width: 54px;
-  height: 46px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: rgba(255, 255, 255, 0.03);
-  border: 1px solid var(--glass-border);
-  border-radius: var(--radius-sm);
-  font-weight: 700;
-  font-family: var(--font-mono);
-  font-size: 0.85rem;
-  color: var(--text-secondary);
-  transition: all var(--transition-fast);
-}
-
-.size-pill-btn:hover {
-  color: var(--text-primary);
-  border-color: rgba(0, 240, 255, 0.4);
-  background: rgba(0, 240, 255, 0.04);
-}
-
-.size-pill-btn.active {
-  background: var(--accent-cyan);
-  color: #000000;
-  border-color: var(--accent-cyan);
-  box-shadow: 0 0 18px var(--accent-cyan-glow);
-  font-weight: 800;
-}
-
-/* --------------------------------------------------------------------------
-   UBICACIÓN DTF
-   -------------------------------------------------------------------------- */
-.position-grid {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 0.75rem;
-}
-
-.position-btn {
-  background: rgba(255, 255, 255, 0.025);
-  border: 1px solid var(--glass-border);
-  border-radius: var(--radius-sm);
-  padding: 0.85rem 1rem;
-  text-align: left;
-  cursor: pointer;
-  transition: all var(--transition-fast);
-  position: relative;
-  overflow: hidden;
-}
-
-.position-btn::before {
-  content: "";
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 3px;
-  height: 100%;
-  background: transparent;
-  transition: background var(--transition-fast);
-}
-
-.position-btn:hover {
-  border-color: rgba(255, 51, 102, 0.4);
-  background: rgba(255, 51, 102, 0.03);
-}
-
-.position-btn:hover::before {
-  background: var(--accent-crimson);
-}
-
-.position-btn.active {
-  border-color: var(--accent-red);
-  background: rgba(229, 29, 36, 0.08);
-  box-shadow: 0 0 24px rgba(229, 29, 36, 0.18);
-}
-
-.position-btn.active::before {
-  background: var(--accent-red);
-  box-shadow: 0 0 10px var(--accent-red);
-}
-
-.position-btn-title {
-  font-family: var(--font-display);
-  font-weight: 700;
-  font-size: 0.825rem;
-  text-transform: uppercase;
-  color: var(--text-primary);
-  margin-bottom: 0.15rem;
-}
-
-.position-btn-sub {
-  font-size: 0.7rem;
-  font-family: var(--font-mono);
-  color: var(--text-muted);
-}
-
-/* --------------------------------------------------------------------------
-   PRESETS DE ARTE Y CARGA DE ARCHIVOS
-   -------------------------------------------------------------------------- */
-.preset-art-row {
-  display: flex;
-  gap: 0.75rem;
-  overflow-x: auto;
-  padding-bottom: 0.5rem;
-  margin-bottom: 1rem;
-  scrollbar-width: thin;
-}
-
-.preset-art-thumb {
-  width: 74px;
-  height: 74px;
-  border-radius: var(--radius-sm);
-  background: rgba(8, 10, 13, 0.9);
-  border: 1.5px solid var(--glass-border);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  flex-shrink: 0;
-  padding: 8px;
-  transition: all var(--transition-fast);
-  position: relative;
-  overflow: hidden;
-}
-
-.preset-art-thumb::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background: radial-gradient(circle at center, transparent 40%, rgba(0, 0, 0, 0.4) 100%);
-  pointer-events: none;
-  opacity: 1;
-  transition: opacity var(--transition-fast);
-}
-
-.preset-art-thumb:hover {
-  border-color: rgba(0, 240, 255, 0.5);
-  transform: scale(1.06);
-}
-
-.preset-art-thumb:hover::after {
-  opacity: 0;
-}
-
-.preset-art-thumb.active {
-  border-color: var(--accent-cyan);
-  box-shadow: 0 0 18px var(--accent-cyan-glow);
-}
-
-.preset-art-thumb.active::after {
-  opacity: 0;
-}
-
-.preset-art-thumb img {
-  width: 100%;
-  height: 100%;
-  object-fit: contain;
-  filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.4));
-  transition: transform var(--transition-fast);
-}
-
-.preset-art-thumb:hover img {
-  transform: scale(1.08);
-}
-
-.upload-dropzone {
-  border: 1.5px dashed rgba(255, 255, 255, 0.12);
-  border-radius: var(--radius-sm);
-  padding: 1.5rem;
-  text-align: center;
-  cursor: pointer;
-  background: rgba(255, 255, 255, 0.015);
-  transition: all var(--transition-normal);
-  position: relative;
-  overflow: hidden;
-}
-
-.upload-dropzone::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background: radial-gradient(circle at center, rgba(0, 240, 255, 0.03) 0%, transparent 70%);
-  opacity: 0;
-  transition: opacity var(--transition-normal);
-  pointer-events: none;
-}
-
-.upload-dropzone:hover {
-  border-color: var(--accent-cyan);
-  background: rgba(0, 240, 255, 0.03);
-}
-
-.upload-dropzone:hover::before {
-  opacity: 1;
-}
-
-.upload-dropzone.dragging {
-  border-color: var(--accent-cyan);
-  background: rgba(0, 240, 255, 0.06);
-  box-shadow: inset 0 0 30px rgba(0, 240, 255, 0.08);
-}
-
-/* --------------------------------------------------------------------------
-   RANGO SLIDER PERSONALIZADO
-   -------------------------------------------------------------------------- */
-.scale-slider-wrap {
-  position: relative;
-  padding: 0.5rem 0;
-}
-
-.scale-slider-wrap input[type="range"] {
-  -webkit-appearance: none;
-  appearance: none;
-  width: 100%;
-  height: 6px;
-  background: rgba(255, 255, 255, 0.08);
-  border-radius: 3px;
-  outline: none;
-  cursor: pointer;
-}
-
-.scale-slider-wrap input[type="range"]::-webkit-slider-thumb {
-  -webkit-appearance: none;
-  appearance: none;
-  width: 22px;
-  height: 22px;
-  border-radius: 50%;
-  background: var(--accent-cyan);
-  box-shadow: 0 0 12px var(--accent-cyan-glow);
-  cursor: pointer;
-  transition: box-shadow 0.2s ease;
-}
-
-.scale-slider-wrap input[type="range"]::-webkit-slider-thumb:hover {
-  box-shadow: 0 0 20px var(--accent-cyan-glow);
-}
-
-.scale-slider-wrap input[type="range"]::-moz-range-thumb {
-  width: 22px;
-  height: 22px;
-  border-radius: 50%;
-  background: var(--accent-cyan);
-  box-shadow: 0 0 12px var(--accent-cyan-glow);
-  cursor: pointer;
-  border: none;
-}
-
-/* --------------------------------------------------------------------------
-   CANTIDAD CON BOTONES +/-
-   -------------------------------------------------------------------------- */
-.qty-stepper {
-  display: flex;
-  align-items: center;
-  gap: 0;
-  border: 1px solid var(--glass-border);
-  border-radius: var(--radius-sm);
-  overflow: hidden;
-  width: fit-content;
-}
-
-.qty-stepper-btn {
-  width: 42px;
-  height: 42px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: rgba(255, 255, 255, 0.04);
-  color: var(--text-primary);
-  font-size: 1.25rem;
-  font-weight: 700;
-  transition: all var(--transition-fast);
-  cursor: pointer;
-}
-
-.qty-stepper-btn:hover {
-  background: rgba(0, 240, 255, 0.12);
-  color: var(--accent-cyan);
-}
-
-.qty-stepper-btn:active {
-  background: rgba(0, 240, 255, 0.2);
-}
-
-.qty-stepper-val {
-  width: 58px;
-  height: 42px;
-  text-align: center;
-  background: transparent;
-  color: var(--text-primary);
-  font-family: var(--font-mono);
-  font-weight: 800;
-  font-size: 1rem;
-  border-left: 1px solid var(--glass-border);
-  border-right: 1px solid var(--glass-border);
-}
-
-/* --------------------------------------------------------------------------
-   COTIZACIÓN EN VIVO
-   -------------------------------------------------------------------------- */
-.live-quote-box {
-  background: linear-gradient(135deg,
-    rgba(229, 29, 36, 0.06) 0%,
-    rgba(0, 240, 255, 0.03) 100%);
-  border: 1px solid rgba(229, 29, 36, 0.25);
-  border-radius: var(--radius-sm);
-  padding: 1.75rem;
-  margin-top: 1.5rem;
-  position: relative;
-  overflow: hidden;
-}
-
-/* Línea decorativa superior */
-.live-quote-box::before {
-  content: "";
-  position: absolute;
-  top: 0;
-  left: 10%;
-  right: 10%;
-  height: 1px;
-  background: linear-gradient(90deg, transparent, rgba(0, 240, 255, 0.3), transparent);
-  pointer-events: none;
-}
-
-.quote-row {
-  display: flex;
-  justify-content: space-between;
-  font-family: var(--font-mono);
-  font-size: 0.825rem;
-  color: var(--text-secondary);
-  margin-bottom: 0.45rem;
-}
-
-.quote-discount-row {
-  color: var(--accent-lime);
-}
-
-.quote-total {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-top: 1.25rem;
-  padding-top: 1rem;
-  border-top: 1px solid var(--glass-border);
-  flex-wrap: wrap;
-  gap: 1rem;
-}
-
-.quote-total-label {
-  font-size: 0.7rem;
-  font-family: var(--font-mono);
-  color: var(--text-muted);
-  text-transform: uppercase;
-  letter-spacing: 0.1em;
-}
-
-.quote-total-price {
-  font-size: 2.15rem;
-  font-weight: 800;
-  font-family: var(--font-display);
-  color: var(--accent-cyan);
-  text-shadow: 0 0 28px var(--accent-cyan-glow);
-  letter-spacing: -0.02em;
-
-  /* Animación sutil al cambiar precio */
-  animation: price-flash 0.35s ease;
-}
-
-@keyframes price-flash {
-  0% { opacity: 0.5; transform: scale(0.96); }
-  50% { opacity: 1; transform: scale(1.02); }
-  100% { opacity: 1; transform: scale(1); }
-}
-
-/* --------------------------------------------------------------------------
-   SISTEMA MULTI-ESTAMPA & ARRASTRE LIBRE INTERACTIVO (CANVAS DTF)
-   -------------------------------------------------------------------------- */
-.dtf-print-draggable {
-  position: absolute;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transform: translate(-50%, -50%);
-  cursor: grab;
-  touch-action: none;
-  user-select: none;
-  z-index: 12;
-  border-radius: 4px;
-  transition: outline 0.18s ease, box-shadow 0.18s ease;
+.dtf-print-draggable.active-print {
+  outline: 1px dashed rgba(255, 255, 255, 0.6);
+  outline-offset: 3px;
 }
 
 .dtf-print-draggable img {
-  max-width: 100%;
-  max-height: 100%;
+  width: 100%;
+  height: 100%;
   object-fit: contain;
   pointer-events: none;
-  filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.55));
+  filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.5));
 }
 
 .dtf-print-draggable svg {
   width: 100%;
   height: 100%;
   pointer-events: none;
-  filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.55));
+  filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.5));
 }
 
-.dtf-print-draggable.is-dragging {
-  cursor: grabbing !important;
-  z-index: 25;
-  filter: drop-shadow(0 16px 32px rgba(0, 0, 0, 0.9)) brightness(1.08);
+/* Gizmo y Manejadores de Estampa */
+.print-gizmo-badge {
+  position: absolute;
+  bottom: calc(100% + 8px);
+  left: 50%;
+  transform: translateX(-50%);
+  background: #09090b;
+  border: 1px solid var(--border-strong);
+  color: #ffffff;
+  padding: 3px 8px;
+  font-family: var(--font-mono);
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  white-space: nowrap;
+  pointer-events: none;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.6);
 }
 
-.dtf-print-draggable.active-print {
-  outline: 1.5px dashed rgba(255, 255, 255, 0.75);
-  outline-offset: 3px;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.6);
-}
-
-/* Handles de arrastre y escala estilo vector gizmo */
 .gizmo-handle {
   position: absolute;
-  width: 7px;
-  height: 7px;
+  width: 8px;
+  height: 8px;
   background: #ffffff;
   border: 1px solid #000000;
-  border-radius: 1px;
   pointer-events: none;
-  z-index: 15;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.8);
 }
 
 .gizmo-handle.handle-tl { top: -4px; left: -4px; }
@@ -967,355 +426,345 @@
 .gizmo-handle.handle-bl { bottom: -4px; left: -4px; }
 .gizmo-handle.handle-br { bottom: -4px; right: -4px; }
 
-/* Etiqueta flotante informativa en la estampa activa */
-.print-gizmo-badge {
-  position: absolute;
-  top: -28px;
-  left: 50%;
-  transform: translateX(-50%);
-  background: rgba(12, 16, 22, 0.95);
-  backdrop-filter: blur(8px);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  color: var(--text-primary);
-  font-family: var(--font-mono);
-  font-size: 11px;
-  font-weight: 600;
-  padding: 2px 7px;
-  border-radius: var(--radius-xs);
-  pointer-events: none;
-  white-space: nowrap;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.6);
-  letter-spacing: 0.04em;
-  display: flex;
-  align-items: center;
-  gap: 4px;
-}
-
-/* Barra inferior informativa con resumen de prenda en el canvas */
+/* Barra Informativa Inferior del Canvas */
 .canvas-badge-info {
   position: absolute;
-  bottom: 12px;
-  left: 12px;
-  right: 12px;
-  background: rgba(10, 14, 20, 0.88);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: var(--radius-xs);
-  padding: 0.5rem 0.85rem;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: rgba(9, 9, 11, 0.95);
+  border-top: 1px solid var(--border-subtle);
+  padding: 0.65rem 1rem;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  z-index: 10;
   font-family: var(--font-mono);
   font-size: 0.725rem;
   color: var(--text-secondary);
-  pointer-events: none;
+  z-index: 5;
 }
 
 .canvas-info-left {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
-  flex-wrap: wrap;
+  gap: 0.45rem;
 }
 
 .canvas-garment-title {
   font-weight: 700;
-  color: var(--text-primary);
-  font-family: var(--font-display);
-}
-
-.canvas-info-sep {
-  color: rgba(255, 255, 255, 0.2);
+  color: #ffffff;
 }
 
 .canvas-color-dot {
   width: 10px;
   height: 10px;
-  border-radius: 50%;
+  border: 1px solid rgba(255, 255, 255, 0.25);
   display: inline-block;
-  border: 1px solid rgba(255, 255, 255, 0.4);
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
 }
 
-.canvas-color-label,
-.canvas-size-label {
+.canvas-info-sep {
   color: var(--text-muted);
 }
 
 .canvas-active-print-tag {
-  color: var(--accent-cyan);
-  font-weight: 600;
-  font-size: 0.7rem;
-  background: rgba(0, 240, 255, 0.08);
-  padding: 2px 8px;
-  border-radius: var(--radius-full);
-  border: 1px solid rgba(0, 240, 255, 0.2);
+  color: var(--text-muted);
 }
 
-/* Delimitador visual de zona segura de estampado industrial */
-.safe-print-boundary {
-  position: absolute;
-  top: 22%;
-  left: 25%;
-  width: 50%;
-  height: 60%;
-  border: 1px dashed rgba(255, 255, 255, 0.12);
-  border-radius: 8px;
-  pointer-events: none;
-  z-index: 5;
+/* ── Dual Preview / Captura Frente y Espalda ─────────────────────────── */
+.visualizer-dual-capture {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.75rem;
+  width: 100%;
+  margin-top: 1rem;
 }
 
-.safe-print-tag {
-  position: absolute;
-  bottom: 4px;
-  right: 8px;
-  font-size: 9px;
-  font-family: var(--font-mono);
-  color: rgba(255, 255, 255, 0.25);
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-}
-
-/* Gestor de Capas Multi-Estampa en el Panel de Controles */
-.print-layers-bar {
+.capture-card {
   display: flex;
-  flex-wrap: wrap;
-  gap: 0.6rem;
   align-items: center;
-  margin-bottom: 1rem;
+  gap: 0.75rem;
+  padding: 0.65rem 0.85rem;
+  background: var(--bg-surface-elevated);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  text-align: left;
 }
 
-.print-layer-chip {
+.capture-card:hover {
+  border-color: var(--border-strong);
+  background: #18181f;
+}
+
+.capture-card.active {
+  border-color: var(--accent-primary);
+  background: var(--accent-primary-subtle);
+}
+
+.capture-thumb {
+  width: 42px;
+  height: 42px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #09090b;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  flex-shrink: 0;
+  position: relative;
+}
+
+.capture-thumb svg {
+  width: 32px;
+  height: 32px;
+}
+
+.mini-print-indicator {
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  background: var(--accent-primary);
+  border-radius: 50%;
+  border: 1.5px solid #ffffff;
+  pointer-events: none;
+  transform: translate(-50%, -50%);
+}
+
+.capture-meta {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  overflow: hidden;
+}
+
+.capture-title {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  font-weight: 800;
+  color: var(--text-primary);
+  letter-spacing: 0.05em;
+}
+
+.capture-desc {
+  font-size: 0.68rem;
+  color: var(--text-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* ── Estado Vacío de Cara (Prenda Lisa) ───────────────────────────────── */
+.face-empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: 1.5rem 1rem;
+  background: var(--bg-surface-elevated);
+  border: 1px dashed var(--border-subtle);
+  border-radius: var(--radius-sm);
+  margin-bottom: 0.75rem;
+}
+
+.face-empty-icon {
+  font-size: 1.85rem;
+  color: var(--text-muted);
+  margin-bottom: 0.4rem;
+}
+
+.face-empty-title {
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 0.25rem;
+}
+
+.face-empty-desc {
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+  max-width: 320px;
+  margin-bottom: 0.85rem;
+}
+
+.btn-add-face-print {
   display: inline-flex;
   align-items: center;
   gap: 0.5rem;
-  background: var(--bg-surface);
-  border: 1px solid var(--glass-border);
-  color: var(--text-secondary);
-  padding: 0.55rem 0.9rem;
-  border-radius: var(--radius-xs);
-  font-size: 0.8rem;
-  font-family: var(--font-mono);
-  cursor: pointer;
-  transition: all var(--transition-fast);
-}
-
-.print-layer-chip:hover {
-  background: var(--bg-surface-elevated);
-  border-color: rgba(255, 255, 255, 0.25);
-}
-
-.print-layer-chip.active {
-  background: rgba(0, 240, 255, 0.12);
-  border-color: var(--accent-cyan);
-  color: var(--accent-cyan);
-  font-weight: 700;
-  box-shadow: 0 0 16px rgba(0, 240, 255, 0.25);
-}
-
-.print-layer-remove-btn {
-  background: transparent;
+  padding: 0.65rem 1.25rem;
+  background: var(--text-primary);
+  color: var(--bg-main);
   border: none;
-  color: var(--text-muted);
-  font-size: 14px;
-  cursor: pointer;
-  padding: 0 2px;
-  line-height: 1;
-  transition: color var(--transition-fast);
-}
-
-.print-layer-remove-btn:hover {
-  color: var(--accent-red-vivid);
-}
-
-.add-print-layer-btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.35rem;
-  background: rgba(0, 255, 136, 0.1);
-  border: 1px dashed var(--accent-lime);
-  color: var(--accent-lime);
-  padding: 0.55rem 0.9rem;
-  border-radius: var(--radius-xs);
-  font-size: 0.775rem;
+  border-radius: var(--radius-sm);
   font-family: var(--font-mono);
-  font-weight: 700;
+  font-size: 0.75rem;
+  font-weight: 800;
   cursor: pointer;
+  letter-spacing: 0.05em;
   transition: all var(--transition-fast);
 }
 
-.add-print-layer-btn:hover {
-  background: rgba(0, 255, 136, 0.2);
-  transform: translateY(-1px);
+.btn-add-face-print:hover {
+  background: #e4e4e7;
 }
 
-/* Grid de deslizadores de ajuste fino */
-.fine-coord-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 1rem;
-  background: rgba(0, 0, 0, 0.35);
-  padding: 1rem;
-  border-radius: var(--radius-xs);
-  border: 1px solid var(--glass-border);
-  margin-top: 0.75rem;
-}
-
-/* ==========================================================================
-   PANEL DE CONFIGURACIÓN DEL ESTUDIO (INSPECTOR DE TALLER)
-   ========================================================================== */
-
-.studio-panel-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  border-bottom: 1px solid var(--glass-border);
-  padding-bottom: 1.15rem;
-  margin-bottom: 1.35rem;
-  flex-wrap: wrap;
-  gap: 0.75rem;
-}
-
-.studio-panel-title {
-  font-family: var(--font-display);
-  font-size: 1.25rem;
-  font-weight: 800;
-  color: var(--text-primary);
-  letter-spacing: -0.02em;
-  margin-bottom: 0.2rem;
-}
-
-.studio-panel-desc {
-  font-size: 0.775rem;
-  color: var(--text-muted);
-}
-
-.active-face-pill {
-  font-family: var(--font-mono);
-  font-size: 0.7rem;
-  font-weight: 700;
-  padding: 0.35rem 0.75rem;
-  border-radius: var(--radius-full);
-  letter-spacing: 0.04em;
+.btn-remove-face-print {
   display: inline-flex;
   align-items: center;
   gap: 0.4rem;
+  padding: 0.5rem 0.85rem;
+  background: transparent;
+  color: #f87171;
+  border: 1px solid rgba(239, 68, 68, 0.35);
+  border-radius: var(--radius-sm);
+  font-family: var(--font-mono);
+  font-size: 0.725rem;
+  font-weight: 700;
+  cursor: pointer;
+  letter-spacing: 0.04em;
+  transition: all var(--transition-fast);
+  margin-top: 0.5rem;
 }
 
-.active-face-pill.face-front {
-  background: rgba(255, 255, 255, 0.06);
-  border: 1px solid rgba(255, 255, 255, 0.2);
+.btn-remove-face-print:hover {
+  background: rgba(239, 68, 68, 0.12);
+  border-color: #ef4444;
+  color: #ffffff;
+}
+
+.order-multi-item-tip {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  padding: 0.85rem 1rem;
+  margin-top: 1.25rem;
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  line-height: 1.45;
+}
+
+.order-multi-item-tip p {
+  margin: 0;
+}
+
+.order-multi-item-tip strong {
   color: var(--text-primary);
 }
 
-.active-face-pill.face-back {
-  background: rgba(229, 29, 36, 0.1);
-  border: 1px solid rgba(229, 29, 36, 0.4);
-  color: #ff6e74;
+.order-multi-item-tip-icon {
+  font-size: 18px;
+  color: var(--accent-primary);
+  flex-shrink: 0;
+  margin-top: 1px;
 }
 
-/* ==========================================================================
-   BARRA DE PASOS GUIADOS DEL ESTUDIO TEXTIL (01, 02, 03)
-   ========================================================================== */
-.studio-step-bar {
+/* --------------------------------------------------------------------------
+   2. COLUMNA DERECHA: CONSOLA DE TALLER DTF POR PESTAÑAS (FASES 01, 02, 03)
+   -------------------------------------------------------------------------- */
+.customizer-inspector-column {
   display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 0.5rem;
-  background: rgba(10, 13, 18, 0.75);
-  border: 1px solid var(--glass-border);
-  border-radius: var(--radius-sm);
-  padding: 0.55rem 0.85rem;
-  margin-bottom: 1.35rem;
+  flex-direction: column;
+  gap: 2rem;
+  width: 100%;
 }
 
-.studio-step-item {
+.atelier-console-card {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  border-radius: 0;
   display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  background: transparent;
-  border: none;
-  cursor: pointer;
-  padding: 0.4rem 0.65rem;
-  border-radius: var(--radius-xs);
-  transition: all var(--transition-fast);
+  flex-direction: column;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.6);
+  width: 100%;
+  overflow: hidden;
 }
 
-.studio-step-item:hover {
-  background: rgba(255, 255, 255, 0.05);
+/* Barra de Pestañas Brutalista */
+.atelier-tabs-nav {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  background: #09090b;
+  border-bottom: 1px solid var(--border-subtle);
 }
 
-.studio-step-item .step-num {
-  display: inline-flex;
+.atelier-tab-btn {
+  display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
-  width: 22px;
-  height: 22px;
-  border-radius: 50%;
-  background: rgba(255, 255, 255, 0.08);
-  border: 1px solid rgba(255, 255, 255, 0.15);
-  font-family: var(--font-mono);
-  font-size: 0.7rem;
-  font-weight: 700;
-  color: var(--text-muted);
+  gap: 0.25rem;
+  padding: 0.95rem 0.5rem;
+  background: transparent;
+  border: none;
+  border-right: 1px solid var(--border-subtle);
+  cursor: pointer;
   transition: all var(--transition-fast);
+  position: relative;
+  text-align: center;
 }
 
-.studio-step-item .step-label {
-  font-family: var(--font-display);
-  font-size: 0.775rem;
-  font-weight: 600;
-  color: var(--text-muted);
-  letter-spacing: 0.01em;
-  transition: color var(--transition-fast);
-  white-space: nowrap;
+.atelier-tab-btn:last-child {
+  border-right: none;
 }
 
-.studio-step-item.active {
-  background: rgba(255, 255, 255, 0.08);
+.atelier-tab-btn:hover {
+  background: rgba(255, 255, 255, 0.02);
 }
 
-.studio-step-item.active .step-num {
-  background: var(--accent-red);
-  border-color: var(--accent-red);
-  color: #ffffff;
-  box-shadow: 0 0 10px rgba(229, 29, 36, 0.4);
+.atelier-tab-btn.active {
+  background: var(--bg-surface);
+  box-shadow: inset 0 2px 0 var(--text-primary);
 }
 
-.studio-step-item.active .step-label {
-  color: var(--text-primary);
+.atelier-tab-num {
+  font-family: var(--font-mono);
+  font-size: 0.675rem;
   font-weight: 700;
+  letter-spacing: 0.1em;
+  color: var(--text-muted);
+  transition: color var(--transition-fast);
 }
 
-.step-line {
-  flex: 1;
-  height: 2px;
-  background: rgba(255, 255, 255, 0.08);
-  border-radius: 1px;
-  transition: background var(--transition-normal);
-  min-width: 12px;
+.atelier-tab-btn.active .atelier-tab-num {
+  color: var(--accent-primary, #6366f1);
 }
 
-.step-line.done {
-  background: rgba(229, 29, 36, 0.5);
+.atelier-tab-label {
+  font-family: var(--font-display);
+  font-size: 0.725rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  transition: color var(--transition-fast);
 }
 
-/* Contenido de cada paso guiado */
-.studio-tab-content {
-  display: none;
-  animation: step-pane-enter 0.22s cubic-bezier(0.16, 1, 0.3, 1) both;
+.atelier-tab-btn.active .atelier-tab-label {
+  color: #ffffff;
 }
 
-.studio-tab-content.active {
-  display: block;
+/* Contenedor del Cuerpo de la Pestaña */
+.atelier-tab-body {
+  padding: 1.5rem;
+  min-height: 400px;
 }
 
-@keyframes step-pane-enter {
+.inspector-step-pane {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  animation: fadeInTab 200ms cubic-bezier(0.19, 1, 0.22, 1);
+}
+
+@keyframes fadeInTab {
   from {
     opacity: 0;
-    transform: translateY(6px);
+    transform: translateY(4px);
   }
   to {
     opacity: 1;
@@ -1323,47 +772,259 @@
   }
 }
 
-/* Cajas modulares de control */
-.hud-box {
-  background: rgba(14, 18, 24, 0.55);
-  border: 1px solid var(--glass-border-light);
-  border-radius: var(--radius-sm);
-  padding: 1.25rem;
-  position: relative;
-}
-
-/* --------------------------------------------------------------------------
-   GRID DE PRENDAS BASE CON MINIATURAS SVG (PASO 1)
-   -------------------------------------------------------------------------- */
-.garment-cards-grid {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 0.75rem;
-}
-
-.garment-card-btn {
-  background: rgba(14, 18, 25, 0.65);
-  border: 1px solid var(--glass-border);
-  border-radius: var(--radius-sm);
-  padding: 0.75rem 0.85rem;
+/* Barra de Indicador de Cara en Paso 2 */
+.step-face-indicator-bar {
   display: flex;
   align-items: center;
+  justify-content: space-between;
+  background: #09090b;
+  border: 1px solid var(--border-subtle);
+  padding: 0.65rem 1rem;
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+}
+
+.step-face-indicator-bar strong {
+  color: #ffffff;
+  letter-spacing: 0.05em;
+}
+
+.btn-switch-face-link {
+  background: transparent;
+  border: none;
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--accent-primary, #a5b4fc);
+  cursor: pointer;
+  letter-spacing: 0.04em;
+  transition: color var(--transition-fast);
+  padding: 0;
+}
+
+.btn-switch-face-link:hover {
+  color: #ffffff;
+  text-decoration: underline;
+}
+
+/* Navegación entre pasos (Footers) */
+.step-nav-footer {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
   gap: 0.75rem;
-  text-align: left;
-  transition: all var(--transition-fast);
+  padding-top: 0.75rem;
+}
+
+.step-nav-footer.step-nav-between {
+  justify-content: space-between;
+}
+
+.step-advance-btn {
+  font-family: var(--font-mono);
+  font-size: 0.775rem;
+  letter-spacing: 0.05em;
+  padding: 0.65rem 1.25rem;
+  border-radius: 75px;
   cursor: pointer;
 }
 
-.garment-card-btn:hover {
-  border-color: rgba(255, 255, 255, 0.3);
-  background: rgba(255, 255, 255, 0.05);
+/* Dock de Cotización Fijo Inferior */
+.live-quote-dock {
+  background: #08090b;
+  border-top: 1px solid var(--border-subtle);
+  padding: 1.25rem 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.quote-dock-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.quote-dock-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  min-width: 0;
+}
+
+.quote-dock-garment {
+  font-family: var(--font-display);
+  font-size: 0.875rem;
+  font-weight: 800;
+  color: #ffffff;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+}
+
+.quote-dock-sub {
+  font-family: var(--font-mono);
+  font-size: 0.725rem;
+  color: var(--text-muted);
+}
+
+.quote-dock-price {
+  display: flex;
+  align-items: baseline;
+  gap: 0.4rem;
+  flex-shrink: 0;
+}
+
+.quote-dock-total {
+  font-family: var(--font-mono);
+  font-size: 1.5rem;
+  font-weight: 900;
+  letter-spacing: -0.02em;
+  color: #ffffff;
+}
+
+.quote-dock-currency {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--text-muted);
+}
+
+.btn-add-cart-dock {
+  width: 100%;
+  justify-content: center;
+  gap: 0.6rem;
+  padding: 0.9rem 1.5rem;
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  border-radius: 75px;
+  background: #ffffff;
+  color: #000000;
+  border: 1px solid #ffffff;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.btn-add-cart-dock:hover {
+  background: #e4e4e7;
+  color: #000000;
   transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(255, 255, 255, 0.15);
+}
+
+.inspector-section {
+  display: flex;
+  flex-direction: column;
+  gap: 1.15rem;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  padding: 1.75rem;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+}
+
+.inspector-section-header {
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.section-badge-index {
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
+  font-weight: 800;
+  color: #ffffff;
+  background: #09090b;
+  border: 1px solid var(--border-strong);
+  padding: 0.35rem 0.6rem;
+  line-height: 1;
+}
+
+.inspector-section-title {
+  font-family: var(--font-display);
+  font-size: 1.1rem;
+  font-weight: 800;
+  letter-spacing: -0.01em;
+  color: #ffffff;
+  margin-bottom: 0.2rem;
+}
+
+.inspector-section-sub {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  line-height: 1.35;
+}
+
+.inspector-box {
+  background: #0c0d10;
+  border: 1px solid var(--border-subtle);
+  padding: 1.15rem;
+}
+
+.control-label-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.85rem;
+}
+
+.control-label {
+  font-family: var(--font-display);
+  font-size: 0.85rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  color: #ffffff;
+}
+
+.control-meta {
+  font-family: var(--font-mono);
+  font-size: 0.725rem;
+  color: var(--text-muted);
+}
+
+.control-meta strong,
+.control-meta.selected-color-name {
+  color: #ffffff;
+  font-weight: 700;
+}
+
+/* Grid de Prendas Base */
+.garment-cards-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0.65rem;
+}
+
+.garment-card-btn {
+  background: var(--bg-surface-elevated, #18181b);
+  border: 1px solid var(--border-default, rgba(255, 255, 255, 0.12));
+  border-radius: 0;
+  padding: 0.75rem 0.85rem;
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  text-align: left;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+}
+
+.garment-card-btn:hover {
+  background: #27272a;
+  border-color: var(--border-strong);
 }
 
 .garment-card-btn.active {
+  background: #27272a;
   border-color: #ffffff;
-  background: rgba(255, 255, 255, 0.09);
-  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.5), inset 0 0 0 1px rgba(255, 255, 255, 0.2);
+  box-shadow: inset 0 0 0 1px #ffffff, 0 4px 12px rgba(0, 0, 0, 0.4);
 }
 
 .garment-card-thumb {
@@ -1373,209 +1034,313 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  opacity: 0.75;
-  transition: opacity var(--transition-fast);
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--border-subtle);
+  border-radius: 0;
 }
 
-.garment-card-btn:hover .garment-card-thumb,
+.garment-card-thumb svg {
+  width: 34px;
+  height: 34px;
+  display: block;
+}
+
 .garment-card-btn.active .garment-card-thumb {
-  opacity: 1;
+  background: rgba(255, 255, 255, 0.1);
+  border-color: var(--border-strong);
 }
 
+.garment-card-info,
 .garment-card-content {
-  flex-grow: 1;
+  flex: 1;
   min-width: 0;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
 }
 
 .garment-card-title {
   font-family: var(--font-display);
   font-weight: 700;
   font-size: 0.825rem;
-  color: var(--text-primary);
-  margin-bottom: 0.2rem;
+  color: #ffffff;
+  margin-bottom: 0.15rem;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  letter-spacing: 0.01em;
 }
 
 .garment-card-meta {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: 0.45rem;
   font-family: var(--font-mono);
-  font-size: 0.7rem;
+  font-size: 0.675rem;
+  color: var(--text-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .garment-gsm-tag {
   color: var(--text-muted);
-  background: rgba(255, 255, 255, 0.04);
-  padding: 1px 4px;
-  border-radius: 2px;
 }
 
 .garment-price-tag {
-  color: var(--accent-lime);
+  color: #ffffff;
   font-weight: 700;
 }
 
-/* Fila de Tallas Textiles */
+/* Selector de Color */
+.color-swatches-row {
+  display: flex;
+  gap: 0.65rem;
+  flex-wrap: wrap;
+}
+
+.color-swatch-btn {
+  width: 38px;
+  height: 38px;
+  border-radius: 4px;
+  border: 1.5px solid rgba(255, 255, 255, 0.35);
+  cursor: pointer;
+  position: relative;
+  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.3), 0 2px 6px rgba(0, 0, 0, 0.5);
+  transition: transform var(--transition-fast), border-color var(--transition-fast), box-shadow var(--transition-fast);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.color-swatch-btn:hover {
+  transform: scale(1.08);
+  border-color: #ffffff;
+}
+
+.color-swatch-btn.active {
+  border-color: #ffffff;
+  box-shadow: 0 0 0 2px var(--bg-surface), 0 0 0 4px #ffffff, 0 4px 12px rgba(0, 0, 0, 0.7);
+  transform: scale(1.04);
+}
+
+.color-swatch-btn .swatch-check {
+  font-size: 18px;
+  line-height: 1;
+  pointer-events: none;
+}
+
+/* Selector de Tallas */
 .size-pills-row {
   display: grid;
   grid-template-columns: repeat(5, 1fr);
-  gap: 0.5rem;
+  gap: 0.45rem;
 }
 
-.size-pills-row .size-pill-btn {
+.size-pill-btn {
   padding: 0.6rem 0.25rem;
-  text-align: center;
+  background: #09090b;
+  border: 1px solid var(--border-subtle);
   font-family: var(--font-mono);
+  font-size: 0.775rem;
   font-weight: 700;
-  font-size: 0.8rem;
-  background: rgba(255, 255, 255, 0.03);
-  border: 1px solid var(--glass-border);
-  border-radius: var(--radius-xs);
   color: var(--text-secondary);
+  text-align: center;
   cursor: pointer;
   transition: all var(--transition-fast);
 }
 
-.size-pills-row .size-pill-btn:hover {
-  border-color: rgba(255, 255, 255, 0.3);
-  color: var(--text-primary);
-}
-
-.size-pills-row .size-pill-btn.active {
-  background: var(--accent-red);
-  border-color: var(--accent-red);
+.size-pill-btn:hover {
   color: #ffffff;
-  box-shadow: 0 0 12px rgba(229, 29, 36, 0.4);
+  border-color: var(--border-strong);
+  background: var(--bg-surface-elevated);
 }
 
-/* --------------------------------------------------------------------------
-   FORMATOS DE TAMAÑO DTF (PASO 2)
-   -------------------------------------------------------------------------- */
-.size-cards-grid {
+.size-pill-btn.active {
+  background: #ffffff;
+  border-color: #ffffff;
+  color: #000000;
+  font-weight: 800;
+}
+
+/* Atajos y Calibración */
+.preset-pos-row {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 0.85rem;
+}
+
+.preset-pos-shortcut {
+  flex: 1;
+  padding: 0.45rem 0.5rem;
+  background: #09090b;
+  border: 1px solid var(--border-subtle);
+  color: var(--text-secondary);
+  font-family: var(--font-mono);
+  font-size: 0.725rem;
+  cursor: pointer;
+  text-align: center;
+  transition: all var(--transition-fast);
+}
+
+.preset-pos-shortcut:hover {
+  background: var(--bg-surface-elevated);
+  color: #ffffff;
+  border-color: var(--border-strong);
+}
+
+.fine-tuning-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
-  gap: 0.65rem;
+  gap: 0.75rem;
 }
 
-.size-card-btn {
-  background: rgba(14, 18, 25, 0.65);
-  border: 1px solid var(--glass-border);
-  border-radius: var(--radius-sm);
-  padding: 0.75rem 0.85rem;
-  text-align: left;
+.tuning-field-full {
+  grid-column: span 2;
+}
+
+.tuning-field {
+  background: #09090b;
+  border: 1px solid var(--border-subtle);
+  padding: 0.65rem 0.85rem;
+}
+
+.tuning-label {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  color: var(--text-muted);
+  margin-bottom: 0.45rem;
+}
+
+.tuning-label strong {
+  color: #ffffff;
+  font-weight: 700;
+}
+
+input[type="range"].tuning-slider {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  height: 4px;
+  background: rgba(255, 255, 255, 0.12);
+  border-radius: 0;
+  outline: none;
+  cursor: pointer;
+}
+
+input[type="range"].tuning-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 14px;
+  height: 14px;
+  background: #ffffff;
+  border-radius: 0;
+  border: 1px solid #000000;
+  cursor: pointer;
+}
+
+input[type="range"].tuning-slider::-moz-range-thumb {
+  width: 14px;
+  height: 14px;
+  background: #ffffff;
+  border-radius: 0;
+  border: 1px solid #000000;
+  cursor: pointer;
+}
+
+/* Galería de Arte & Subida */
+.preset-art-row {
+  display: flex;
+  gap: 0.65rem;
+  overflow-x: auto;
+  padding-bottom: 0.4rem;
+  margin-bottom: 0.75rem;
+  scrollbar-width: thin;
+}
+
+.preset-art-thumb {
+  width: 64px;
+  height: 64px;
+  background: #09090b;
+  border: 1px solid var(--border-subtle);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  flex-shrink: 0;
+  padding: 6px;
+  transition: all var(--transition-fast);
+}
+
+.preset-art-thumb:hover {
+  border-color: var(--border-strong);
+  background: var(--bg-surface-elevated);
+}
+
+.preset-art-thumb.active {
+  border-color: #ffffff;
+  box-shadow: inset 0 0 0 1px #ffffff;
+  background: var(--bg-surface-elevated);
+}
+
+.preset-art-thumb svg {
+  width: 100%;
+  height: 100%;
+}
+
+.upload-dropzone {
+  border: 1px dashed var(--border-strong);
+  background: #09090b;
+  padding: 1.25rem 1rem;
+  text-align: center;
   cursor: pointer;
   transition: all var(--transition-fast);
-  display: flex;
-  flex-direction: column;
-  gap: 0.25rem;
 }
 
-.size-card-btn:hover {
-  border-color: rgba(0, 240, 255, 0.4);
-  background: rgba(0, 240, 255, 0.03);
+.upload-dropzone:hover,
+.upload-dropzone.dragging {
+  border-color: #ffffff;
+  background: var(--bg-surface-elevated);
 }
 
-.size-card-btn.active {
-  border-color: var(--accent-cyan);
-  background: rgba(0, 240, 255, 0.08);
-  box-shadow: 0 0 16px rgba(0, 240, 255, 0.15), inset 0 0 0 1px rgba(0, 240, 255, 0.3);
+.upload-dropzone-icon {
+  font-size: 26px;
+  color: var(--text-secondary);
+  margin-bottom: 0.35rem;
 }
 
-.size-card-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: baseline;
-}
-
-.size-card-key {
+.upload-dropzone-title {
   font-family: var(--font-display);
-  font-weight: 800;
-  font-size: 1rem;
-  color: var(--text-primary);
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #ffffff;
 }
 
-.size-card-btn.active .size-card-key {
-  color: var(--accent-cyan);
-}
-
-.size-card-cm {
+.upload-dropzone-sub {
   font-family: var(--font-mono);
   font-size: 0.7rem;
   color: var(--text-muted);
+  margin-top: 2px;
 }
 
-.size-card-sub {
-  font-size: 0.7rem;
-  color: var(--text-muted);
-  line-height: 1.25;
-}
-
-.size-card-price {
-  font-family: var(--font-mono);
-  font-size: 0.775rem;
-  font-weight: 700;
-  color: var(--accent-cyan);
-  margin-top: 0.15rem;
-}
-
-/* Selector de Cara */
-.face-toggle-row {
+/* Stepper de Cantidad */
+.qty-selector-row {
   display: flex;
-  gap: 0.6rem;
-}
-
-.face-select-btn {
-  flex: 1;
-  padding: 0.55rem 0.85rem;
-  font-size: 0.775rem;
-  font-family: var(--font-mono);
-  font-weight: 700;
-}
-
-/* --------------------------------------------------------------------------
-   BOTONES DE NAVEGACIÓN Y STEPPERS ENTRE PASOS
-   -------------------------------------------------------------------------- */
-.step-nav-footer {
-  display: flex;
-  justify-content: flex-end;
-  margin-top: 1.25rem;
-  padding-top: 1rem;
-  border-top: 1px solid var(--glass-border);
-}
-
-.step-nav-footer-dual {
-  display: flex;
+  align-items: center;
   justify-content: space-between;
-  align-items: center;
-  gap: 0.75rem;
-  margin-top: 1.25rem;
-  padding-top: 1rem;
-  border-top: 1px solid var(--glass-border);
+  flex-wrap: wrap;
+  gap: 0.85rem;
 }
 
-.step-next-btn,
-.step-back-btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5rem;
-  padding: 0.65rem 1.25rem;
-  font-family: var(--font-mono);
-  font-size: 0.8rem;
-  font-weight: 700;
-  letter-spacing: 0.03em;
-}
-
-/* Stepper para cantidad de prendas */
 .qty-stepper {
   display: inline-flex;
   align-items: center;
-  background: rgba(0, 0, 0, 0.4);
-  border: 1px solid var(--glass-border);
-  border-radius: var(--radius-xs);
-  overflow: hidden;
+  background: #09090b;
+  border: 1px solid var(--border-subtle);
 }
 
 .qty-stepper-btn {
@@ -1583,18 +1348,18 @@
   height: 36px;
   background: transparent;
   border: none;
-  color: var(--text-primary);
+  color: #ffffff;
   font-size: 1.1rem;
-  font-weight: 700;
+  font-family: var(--font-mono);
+  cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  cursor: pointer;
   transition: background var(--transition-fast);
 }
 
 .qty-stepper-btn:hover {
-  background: rgba(255, 255, 255, 0.08);
+  background: var(--bg-surface-elevated);
 }
 
 .qty-stepper-val {
@@ -1602,13 +1367,13 @@
   height: 36px;
   background: transparent;
   border: none;
-  border-left: 1px solid var(--glass-border);
-  border-right: 1px solid var(--glass-border);
+  border-left: 1px solid var(--border-subtle);
+  border-right: 1px solid var(--border-subtle);
   text-align: center;
   font-family: var(--font-mono);
   font-size: 0.95rem;
   font-weight: 700;
-  color: var(--text-primary);
+  color: #ffffff;
   outline: none;
   -moz-appearance: textfield;
 }
@@ -1619,166 +1384,66 @@
   margin: 0;
 }
 
-/* Atajos de Posicionamiento */
-.preset-pos-row {
-  display: flex;
-  gap: 0.5rem;
-  margin-bottom: 1rem;
-  flex-wrap: wrap;
-}
-
-.preset-pos-shortcut {
-  flex: 1;
-  min-width: 90px;
-  padding: 0.45rem 0.6rem;
-  font-size: 0.725rem;
-  font-family: var(--font-mono);
-}
-
-/* Sliders de ajuste ergonómicos */
-.cyber-sliders-container {
-  display: flex;
-  flex-direction: column;
-  gap: 0.85rem;
-}
-
-.cyber-slider-group {
-  background: rgba(0, 0, 0, 0.28);
-  padding: 0.7rem 0.95rem;
-  border-radius: var(--radius-xs);
-  border: 1px solid rgba(255, 255, 255, 0.05);
-}
-
-.slider-header-row {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  font-size: 0.725rem;
-  font-family: var(--font-mono);
-  color: var(--text-muted);
-  margin-bottom: 0.45rem;
-}
-
-.slider-header-row strong {
-  color: var(--text-primary);
-  font-weight: 700;
-}
-
-input[type="range"].cyber-slider {
-  -webkit-appearance: none;
-  appearance: none;
-  width: 100%;
-  height: 5px;
-  background: rgba(255, 255, 255, 0.12);
-  border-radius: 3px;
-  outline: none;
-  border: none;
-  cursor: pointer;
-  transition: all var(--transition-fast);
-}
-
-input[type="range"].cyber-slider::-webkit-slider-thumb {
-  -webkit-appearance: none;
-  appearance: none;
-  width: 16px;
-  height: 16px;
-  border-radius: 50%;
-  background: #ffffff;
-  border: 2px solid #10141a;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.6);
-  cursor: pointer;
-  transition: transform var(--transition-fast);
-}
-
-input[type="range"].cyber-slider::-webkit-slider-thumb:hover {
-  transform: scale(1.2);
-}
-
-input[type="range"].cyber-slider::-moz-range-thumb {
-  width: 16px;
-  height: 16px;
-  border-radius: 50%;
-  background: #ffffff;
-  border: 2px solid #10141a;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.6);
-  cursor: pointer;
-}
-
-/* Selector de cantidad y descuentos */
-.qty-selector-row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  flex-wrap: wrap;
-  gap: 1rem;
-}
-
 .qty-discount-pills {
   display: flex;
-  gap: 0.5rem;
+  gap: 0.45rem;
   flex-wrap: wrap;
 }
 
 .qty-tier-pill {
-  font-size: 0.7rem;
   font-family: var(--font-mono);
-  padding: 0.35rem 0.65rem;
-  border-radius: var(--radius-xs);
-  background: rgba(255, 255, 255, 0.03);
-  border: 1px solid var(--glass-border);
+  font-size: 0.675rem;
+  padding: 0.35rem 0.6rem;
+  background: #09090b;
+  border: 1px solid var(--border-subtle);
   color: var(--text-muted);
-  transition: all var(--transition-fast);
 }
 
 .qty-tier-pill.active {
-  background: rgba(0, 255, 136, 0.08);
-  border-color: rgba(0, 255, 136, 0.35);
-  color: var(--accent-lime);
+  border-color: #22c55e;
+  color: #22c55e;
   font-weight: 700;
+  background: rgba(34, 197, 94, 0.08);
 }
 
-/* Ficha técnica de taller */
-.production-specs-mini-grid {
+/* Especificaciones Técnicas */
+.specs-box {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 0.6rem;
-  margin-top: 0.5rem;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0.5rem;
+  padding: 0.85rem;
 }
 
-.production-specs-mini-grid > div {
-  background: rgba(0, 0, 0, 0.3);
-  padding: 0.65rem 0.85rem;
-  border-radius: var(--radius-xs);
-  border: 1px solid var(--glass-border);
+.specs-pill {
   display: flex;
   flex-direction: column;
+  background: #09090b;
+  border: 1px solid var(--border-subtle);
+  padding: 0.5rem;
+  text-align: center;
 }
 
-.production-specs-mini-grid small {
-  font-size: 0.65rem;
-  color: var(--text-muted);
+.specs-key {
   font-family: var(--font-mono);
-  letter-spacing: 0.06em;
+  font-size: 0.6rem;
+  color: var(--text-muted);
+  letter-spacing: 0.05em;
 }
 
-.production-specs-mini-grid strong {
-  font-size: 0.9rem;
-  color: var(--text-primary);
+.specs-val {
   font-family: var(--font-display);
+  font-size: 0.85rem;
+  font-weight: 800;
+  color: #ffffff;
   margin-top: 2px;
 }
 
-/* --------------------------------------------------------------------------
-   COTIZACIÓN EN VIVO Y CTA DE COMPRA
-   -------------------------------------------------------------------------- */
-.live-quote-box {
-  background: rgba(14, 18, 25, 0.75);
-  border: 1px solid var(--glass-border-light);
-  border-top: 2px solid rgba(229, 29, 36, 0.65);
-  border-radius: var(--radius-sm);
+/* Cotización en Vivo & Gran CTA */
+.live-quote-card {
+  background: #09090b;
+  border: 1px solid var(--border-subtle);
+  border-top: 2px solid var(--accent-primary);
   padding: 1.5rem;
-  margin-top: 1.5rem;
-  position: relative;
 }
 
 .quote-row {
@@ -1791,146 +1456,93 @@ input[type="range"].cyber-slider::-moz-range-thumb {
 }
 
 .quote-discount-row {
-  color: var(--accent-lime);
+  color: #22c55e;
 }
 
-.quote-total {
+.quote-divider {
+  height: 1px;
+  background: var(--border-subtle);
+  margin: 1rem 0;
+}
+
+.quote-total-block {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-top: 1.25rem;
-  padding-top: 1rem;
-  border-top: 1px solid var(--glass-border);
   flex-wrap: wrap;
-  gap: 1rem;
+  gap: 1.25rem;
 }
 
 .quote-total-label {
-  font-size: 0.7rem;
   font-family: var(--font-mono);
+  font-size: 0.7rem;
   color: var(--text-muted);
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
+  letter-spacing: 0.06em;
 }
 
 .quote-total-price {
-  font-size: 1.95rem;
-  font-weight: 800;
   font-family: var(--font-display);
-  color: var(--text-primary);
+  font-size: 2rem;
+  font-weight: 900;
+  color: #ffffff;
   letter-spacing: -0.02em;
 }
 
 .btn-add-cart {
-  padding: 0.85rem 1.65rem;
-  font-weight: 800;
-  letter-spacing: 0.04em;
+  background: #ffffff;
+  color: #000000;
+  border: 1px solid #ffffff;
+  padding: 0.95rem 1.75rem;
   font-family: var(--font-mono);
   font-size: 0.85rem;
+  font-weight: 800;
+  letter-spacing: 0.05em;
   display: inline-flex;
   align-items: center;
   gap: 0.5rem;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.btn-add-cart:hover {
+  background: var(--accent-primary);
+  border-color: var(--accent-primary);
+  color: #ffffff;
+  transform: translateY(-2px);
 }
 
 /* --------------------------------------------------------------------------
-   RESPONSIVIDAD INTEGRAL DEL ESTUDIO
+   3. RESPONSIVIDAD INTEGRAL
    -------------------------------------------------------------------------- */
 @media (max-width: 1024px) {
   .customizer-layout {
     grid-template-columns: 1fr;
-    gap: 1.75rem;
+    gap: 2rem;
   }
 
-  .visualizer-card {
+  .customizer-stage-column {
     position: static;
-    top: auto;
     max-width: 600px;
     margin: 0 auto;
-    padding: 1.5rem;
   }
 
-  .controls-card {
+  .customizer-inspector-column {
     max-width: 600px;
     margin: 0 auto;
-    padding: 1.5rem;
   }
 }
 
 @media (max-width: 768px) {
   .customizer-section {
-    padding: 2.5rem 0 3.5rem;
+    padding: 2.5rem 0 4rem;
   }
 
   .visualizer-card {
     padding: 1rem;
-    border-radius: var(--radius-md);
-    max-width: 100%;
   }
 
-  .visualizer-toolbar {
-    flex-direction: column;
-    align-items: stretch;
-    gap: 0.5rem;
-  }
-
-  .view-toggle-group {
-    width: 100%;
-  }
-
-  .view-toggle-btn {
-    flex: 1;
-    text-align: center;
-    justify-content: center;
-    padding: 0.45rem 0.35rem;
-    font-size: 0.7rem;
-  }
-
-  .canvas-action-btn {
-    width: 100%;
-    justify-content: center;
-    padding: 0.45rem;
-  }
-
-  .canvas-viewport {
-    max-width: 100%;
-    max-height: 380px;
-    aspect-ratio: 1 / 1.05;
-  }
-
-  .canvas-badge-info {
-    padding: 0.4rem 0.6rem;
-    font-size: 0.65rem;
-    flex-direction: column;
-    gap: 0.3rem;
-    align-items: flex-start;
-  }
-
-  .controls-card {
-    padding: 1.15rem 0.85rem;
-    border-radius: var(--radius-md);
-    max-width: 100%;
-  }
-
-  .studio-panel-header {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 0.5rem;
-    padding-bottom: 0.85rem;
-    margin-bottom: 1rem;
-  }
-
-  .studio-step-bar {
-    padding: 0.4rem 0.6rem;
-    gap: 0.35rem;
-  }
-
-  .studio-step-item {
-    padding: 0.35rem 0.45rem;
-    gap: 0.35rem;
-  }
-
-  .studio-step-item .step-label {
-    font-size: 0.725rem;
+  .inspector-section {
+    padding: 1.25rem;
   }
 
   .garment-cards-grid {
@@ -1941,66 +1553,21 @@ input[type="range"].cyber-slider::-moz-range-thumb {
     grid-template-columns: 1fr;
   }
 
-  .size-pills-row {
-    grid-template-columns: repeat(5, 1fr);
-    gap: 0.35rem;
+  .fine-tuning-grid {
+    grid-template-columns: 1fr;
   }
 
-  .size-pills-row .size-pill-btn {
-    padding: 0.5rem 0.15rem;
-    font-size: 0.725rem;
+  .tuning-field-full {
+    grid-column: span 1;
   }
 
-  .preset-pos-row {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 0.35rem;
+  .specs-box {
+    grid-template-columns: repeat(2, 1fr);
   }
 
-  .preset-pos-shortcut {
-    min-width: 0;
-    padding: 0.4rem 0.2rem;
-    font-size: 0.675rem;
-    text-align: center;
-  }
-
-  .step-nav-footer-dual {
-    flex-direction: column-reverse;
-    align-items: stretch;
-    gap: 0.6rem;
-  }
-
-  .step-nav-footer-dual button,
-  .step-nav-footer button {
-    width: 100%;
-    justify-content: center;
-  }
-
-  .qty-selector-row {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 0.75rem;
-  }
-
-  .qty-discount-pills {
-    width: 100%;
-  }
-
-  .qty-tier-pill {
-    flex: 1;
-    text-align: center;
-    font-size: 0.65rem;
-    padding: 0.3rem 0.2rem;
-  }
-
-  .live-quote-box {
-    padding: 1.15rem 0.85rem;
-  }
-
-  .quote-total {
+  .quote-total-block {
     flex-direction: column;
     align-items: stretch;
-    gap: 0.75rem;
   }
 
   .btn-add-cart {
@@ -2010,17 +1577,102 @@ input[type="range"].cyber-slider::-moz-range-thumb {
 }
 
 @media (max-width: 480px) {
-  .studio-step-item .step-label {
-    display: none;
+  .canvas-viewport {
+    aspect-ratio: 1 / 1;
+    max-height: 400px;
   }
 
-  .studio-step-item.active .step-label {
-    display: inline-block;
+  .garment-cards-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.5rem;
   }
 
-  .step-line {
-    min-width: 8px;
+  .garment-card-btn {
+    padding: 0.55rem 0.5rem;
+    gap: 0.5rem;
+  }
+
+  .garment-card-thumb {
+    width: 36px;
+    height: 36px;
+  }
+
+  .garment-card-thumb svg {
+    width: 28px;
+    height: 28px;
+  }
+
+  .garment-card-title {
+    font-size: 0.725rem;
+  }
+
+  .garment-card-meta {
+    font-size: 0.625rem;
+  }
+
+  .color-swatches-row {
+    gap: 0.5rem;
+  }
+
+  .color-swatch-btn {
+    width: 36px;
+    height: 36px;
+  }
+
+  .size-pills-row {
+    grid-template-columns: repeat(5, 1fr);
+    gap: 0.25rem;
+  }
+
+  .size-pill-btn {
+    padding: 0.5rem 0.1rem;
+    font-size: 0.7rem;
+  }
+
+  .preset-pos-row {
+    flex-direction: column;
+  }
+
+  .qty-selector-row {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .atelier-tab-btn {
+    padding: 0.75rem 0.25rem;
+    gap: 0.15rem;
+  }
+
+  .atelier-tab-num {
+    font-size: 0.6rem;
+  }
+
+  .atelier-tab-label {
+    font-size: 0.625rem;
+    letter-spacing: 0.02em;
+  }
+
+  .atelier-tab-body {
+    padding: 1rem;
+    min-height: auto;
+  }
+
+  .live-quote-dock {
+    padding: 1rem;
+  }
+
+  .quote-dock-row {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+
+  .quote-dock-price {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .quote-dock-total {
+    font-size: 1.25rem;
   }
 }
-
-

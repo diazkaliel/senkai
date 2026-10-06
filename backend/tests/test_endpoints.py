@@ -7,13 +7,24 @@ un servidor externo ni abrir puertos TCP de red.
 import pytest
 from starlette.testclient import TestClient
 
+import asyncio
+from sqlalchemy import update
 from app.main import app
 from app.core.config import settings
+from app.db.session import async_session_factory
+from app.db.models import GarmentVariantModel
 
 
 @pytest.fixture(scope="module")
 def client():
-    """Cliente de pruebas ASGI con ciclo de vida de aplicación completo."""
+    """Cliente de pruebas ASGI con ciclo de vida de aplicación completo e inventario verificado."""
+    async def reset_inventory():
+        async with async_session_factory() as session:
+            await session.execute(update(GarmentVariantModel).values(stock_quantity=50))
+            await session.commit()
+
+    asyncio.run(reset_inventory())
+
     with TestClient(app) as test_client:
         yield test_client
 
@@ -271,6 +282,8 @@ def test_multi_print_order_creation_and_recalculation(client):
             "garment_name": "Polera Oversized Heavyweight 240g",
             "selected_color": {"name": "Obsidian Black", "hex_code": "#121212", "in_stock": True},
             "selected_size": "L",
+            "preview_front_summary": "A4 (Logotipo Senkai Pecho)",
+            "preview_back_summary": "A3 (Ilustración Mecha Unit)",
             "prints": [
                 {
                     "view": "front",
@@ -314,6 +327,8 @@ def test_multi_print_order_creation_and_recalculation(client):
     assert item_res["subtotal"] == expected_subtotal
     assert created["shipping_cost"] == 3990
     assert created["total_amount"] == expected_total
+    assert item_res["preview_front_summary"] == "A4 (Logotipo Senkai Pecho)"
+    assert item_res["preview_back_summary"] == "A3 (Ilustración Mecha Unit)"
 
     # Validar que las 2 estampas preservaron sus coordenadas de calibración
     assert len(item_res["prints"]) == 2
@@ -333,6 +348,8 @@ def test_multi_print_order_creation_and_recalculation(client):
     assert res_get.status_code == 200
     saved = res_get.json()
     assert len(saved["items"][0]["prints"]) == 2
+    assert saved["items"][0]["preview_front_summary"] == "A4 (Logotipo Senkai Pecho)"
+    assert saved["items"][0]["preview_back_summary"] == "A3 (Ilustración Mecha Unit)"
     assert saved["customer"]["notes"] == "Centrar estampa frontal 4cm bajo cuello"
 
 
@@ -485,6 +502,245 @@ def test_correlation_id_header_propagated(client):
     assert res.status_code == 200
     assert res.headers.get("X-Correlation-ID") == custom_cid
     assert "X-Response-Time-Ms" in res.headers
+
+
+def test_admin_update_garment_price_and_photo(client):
+    """
+    PRUEBA DE GESTIÓN COMERCIAL:
+    Verifica que el administrador pueda modificar de forma persistente el precio base
+    y las fotos reales de una prenda, y que las órdenes posteriores calculen con el nuevo precio.
+    """
+    garment_id = "garment-polera-classic-180"
+
+    # 1. Sin token debe fallar con 401
+    res_unauth = client.patch(
+        f"{settings.API_V1_PREFIX}/admin/garments/{garment_id}",
+        json={"base_price": 9990}
+    )
+    assert res_unauth.status_code == 401
+
+    # 2. Con token debe actualizar precio y fotos
+    admin_headers = {"X-Workshop-Token": settings.WORKSHOP_SECRET_KEY}
+    update_payload = {
+        "base_price": 10990,
+        "photo_front": "/static/assets/garments/tshirt_front.png",
+        "photo_back": "/static/assets/garments/tshirt_back.png"
+    }
+    res_update = client.patch(
+        f"{settings.API_V1_PREFIX}/admin/garments/{garment_id}",
+        json=update_payload,
+        headers=admin_headers
+    )
+    assert res_update.status_code == 200
+    updated_data = res_update.json()
+    assert updated_data["base_price"] == 10990
+    assert updated_data["photo_front"] == "/static/assets/garments/tshirt_front.png"
+
+    # 3. Comprobar que GET /garments/{garment_id} refleja el cambio
+    res_get = client.get(f"{settings.API_V1_PREFIX}/garments/{garment_id}")
+    assert res_get.status_code == 200
+    assert res_get.json()["base_price"] == 10990
+
+    # 4. Crear un pedido y verificar recálculo autoritativo con el nuevo precio base
+    order_payload = {
+        "customer": {
+            "full_name": "Test Nuevo Precio",
+            "email": "precio@senkai.cl",
+            "phone": "+56911112222",
+            "delivery_method": "pickup"
+        },
+        "items": [{
+            "garment_id": garment_id,
+            "selected_color": {"name": "Negro", "hex_code": "#121212", "in_stock": True},
+            "selected_size": "M",
+            "quantity": 2
+        }]
+    }
+    res_order = client.post(f"{settings.API_V1_PREFIX}/orders/", json=order_payload)
+    assert res_order.status_code == 201
+    # 2 unidades a $10.990 = $21.980
+    assert res_order.json()["total_amount"] == 21980
+
+
+def test_admin_auth_rejects_old_hardcoded_tokens(client):
+    """
+    Verifica que los tokens anteriormente hardcodeados en código sean rechazados con 401,
+    haciendo cumplir que únicamente la variable de entorno WORKSHOP_SECRET_KEY sea válida.
+    """
+    # Si la variable de entorno es la por defecto, probamos con un token viejo variante
+    fake_old_token = "senkai_taller_secret_2026_obsoleto"
+    res = client.get(
+        f"{settings.API_V1_PREFIX}/admin/metrics",
+        headers={"X-Workshop-Token": fake_old_token}
+    )
+    assert res.status_code == 401
+    assert "Acceso denegado" in res.json()["detail"]
+
+
+def test_public_tracking_masks_pii_and_auth_reveals(client):
+    """
+    PRUEBA DE PRIVACIDAD CRÍTICA:
+    1. Crea una orden con datos personales completos (nombre, email, teléfono, dirección exacta).
+    2. Consulta pública: Verifica que el DTO sanitizado enmascare el nombre y NO exponga email, teléfono ni dirección.
+    3. Consulta de taller autenticada: Verifica que un operario sí reciba los datos de despacho completos.
+    """
+    order_payload = {
+        "customer": {
+            "full_name": "Carlos Santana",
+            "email": "carlos.santana@rock.com",
+            "phone": "+56987654321",
+            "delivery_method": "shipping",
+            "shipping_address": "Av. Libertador Bernardo O'Higgins 1050",
+            "shipping_city": "Santiago",
+            "notes": "Dejar en conserjería"
+        },
+        "items": [{
+            "garment_id": "garment-polera-heavyweight-240",
+            "selected_color": {"name": "Negro", "hex_code": "#121212", "in_stock": True},
+            "selected_size": "L",
+            "quantity": 1
+        }]
+    }
+
+    res_create = client.post(f"{settings.API_V1_PREFIX}/orders/", json=order_payload)
+    assert res_create.status_code == 201
+    order_data = res_create.json()
+    order_number = order_data["order_number"]
+
+    # Consulta Pública (sin cabecera de taller)
+    res_public = client.get(f"{settings.API_V1_PREFIX}/orders/{order_number}")
+    assert res_public.status_code == 200
+    public_dto = res_public.json()
+
+    assert "customer" in public_dto
+    customer_pub = public_dto["customer"]
+    assert customer_pub["full_name"] == "Carlos S.", "El nombre no fue enmascarado adecuadamente para proteger la privacidad"
+    assert "email" not in customer_pub, "FUGA DE PRIVACIDAD: El correo fue expuesto a clientes no autenticados"
+    assert "phone" not in customer_pub, "FUGA DE PRIVACIDAD: El teléfono fue expuesto a clientes no autenticados"
+    assert "shipping_address" not in customer_pub, "FUGA DE PRIVACIDAD: La dirección exacta fue expuesta públicamente"
+    assert customer_pub["shipping_city"] == "Santiago"
+    assert customer_pub["notes"] == "Dejar en conserjería"
+
+    # Consulta Autenticada con Token de Taller
+    admin_headers = {"X-Workshop-Token": settings.WORKSHOP_SECRET_KEY}
+    res_admin = client.get(f"{settings.API_V1_PREFIX}/orders/{order_number}", headers=admin_headers)
+    assert res_admin.status_code == 200
+    admin_dto = res_admin.json()
+
+    assert admin_dto["customer"]["full_name"] == "Carlos Santana"
+    assert admin_dto["customer"]["email"] == "carlos.santana@rock.com"
+    assert admin_dto["customer"]["phone"] == "+56987654321"
+    assert admin_dto["customer"]["shipping_address"] == "Av. Libertador Bernardo O'Higgins 1050"
+
+
+def test_insufficient_stock_rejection(client):
+    """
+    PRUEBA DE CONSISTENCIA DE INVENTARIO:
+    Intenta ordenar una cantidad que excede las existencias físicas disponibles.
+    El backend debe rechazar con HTTP 400 indicando stock insuficiente.
+    """
+    excessive_payload = {
+        "customer": {
+            "full_name": "Comprador Excesivo",
+            "email": "exceso@test.com",
+            "phone": "+56900000000",
+            "delivery_method": "pickup"
+        },
+        "items": [{
+            "garment_id": "garment-polera-heavyweight-240",
+            "selected_color": {"name": "Negro", "hex_code": "#121212", "in_stock": True},
+            "selected_size": "XL",
+            "quantity": 99999  # Excede los 50 disponibles en seed
+        }]
+    }
+
+    res = client.post(f"{settings.API_V1_PREFIX}/orders/", json=excessive_payload)
+    assert res.status_code == 400
+    assert "Stock insuficiente" in res.json()["detail"]
+
+
+def test_order_concurrency_numbering_sequential(client):
+    """
+    Valida que dos pedidos creados consecutivamente generen códigos secuenciales crecientes
+    sin colisión de claves únicas.
+    """
+    def make_payload(name):
+        return {
+            "customer": {
+                "full_name": name,
+                "email": f"{name.lower().replace(' ', '')}@test.cl",
+                "phone": "+56911223344",
+                "delivery_method": "pickup"
+            },
+            "items": [{
+                "garment_id": "garment-polera-classic-180",
+                "selected_color": {"name": "Negro", "hex_code": "#121212", "in_stock": True},
+                "selected_size": "S",
+                "quantity": 1
+            }]
+        }
+
+    res1 = client.post(f"{settings.API_V1_PREFIX}/orders/", json=make_payload("Orden Secuencial A"))
+    res2 = client.post(f"{settings.API_V1_PREFIX}/orders/", json=make_payload("Orden Secuencial B"))
+
+    assert res1.status_code == 201
+    assert res2.status_code == 201
+
+    num1 = res1.json()["order_number"]
+    num2 = res2.json()["order_number"]
+
+    assert num1 != num2
+    seq1 = int(num1.split("-")[-1])
+    seq2 = int(num2.split("-")[-1])
+    assert seq2 > seq1
+
+
+def test_admin_analytics_requires_auth(client):
+    """Verifica que el endpoint de analítica exija token de taller (401 Unauthorized sin credencial)."""
+    res = client.get(f"{settings.API_V1_PREFIX}/admin/analytics")
+    assert res.status_code == 401
+
+
+def test_admin_analytics_metrics_calculation(client):
+    """
+    Verifica que el endpoint /admin/analytics:
+    1. Retorne KPIs globales (ingresos, AOV, prendas totales).
+    2. Construya una serie temporal continua con N días exactos.
+    3. Incluya el ranking de prendas bestsellers y distribución logística.
+    """
+    admin_headers = {"X-Workshop-Token": settings.WORKSHOP_SECRET_KEY}
+    res = client.get(f"{settings.API_V1_PREFIX}/admin/analytics?days=14", headers=admin_headers)
+    assert res.status_code == 200
+    data = res.json()
+
+    assert data["period_days"] == 14
+    assert "total_revenue_period" in data
+    assert "average_order_value_clp" in data
+    assert "historical_revenue_clp" in data
+    assert "timeseries" in data
+    assert len(data["timeseries"]) == 14
+
+    # Verificar estructura del punto de serie temporal
+    first_point = data["timeseries"][0]
+    assert "date" in first_point
+    assert "label" in first_point
+    assert "revenue_clp" in first_point
+    assert "orders_count" in first_point
+
+    # Verificar ranking de prendas
+    assert "top_garments" in data
+    if len(data["top_garments"]) > 0:
+        top1 = data["top_garments"][0]
+        assert "garment_name" in top1
+        assert "units_sold" in top1
+        assert "share_percentage" in top1
+
+    # Verificar desglose logístico
+    assert "logistics" in data
+    assert "pickup_percentage" in data["logistics"]
+    assert "shipping_percentage" in data["logistics"]
+    assert data["logistics"]["pickup_percentage"] + data["logistics"]["shipping_percentage"] in (100.0, 0.0)
+
 
 
 

@@ -1,14 +1,10 @@
-"""
-Endpoints para creación y seguimiento de pedidos de clientes.
-"""
-
-from typing import List, Optional
+from typing import List, Optional, Union
 from fastapi import APIRouter, HTTPException, status, Query, Depends, Header
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.schemas.domain import OrderCreate, OrderResponse, OrderProductionStatus
+from app.schemas.domain import OrderCreate, OrderResponse, OrderTrackingResponse, OrderProductionStatus
 from app.services.order_service import order_service, OrderService
-from app.core.security import require_workshop_auth
+from app.core.security import require_workshop_auth, is_authenticated_workshop
 from app.core.exceptions import EntityNotFoundException, SenkaiDomainException
 from app.db.session import get_db
 
@@ -44,15 +40,27 @@ async def list_orders(
     return await order_service.list_orders(session, status=status)
 
 
-@router.get("/{order_number}", response_model=OrderResponse, summary="Consultar estado de seguimiento de un pedido por código")
+@router.get(
+    "/{order_number}",
+    response_model=Union[OrderResponse, OrderTrackingResponse],
+    summary="Consultar estado de seguimiento de un pedido por código"
+)
 async def get_order_by_number(
     order_number: str,
+    is_admin: bool = Depends(is_authenticated_workshop),
     session: AsyncSession = Depends(get_db)
 ):
-    order = await order_service.get_by_identifier(session, order_number)
+    """
+    Entrega el estado del pedido y su trazabilidad.
+    Si la consulta es pública, enmascara y sanitiza los datos personales (PII) del cliente.
+    Si la consulta incluye token de taller autorizado, retorna los datos completos de contacto y despacho.
+    """
+    order = await order_service.repository.find_by_identifier(session, order_number)
     if not order:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail=f"Pedido '{order_number}' no encontrado en el sistema."
         )
-    return order
+    if is_admin:
+        return order_service.to_response_dto(order)
+    return order_service.to_tracking_dto(order)

@@ -7,7 +7,7 @@ from typing import List, Optional
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.schemas.domain import (
-    GarmentBase, GarmentCategory, GarmentSize, ColorVariant
+    GarmentBase, GarmentCategory, GarmentSize, ColorVariant, GarmentUpdatePayload
 )
 from app.repositories.catalog_repository import catalog_repository, CatalogRepository
 from app.core.exceptions import EntityNotFoundException
@@ -32,11 +32,11 @@ class CatalogService:
                 composition="100% Algodón Peinado Ringspun",
                 base_price=12990,
                 colors=[
-                    ColorVariant(name="Obsidian Black", hex_code="#121212", in_stock=True),
-                    ColorVariant(name="Vintage Chalk White", hex_code="#F4F4F0", in_stock=True),
-                    ColorVariant(name="Slate Washed Gray", hex_code="#3D404A", in_stock=True),
-                    ColorVariant(name="Forest Deep Green", hex_code="#1E3329", in_stock=True),
-                    ColorVariant(name="Raw Terracotta", hex_code="#8D4330", in_stock=True),
+                    ColorVariant(name="Negro", hex_code="#121212", in_stock=True),
+                    ColorVariant(name="Gris", hex_code="#61646B", in_stock=True),
+                    ColorVariant(name="Azul", hex_code="#142036", in_stock=True),
+                    ColorVariant(name="Rojo", hex_code="#B21B24", in_stock=True),
+                    ColorVariant(name="Blanco", hex_code="#FFFFFF", in_stock=True),
                 ],
                 sizes=[GarmentSize.S, GarmentSize.M, GarmentSize.L, GarmentSize.XL, GarmentSize.XXL],
                 image_front_template="/assets/templates/tshirt_front.svg",
@@ -52,10 +52,11 @@ class CatalogService:
                 composition="100% Algodón Jersey",
                 base_price=8990,
                 colors=[
-                    ColorVariant(name="Obsidian Black", hex_code="#121212", in_stock=True),
-                    ColorVariant(name="Pure White", hex_code="#FFFFFF", in_stock=True),
-                    ColorVariant(name="Navy Deep Blue", hex_code="#101D2D", in_stock=True),
-                    ColorVariant(name="Burgundy Red", hex_code="#4A1521", in_stock=True),
+                    ColorVariant(name="Negro", hex_code="#121212", in_stock=True),
+                    ColorVariant(name="Gris", hex_code="#61646B", in_stock=True),
+                    ColorVariant(name="Azul", hex_code="#142036", in_stock=True),
+                    ColorVariant(name="Rojo", hex_code="#B21B24", in_stock=True),
+                    ColorVariant(name="Blanco", hex_code="#FFFFFF", in_stock=True),
                 ],
                 sizes=[GarmentSize.S, GarmentSize.M, GarmentSize.L, GarmentSize.XL],
                 image_front_template="/assets/templates/tshirt_front.svg",
@@ -71,10 +72,11 @@ class CatalogService:
                 composition="80% Algodón / 20% Poliéster Antipilling",
                 base_price=24990,
                 colors=[
-                    ColorVariant(name="Obsidian Black", hex_code="#121212", in_stock=True),
-                    ColorVariant(name="Cement Gray", hex_code="#7A7D84", in_stock=True),
-                    ColorVariant(name="Deep Olive Green", hex_code="#2B3629", in_stock=True),
-                    ColorVariant(name="Raw Bone", hex_code="#E8E4D9", in_stock=True),
+                    ColorVariant(name="Negro", hex_code="#121212", in_stock=True),
+                    ColorVariant(name="Gris", hex_code="#61646B", in_stock=True),
+                    ColorVariant(name="Azul", hex_code="#142036", in_stock=True),
+                    ColorVariant(name="Rojo", hex_code="#B21B24", in_stock=True),
+                    ColorVariant(name="Blanco", hex_code="#FFFFFF", in_stock=True),
                 ],
                 sizes=[GarmentSize.S, GarmentSize.M, GarmentSize.L, GarmentSize.XL, GarmentSize.XXL],
                 image_front_template="/assets/templates/hoodie_front.svg",
@@ -90,9 +92,11 @@ class CatalogService:
                 composition="80% Algodón / 20% Poliéster",
                 base_price=21990,
                 colors=[
-                    ColorVariant(name="Obsidian Black", hex_code="#121212", in_stock=True),
-                    ColorVariant(name="Heather Gray", hex_code="#61646B", in_stock=True),
-                    ColorVariant(name="Midnight Navy", hex_code="#141C2B", in_stock=True),
+                    ColorVariant(name="Negro", hex_code="#121212", in_stock=True),
+                    ColorVariant(name="Gris", hex_code="#61646B", in_stock=True),
+                    ColorVariant(name="Azul", hex_code="#142036", in_stock=True),
+                    ColorVariant(name="Rojo", hex_code="#B21B24", in_stock=True),
+                    ColorVariant(name="Blanco", hex_code="#FFFFFF", in_stock=True),
                 ],
                 sizes=[GarmentSize.S, GarmentSize.M, GarmentSize.L, GarmentSize.XL],
                 image_front_template="/assets/templates/crewneck_front.svg",
@@ -119,6 +123,19 @@ class CatalogService:
         if not garment:
             raise EntityNotFoundException(f"Prenda con ID '{garment_id}' no existe en el catálogo.")
         return garment
+
+    async def update_garment_async(
+        self,
+        session: AsyncSession,
+        garment_id: str,
+        payload: GarmentUpdatePayload
+    ) -> GarmentBase:
+        """Actualiza el precio, fotos o metadatos de una prenda en la base de datos."""
+        update_dict = payload.model_dump(exclude_unset=True)
+        updated_model = await self.repository.update_garment(session, garment_id, update_dict)
+        if not updated_model:
+            raise EntityNotFoundException(f"Prenda con ID '{garment_id}' no encontrada para actualizar.")
+        return self.repository.to_schema(updated_model)
 
     # Métodos sincrónicos compatibles
     def get_all_garments(self) -> List[GarmentBase]:

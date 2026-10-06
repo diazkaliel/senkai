@@ -13,7 +13,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.schemas.domain import (
     OrderCreate, OrderResponse, OrderItemResponse, OrderProductionStatus,
-    DTFPrintItem, DTFPrintPosition
+    DTFPrintItem, DTFPrintPosition, OrderTrackingResponse, CustomerTrackingInfo
 )
 from app.db.models import OrderModel, OrderItemModel, IdempotencyRecordModel
 from app.repositories.order_repository import order_repository, OrderRepository
@@ -57,6 +57,7 @@ class OrderService:
 
         verified_items: List[OrderItemResponse] = []
         relational_items: List[OrderItemModel] = []
+        items_to_deduct: List[Dict[str, Any]] = []
         subtotal_accumulated = 0
 
         for item in payload.items:
@@ -101,6 +102,8 @@ class OrderService:
                     selected_size=item.selected_size,
                     prints=verified_prints,
                     dtf_config=item.dtf_config,
+                    preview_front_summary=item.preview_front_summary,
+                    preview_back_summary=item.preview_back_summary,
                     quantity=item.quantity,
                     unit_price=unit_price,
                     subtotal=item_subtotal
@@ -124,29 +127,32 @@ class OrderService:
                 )
             )
 
-            # Descuento atómico de stock físico si la variante existe en BD
-            await self.catalog_repo.deduct_stock(
-                session=session,
-                garment_id=garment.id,
-                color_name=item.selected_color.name,
-                size=item.selected_size.value,
-                quantity=item.quantity
-            )
+            # Acumular ítem para validación y reserva atómica de inventario
+            items_to_deduct.append({
+                "garment_id": garment.id,
+                "garment_name": garment.name,
+                "color_name": item.selected_color.name,
+                "color_hex": item.selected_color.hex_code,
+                "size": item.selected_size.value,
+                "quantity": item.quantity
+            })
+
+        # Verificación y reserva atómica de existencias físicas (falla rápido sin inconsistencias)
+        await self.catalog_repo.verify_and_deduct_stock_atomic(session, items_to_deduct)
 
         # Cálculo autoritativo de despacho (0 retiro en taller, 3990 envío)
         shipping_cost = 0 if payload.customer.delivery_method == "pickup" else 3990
         total_authorized = subtotal_accumulated + shipping_cost
 
-        # Generación de número de orden secuencial y fechas estimadas
-        current_count = await self.repository.count_orders(session)
-        order_seq = current_count + 1
+        # Generación de número de orden secuencial resistente a condiciones de carrera
         now = datetime.now(timezone.utc)
+        order_number = await self.repository.get_next_order_number(session, year=now.year)
         estimated_date = (now + timedelta(days=2)).strftime("%d/%m/%Y")
         order_id = str(uuid.uuid4())
 
         db_order = OrderModel(
             id=order_id,
-            order_number=f"SNK-2026-{order_seq:04d}",
+            order_number=order_number,
             customer_name=payload.customer.full_name,
             customer_email=payload.customer.email,
             customer_phone=payload.customer.phone,
@@ -217,6 +223,39 @@ class OrderService:
                 "shipping_city": o.shipping_city,
                 "notes": o.notes
             },
+            items=o.items,
+            total_amount=o.total_amount,
+            shipping_cost=o.shipping_cost,
+            status=OrderProductionStatus(o.status),
+            created_at=created_str,
+            updated_at=updated_str,
+            estimated_delivery=o.estimated_delivery,
+            tracking_code=o.tracking_code
+        )
+
+    @staticmethod
+    def _mask_name(name: str) -> str:
+        parts = name.strip().split()
+        if not parts:
+            return "Cliente Senkai"
+        if len(parts) == 1:
+            return parts[0]
+        return f"{parts[0]} {parts[1][0]}."
+
+    @classmethod
+    def to_tracking_dto(cls, o: OrderModel) -> OrderTrackingResponse:
+        """Mapeo a contrato de tracking público sanitizado sin datos de contacto directos."""
+        created_str = o.created_at.isoformat() if isinstance(o.created_at, datetime) else str(o.created_at)
+        updated_str = o.updated_at.isoformat() if isinstance(o.updated_at, datetime) else str(o.updated_at)
+        return OrderTrackingResponse(
+            id=o.id,
+            order_number=o.order_number,
+            customer=CustomerTrackingInfo(
+                full_name=cls._mask_name(o.customer_name),
+                delivery_method=o.delivery_method,
+                shipping_city=o.shipping_city,
+                notes=o.notes
+            ),
             items=o.items,
             total_amount=o.total_amount,
             shipping_cost=o.shipping_cost,

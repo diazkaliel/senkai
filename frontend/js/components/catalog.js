@@ -1,22 +1,8 @@
-/**
- * SEIKO // CATÁLOGO STREETWEAR DE ALTA DEFINICIÓN (LOOKBOOK V4)
- * Exhibición pública hiperrealista con previsualización interactiva Frontal / Espalda,
- * selector dinámico de color en tarjeta, badges de gramaje y enlace al simulador 3D.
- */
-
 import { SVG_GARMENTS, PRESET_ARTWORKS } from './svg_templates.js';
 
-export class CatalogComponent {
-  constructor(containerId, options = {}) {
-    this.container = document.getElementById(containerId);
-    this.onSelectForCustomizer = options.onSelectForCustomizer || (() => {});
-    this.onAddToCart = options.onAddToCart || (() => {});
-    this.garments = [];
-    this.activeFilter = "all";
-
-    this.collectionItems = [
-      {
-        id: "col-polera-cyber-kanji",
+export const COLLECTION_ITEMS = [
+  {
+    id: "col-polera-cyber-kanji",
         garmentId: "garment-polera-heavyweight-240",
         name: "Polera Oversized 'Cyber Kanji 2026'",
         price: 22990,
@@ -26,13 +12,14 @@ export class CatalogComponent {
         colorHex: "#121212",
         currentView: "front",
         availableColors: [
-          { name: "Obsidian Black", hex: "#121212" },
-          { name: "Chalk White", hex: "#F4F4F0" },
-          { name: "Cement Gray", hex: "#7A7D84" },
-          { name: "Terracotta", hex: "#8A4332" }
+          { name: "Negro", hex: "#121212" },
+          { name: "Gris", hex: "#61646B" },
+          { name: "Azul", hex: "#142036" },
+          { name: "Rojo", hex: "#B21B24" },
+          { name: "Blanco", hex: "#FFFFFF" }
         ],
-        frontArt: PRESET_ARTWORKS[1], // Senkai Badge Pocket
-        backArt: PRESET_ARTWORKS[2],  // Cyber Kanji Maxi Espalda
+        frontArt: PRESET_ARTWORKS[1],
+        backArt: PRESET_ARTWORKS[2],
         frontSpecs: { width: "85px", height: "85px", top: "35%", left: "36%" },
         backSpecs: { width: "190px", height: "190px", top: "42%", left: "50%" }
       },
@@ -44,13 +31,14 @@ export class CatalogComponent {
         badge: "320g Afelpado • Heavyweight",
         category: "hoodies",
         garmentType: "hoodie",
-        colorHex: "#7A7D84",
-        currentView: "back", // Muestra la impresionante espalda por defecto
+        colorHex: "#61646B",
+        currentView: "back",
         availableColors: [
-          { name: "Cement Gray", hex: "#7A7D84" },
-          { name: "Obsidian Black", hex: "#121212" },
-          { name: "Raw Bone", hex: "#D6D1C7" },
-          { name: "Deep Olive", hex: "#2D3A2B" }
+          { name: "Negro", hex: "#121212" },
+          { name: "Gris", hex: "#61646B" },
+          { name: "Azul", hex: "#142036" },
+          { name: "Rojo", hex: "#B21B24" },
+          { name: "Blanco", hex: "#FFFFFF" }
         ],
         frontArt: PRESET_ARTWORKS[0], // Senkai Official
         backArt: PRESET_ARTWORKS[3],  // Mecha Unit Eva-01 Maxi
@@ -65,12 +53,14 @@ export class CatalogComponent {
         badge: "240g Peinado • Drop Shoulder",
         category: "urbanas",
         garmentType: "tshirt",
-        colorHex: "#F4F4F0",
+        colorHex: "#FFFFFF",
         currentView: "front",
         availableColors: [
-          { name: "Chalk White", hex: "#F4F4F0" },
-          { name: "Obsidian Black", hex: "#121212" },
-          { name: "Washed Gray", hex: "#4A4D54" }
+          { name: "Negro", hex: "#121212" },
+          { name: "Gris", hex: "#61646B" },
+          { name: "Azul", hex: "#142036" },
+          { name: "Rojo", hex: "#B21B24" },
+          { name: "Blanco", hex: "#FFFFFF" }
         ],
         frontArt: PRESET_ARTWORKS[4], // Acid Type Streetwear
         backArt: PRESET_ARTWORKS[2],  // Cyber Kanji 2026
@@ -88,9 +78,11 @@ export class CatalogComponent {
         colorHex: "#121212",
         currentView: "front",
         availableColors: [
-          { name: "Obsidian Black", hex: "#121212" },
-          { name: "Heather Gray", hex: "#8A8E95" },
-          { name: "Midnight Navy", hex: "#1A2238" }
+          { name: "Negro", hex: "#121212" },
+          { name: "Gris", hex: "#61646B" },
+          { name: "Azul", hex: "#142036" },
+          { name: "Rojo", hex: "#B21B24" },
+          { name: "Blanco", hex: "#FFFFFF" }
         ],
         frontArt: PRESET_ARTWORKS[1], // Senkai Badge Pocket
         backArt: PRESET_ARTWORKS[4],  // Acid Type
@@ -105,13 +97,14 @@ export class CatalogComponent {
         badge: "180g Jersey • Regular Fit",
         category: "minimalista",
         garmentType: "tshirt",
-        colorHex: "#1B2A4A",
+        colorHex: "#142036",
         currentView: "front",
         availableColors: [
-          { name: "Navy Deep", hex: "#1B2A4A" },
-          { name: "Blanco Puro", hex: "#FFFFFF" },
           { name: "Negro", hex: "#121212" },
-          { name: "Burgundy", hex: "#4A1521" }
+          { name: "Gris", hex: "#61646B" },
+          { name: "Azul", hex: "#142036" },
+          { name: "Rojo", hex: "#B21B24" },
+          { name: "Blanco", hex: "#FFFFFF" }
         ],
         frontArt: PRESET_ARTWORKS[0], // Senkai Official
         backArt: PRESET_ARTWORKS[1],  // Minimalist Badge
@@ -129,8 +122,11 @@ export class CatalogComponent {
         colorHex: "#121212",
         currentView: "back",
         availableColors: [
-          { name: "Obsidian Black", hex: "#121212" },
-          { name: "Deep Olive", hex: "#2D3A2B" }
+          { name: "Negro", hex: "#121212" },
+          { name: "Gris", hex: "#61646B" },
+          { name: "Azul", hex: "#142036" },
+          { name: "Rojo", hex: "#B21B24" },
+          { name: "Blanco", hex: "#FFFFFF" }
         ],
         frontArt: PRESET_ARTWORKS[1], // Pocket Badge
         backArt: PRESET_ARTWORKS[2],  // Cyber Kanji Maxi
@@ -138,6 +134,15 @@ export class CatalogComponent {
         backSpecs: { width: "210px", height: "210px", top: "43%", left: "50%" }
       }
     ];
+
+export class CatalogComponent {
+  constructor(containerId, options = {}) {
+    this.container = document.getElementById(containerId);
+    this.onSelectForCustomizer = options.onSelectForCustomizer || (() => {});
+    this.onAddToCart = options.onAddToCart || (() => {});
+    this.garments = [];
+    this.activeFilter = "all";
+    this.collectionItems = options.items || COLLECTION_ITEMS;
   }
 
   init(garments) {
@@ -154,7 +159,6 @@ export class CatalogComponent {
     this.container.innerHTML = `
       <div class="collection-section">
         <div class="collection-header-center">
-          <span class="badge badge-cyan" style="margin-bottom: 0.5rem;">LOOKBOOK 2026 // EDICIÓN LIMITADA</span>
           <h2 class="collection-title-main">Colección Textil Streetwear</h2>
           <p style="font-size: 0.925rem; color: var(--text-secondary); max-width: 600px; margin: 0 auto;">
             Prendas de alta gama confeccionadas en algodón pesado de 240g a 320g con estampados DTF de alta resolución en frente y espalda.
@@ -176,77 +180,7 @@ export class CatalogComponent {
   }
 
   renderProductCard(item) {
-    const isBack = item.currentView === "back";
-    const templateKey = `${item.garmentType}_${isBack ? 'back' : 'front'}`;
-    const garmentSvg = SVG_GARMENTS[templateKey] ? SVG_GARMENTS[templateKey](item.colorHex) : SVG_GARMENTS.tshirt_front(item.colorHex);
-
-    const activeArt = isBack ? item.backArt : item.frontArt;
-    const activeSpecs = isBack ? item.backSpecs : item.frontSpecs;
-
-    return `
-      <div class="collection-card-pro" data-card-id="${item.id}">
-        <!-- Badge superior de gramaje y especificación textil -->
-        <div class="card-pro-top-bar">
-          <span class="card-pro-badge">${item.badge}</span>
-          <div class="card-pro-view-toggle">
-            <button class="card-view-btn ${!isBack ? 'active' : ''}" data-flip-view="front" data-card-id="${item.id}" title="Ver cara frontal">
-              FRENTE
-            </button>
-            <button class="card-view-btn ${isBack ? 'active' : ''}" data-flip-view="back" data-card-id="${item.id}" title="Ver cara trasera (espalda)">
-              ESPALDA
-            </button>
-          </div>
-        </div>
-
-        <!-- Escenario visual interactivo -->
-        <div class="card-pro-viewport" data-open-customizer="${item.garmentId}" data-color-hex="${item.colorHex}" data-view="${item.currentView}" title="Haz clic para personalizar en el simulador 3D">
-          <div class="card-pro-garment-wrap">
-            ${garmentSvg}
-          </div>
-
-          <!-- Estampa DTF superpuesta con fidelidad de escala -->
-          <div class="card-pro-artwork-overlay" style="top: ${activeSpecs.top}; left: ${activeSpecs.left}; width: ${activeSpecs.width}; height: ${activeSpecs.height};">
-            ${activeArt.svgContent}
-          </div>
-
-          <!-- Píldora indicadora de cara -->
-          <div class="card-face-indicator">
-            ${isBack ? '🔄 ESTAMPA TRASERA MAXI' : '👕 ESTAMPA FRONTAL'}
-          </div>
-        </div>
-
-        <!-- Información y selector de colores en vivo -->
-        <div class="card-pro-footer">
-          <div class="card-pro-title-row">
-            <h4 class="card-pro-name">${item.name}</h4>
-            <div class="card-pro-price">$${item.price.toLocaleString('es-CL')} <small>CLP</small></div>
-          </div>
-
-          <!-- Selector de color dinámico en la misma tarjeta -->
-          <div class="card-pro-colors-row">
-            <span class="card-colors-label">Color:</span>
-            <div class="card-swatches-list">
-              ${item.availableColors.map(c => `
-                <button class="card-swatch-dot ${c.hex.toLowerCase() === item.colorHex.toLowerCase() ? 'active' : ''}" 
-                        style="background: ${c.hex};" 
-                        title="${c.name}"
-                        data-card-id="${item.id}" 
-                        data-color-hex="${c.hex}">
-                </button>
-              `).join('')}
-            </div>
-          </div>
-
-          <!-- Acciones de la tarjeta -->
-          <div class="card-pro-actions">
-            <button class="btn btn-primary card-action-custom-btn" data-open-customizer="${item.garmentId}" data-color-hex="${item.colorHex}" data-view="${item.currentView}">
-              <span class="material-symbols-outlined" style="font-size: 16px;">brush</span>
-              Personalizar en Simulador 3D
-            </button>
-          </div>
-        </div>
-      </div>
-    `;
+    return renderProductCardMarkup(item, this.garments);
   }
 
   attachEvents() {
@@ -259,8 +193,22 @@ export class CatalogComponent {
       });
     });
 
-    // Conmutador de vista Frontal / Trasera en la tarjeta
-    this.container.querySelectorAll('.card-view-btn').forEach(btn => {
+    // Alternar entre fotografía real de estudio y ficha técnica SVG
+    this.container.querySelectorAll('[data-toggle-mode]').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const cardId = e.currentTarget.dataset.toggleMode;
+        const item = this.collectionItems.find(i => i.id === cardId);
+        if (item) {
+          item.viewMode = (item.viewMode === "svg") ? "photo" : "svg";
+          this.render();
+          this.attachEvents();
+        }
+      });
+    });
+
+    // Conmutador de vista Frontal / Trasera en la tarjeta vía Flip 3D (DESIGN.md)
+    this.container.querySelectorAll('.card-view-btn[data-flip-view]').forEach(btn => {
       btn.addEventListener('click', (e) => {
         e.stopPropagation();
         const cardId = e.currentTarget.dataset.cardId;
@@ -268,8 +216,23 @@ export class CatalogComponent {
         const item = this.collectionItems.find(i => i.id === cardId);
         if (item && item.currentView !== newView) {
           item.currentView = newView;
-          this.render();
-          this.attachEvents();
+          const isBack = newView === "back";
+          const cardEl = e.currentTarget.closest('.collection-card-pro');
+          if (cardEl) {
+            const flipper = cardEl.querySelector('.card-pro-flip-flipper');
+            if (flipper) flipper.classList.toggle('is-flipped', isBack);
+            const faceText = cardEl.querySelector('.card-face-text');
+            if (faceText) faceText.textContent = isBack ? 'ESPALDA' : 'FRENTE';
+            cardEl.querySelectorAll('.card-view-btn[data-flip-view]').forEach(b => {
+              b.classList.toggle('active', b.dataset.flipView === newView);
+            });
+            const viewport = cardEl.querySelector('.card-pro-viewport');
+            if (viewport) viewport.dataset.view = newView;
+            const ctaBtn = cardEl.querySelector('.card-action-custom-btn');
+            if (ctaBtn) ctaBtn.dataset.view = newView;
+            cardEl.querySelector('.card-pro-face-front')?.setAttribute('aria-hidden', isBack ? 'true' : 'false');
+            cardEl.querySelector('.card-pro-face-back')?.setAttribute('aria-hidden', !isBack ? 'true' : 'false');
+          }
         }
       });
     });
@@ -299,4 +262,115 @@ export class CatalogComponent {
       });
     });
   }
+}
+
+/**
+ * Renderizador agnóstico de tarjetas de producto con estética técnica.
+ * Reutilizado tanto en la grilla del catálogo como en el riel editorial (carrusel).
+ */
+export function renderProductCardMarkup(item, garments = []) {
+  const garment = (garments || []).find(g => g.id === item.garmentId);
+  const isBack = item.currentView === "back";
+  const viewMode = item.viewMode || "photo";
+
+  const basePrice = garment ? garment.base_price : (item.price - (item.artCost || 10000));
+  const finalPrice = basePrice + (item.artCost || 10000);
+
+  const realPhotoFrontSrc = garment?.photo_front || '/static/assets/garments/tshirt_front.png';
+  const realPhotoBackSrc = garment?.photo_back || '/static/assets/garments/tshirt_back.png';
+
+  const garmentSvgFront = SVG_GARMENTS[`${item.garmentType}_front`]
+    ? SVG_GARMENTS[`${item.garmentType}_front`](item.colorHex)
+    : SVG_GARMENTS.tshirt_front(item.colorHex);
+
+  const garmentSvgBack = SVG_GARMENTS[`${item.garmentType}_back`]
+    ? SVG_GARMENTS[`${item.garmentType}_back`](item.colorHex)
+    : SVG_GARMENTS.tshirt_back(item.colorHex);
+
+  return `
+    <div class="collection-card-pro corner-brackets reactive-border" data-card-id="${item.id}">
+      <div class="card-pro-top-bar" style="display: flex; justify-content: space-between; align-items: center; gap: 0.5rem; flex-wrap: wrap;">
+        <span class="tech-tag">SPEC // <strong>${item.badge}</strong></span>
+        <div style="display: flex; gap: 0.35rem; align-items: center;">
+          <button class="card-view-btn mode-toggle-btn ${viewMode === 'photo' ? 'active' : ''}" data-toggle-mode="${item.id}" title="Alternar entre Foto Real y Vector SVG" style="font-size: 0.65rem; padding: 0.2rem 0.5rem;">
+            ${viewMode === 'photo' ? '📷 FOTO' : '📐 SVG'}
+          </button>
+          <div class="card-pro-view-toggle">
+            <button class="card-view-btn ${!isBack ? 'active' : ''}" data-flip-view="front" data-card-id="${item.id}" title="Ver cara frontal">
+              FRENTE
+            </button>
+            <button class="card-view-btn ${isBack ? 'active' : ''}" data-flip-view="back" data-card-id="${item.id}" title="Ver cara trasera (espalda)">
+              ESPALDA
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div class="card-pro-viewport" data-open-customizer="${item.garmentId}" data-color-hex="${item.colorHex}" data-view="${item.currentView}" title="Personalizar en taller DTF">
+        <div class="card-pro-flip-stage">
+          <div class="card-pro-flip-flipper ${isBack ? 'is-flipped' : ''}">
+            <!-- CARA FRONTAL -->
+            <div class="card-pro-flip-face card-pro-face-front" aria-hidden="${isBack ? 'true' : 'false'}">
+              <div class="card-pro-garment-wrap">
+                ${viewMode === 'photo' ? `
+                  <img src="${realPhotoFrontSrc}" alt="${item.name} Frontal" class="card-real-photo-img" onerror="this.src='/static/assets/garments/tshirt_front.png'">
+                ` : `
+                  ${garmentSvgFront}
+                `}
+              </div>
+              <div class="card-pro-artwork-overlay" style="top: ${item.frontSpecs.top}; left: ${item.frontSpecs.left}; width: ${item.frontSpecs.width}; height: ${item.frontSpecs.height}; ${viewMode === 'photo' ? 'opacity: 0.95;' : ''}">
+                ${item.frontArt.svgContent}
+              </div>
+            </div>
+
+            <!-- CARA TRASERA (ROTADA 180 DEG) -->
+            <div class="card-pro-flip-face card-pro-face-back" aria-hidden="${!isBack ? 'true' : 'false'}">
+              <div class="card-pro-garment-wrap">
+                ${viewMode === 'photo' ? `
+                  <img src="${realPhotoBackSrc}" alt="${item.name} Espalda" class="card-real-photo-img" onerror="this.src='/static/assets/garments/tshirt_back.png'">
+                ` : `
+                  ${garmentSvgBack}
+                `}
+              </div>
+              <div class="card-pro-artwork-overlay" style="top: ${item.backSpecs.top}; left: ${item.backSpecs.left}; width: ${item.backSpecs.width}; height: ${item.backSpecs.height}; ${viewMode === 'photo' ? 'opacity: 0.95;' : ''}">
+                ${item.backArt.svgContent}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card-face-indicator">
+          ${viewMode === 'photo' ? '📷 FOTO REAL' : '📐 FICHA TÉCNICA'} • <span class="card-face-text">${isBack ? 'ESPALDA' : 'FRENTE'}</span>
+        </div>
+      </div>
+
+      <div class="card-pro-footer">
+        <div class="card-pro-title-row">
+          <h4 class="card-pro-name">${item.name}</h4>
+          <div class="card-pro-price">$${finalPrice.toLocaleString('es-CL')} <small>CLP</small></div>
+        </div>
+
+        <div class="card-pro-colors-row">
+          <span class="card-colors-label">Color:</span>
+          <div class="card-swatches-list">
+            ${item.availableColors.map(c => `
+              <button class="card-swatch-dot ${c.hex.toLowerCase() === item.colorHex.toLowerCase() ? 'active' : ''}" 
+                      style="background: ${c.hex};" 
+                      title="${c.name}"
+                      data-card-id="${item.id}" 
+                      data-color-hex="${c.hex}">
+              </button>
+            `).join('')}
+          </div>
+        </div>
+
+        <div class="card-pro-actions">
+          <button class="btn btn-primary card-action-custom-btn" data-open-customizer="${item.garmentId}" data-color-hex="${item.colorHex}" data-view="${item.currentView}">
+            <span class="material-symbols-outlined" style="font-size: 16px;">precision_manufacturing</span>
+            CONFIGURAR EN ATELIER ↗
+          </button>
+        </div>
+      </div>
+    </div>
+  `;
 }

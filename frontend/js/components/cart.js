@@ -25,7 +25,7 @@ export class CartController {
     this.items.push(item);
     this.updateUI();
     this.openDrawer();
-    this.showToast(`✨ Prenda agregada: ${item.garment_name}`);
+    this.showToast(`✨ Prenda agregada a la orden de trabajo: ${item.garment_name}`);
   }
 
   removeItem(index) {
@@ -139,15 +139,30 @@ export class CartController {
 
   /**
    * Resumen conciso para el operario y cliente de las estampas aplicadas a la prenda.
-   * Maneja tanto el nuevo modelo multi-estampa libre como el formato legado de estampa única.
+   * Muestra de forma nítida la condición de ambas caras (Frente y Espalda).
    */
   formatItemPrintsSpecs(item) {
+    if (item.preview_front_summary || item.preview_back_summary) {
+      const front = item.preview_front_summary || 'Cara Lisa';
+      const back = item.preview_back_summary || 'Cara Lisa';
+      return `
+        <div style="font-size: 0.775rem; margin-top: 3px; line-height: 1.4;">
+          <span style="color: var(--text-primary); font-weight: 700;">Frente:</span> ${front} &bull; 
+          <span style="color: var(--text-primary); font-weight: 700;">Espalda:</span> ${back}
+        </div>
+      `;
+    }
     if (item.prints && item.prints.length > 0) {
-      const printsSummary = item.prints.map(p => {
-        const sideLabel = p.view === 'back' ? 'Espalda' : 'Frontal';
-        return `${sideLabel} [${p.print_size}]`;
-      }).join(' + ');
-      return `Estampas DTF (${item.prints.length}): <strong>${printsSummary}</strong>`;
+      const frontPrints = item.prints.filter(p => p.view === 'front');
+      const backPrints = item.prints.filter(p => p.view === 'back');
+      const front = frontPrints.length > 0 ? frontPrints.map(p => p.print_size).join(', ') : 'Cara Lisa';
+      const back = backPrints.length > 0 ? backPrints.map(p => p.print_size).join(', ') : 'Cara Lisa';
+      return `
+        <div style="font-size: 0.775rem; margin-top: 3px; line-height: 1.4;">
+          <span style="color: var(--text-primary); font-weight: 700;">Frente:</span> ${front} &bull; 
+          <span style="color: var(--text-primary); font-weight: 700;">Espalda:</span> ${back}
+        </div>
+      `;
     }
     if (item.dtf_config) {
       return `Estampa: <strong>${item.dtf_config.position.toUpperCase()} [${item.dtf_config.print_size}]</strong>`;
@@ -162,16 +177,23 @@ export class CartController {
 
     if (summaryEl) {
       summaryEl.innerHTML = this.items.map(i => {
-        let printBadge = 'Lisa';
+        let frontSpec = 'Lisa';
+        let backSpec = 'Lisa';
         if (i.prints && i.prints.length > 0) {
-          printBadge = i.prints.map(p => `${p.view === 'back' ? 'Espalda' : 'Front'} ${p.print_size}`).join('+');
-        } else if (i.dtf_config) {
-          printBadge = i.dtf_config.print_size;
+          const fp = i.prints.filter(p => p.view === 'front');
+          const bp = i.prints.filter(p => p.view === 'back');
+          if (fp.length > 0) frontSpec = fp.map(p => p.print_size).join('+');
+          if (bp.length > 0) backSpec = bp.map(p => p.print_size).join('+');
         }
 
         return `
-          <div style="display: flex; justify-content: space-between; font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 0.4rem;">
-            <span>${i.quantity}x ${i.garment_name} (${i.selected_size}) [DTF: ${printBadge}]</span>
+          <div style="display: flex; justify-content: space-between; font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 0.5rem; padding-bottom: 0.5rem; border-bottom: 1px dashed rgba(255,255,255,0.06);">
+            <div>
+              <div style="color: var(--text-primary); font-weight: 600;">${i.quantity}x ${i.garment_name} (${i.selected_size}) - ${i.selected_color.name}</div>
+              <div style="font-size: 0.75rem; color: var(--text-muted); font-family: var(--font-mono);">
+                Frente: [${frontSpec}] &bull; Espalda: [${backSpec}]
+              </div>
+            </div>
             <span style="font-family: var(--font-mono); font-weight: 600;">$${i.subtotal.toLocaleString('es-CL')} CLP</span>
           </div>
         `;

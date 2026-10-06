@@ -10,8 +10,12 @@ from datetime import datetime, timezone, timedelta
 from sqlalchemy import select, func
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.db.models import GarmentModel, GarmentVariantModel, OrderModel, OrderItemModel
+from app.db.models import (
+    GarmentModel, GarmentVariantModel, OrderModel, OrderItemModel, SiteSectionContentModel
+)
 from app.schemas.domain import GarmentCategory, GarmentSize, OrderProductionStatus
+from app.services.content_service import DEFAULT_SECTIONS_CONTENT
+
 
 
 # Catálogo textil oficial de alta gama
@@ -26,12 +30,14 @@ INITIAL_GARMENTS = [
         "base_price": 12990,
         "image_front_template": "/assets/templates/tshirt_front.svg",
         "image_back_template": "/assets/templates/tshirt_back.svg",
+        "photo_front": "/static/assets/garments/tshirt_front.png",
+        "photo_back": "/static/assets/garments/tshirt_back.png",
         "colors": [
-            ("Obsidian Black", "#121212"),
-            ("Vintage Chalk White", "#F4F4F0"),
-            ("Slate Washed Gray", "#3D404A"),
-            ("Forest Deep Green", "#1E3329"),
-            ("Raw Terracotta", "#8D4330"),
+            ("Negro", "#121212"),
+            ("Gris", "#61646B"),
+            ("Azul", "#142036"),
+            ("Rojo", "#B21B24"),
+            ("Blanco", "#FFFFFF"),
         ],
         "sizes": ["S", "M", "L", "XL", "XXL"]
     },
@@ -45,11 +51,14 @@ INITIAL_GARMENTS = [
         "base_price": 8990,
         "image_front_template": "/assets/templates/tshirt_front.svg",
         "image_back_template": "/assets/templates/tshirt_back.svg",
+        "photo_front": "/static/assets/garments/tshirt_front.png",
+        "photo_back": "/static/assets/garments/tshirt_back.png",
         "colors": [
-            ("Obsidian Black", "#121212"),
-            ("Pure White", "#FFFFFF"),
-            ("Navy Deep Blue", "#101D2D"),
-            ("Burgundy Red", "#4A1521"),
+            ("Negro", "#121212"),
+            ("Gris", "#61646B"),
+            ("Azul", "#142036"),
+            ("Rojo", "#B21B24"),
+            ("Blanco", "#FFFFFF"),
         ],
         "sizes": ["S", "M", "L", "XL"]
     },
@@ -63,11 +72,14 @@ INITIAL_GARMENTS = [
         "base_price": 24990,
         "image_front_template": "/assets/templates/hoodie_front.svg",
         "image_back_template": "/assets/templates/hoodie_back.svg",
+        "photo_front": "/static/assets/garments/hoodie_front.png",
+        "photo_back": "/static/assets/garments/hoodie_back.png",
         "colors": [
-            ("Obsidian Black", "#121212"),
-            ("Cement Gray", "#7A7D84"),
-            ("Deep Olive Green", "#2B3629"),
-            ("Raw Bone", "#E8E4D9"),
+            ("Negro", "#121212"),
+            ("Gris", "#61646B"),
+            ("Azul", "#142036"),
+            ("Rojo", "#B21B24"),
+            ("Blanco", "#FFFFFF"),
         ],
         "sizes": ["S", "M", "L", "XL", "XXL"]
     },
@@ -81,10 +93,14 @@ INITIAL_GARMENTS = [
         "base_price": 21990,
         "image_front_template": "/assets/templates/crewneck_front.svg",
         "image_back_template": "/assets/templates/crewneck_back.svg",
+        "photo_front": "/static/assets/garments/crewneck_front.png",
+        "photo_back": "/static/assets/garments/crewneck_back.png",
         "colors": [
-            ("Obsidian Black", "#121212"),
-            ("Heather Gray", "#61646B"),
-            ("Midnight Navy", "#141C2B"),
+            ("Negro", "#121212"),
+            ("Gris", "#61646B"),
+            ("Azul", "#142036"),
+            ("Rojo", "#B21B24"),
+            ("Blanco", "#FFFFFF"),
         ],
         "sizes": ["S", "M", "L", "XL"]
     }
@@ -107,6 +123,8 @@ async def seed_database_if_empty(session: AsyncSession) -> None:
                 base_price=g_data["base_price"],
                 image_front_template=g_data["image_front_template"],
                 image_back_template=g_data["image_back_template"],
+                photo_front=g_data.get("photo_front"),
+                photo_back=g_data.get("photo_back"),
                 is_active=True
             )
             session.add(garment)
@@ -127,6 +145,20 @@ async def seed_database_if_empty(session: AsyncSession) -> None:
                     session.add(variant)
 
         await session.commit()
+    else:
+        # Asegurar retrocompatibilidad: rellenar fotos reales si las prendas existentes no las tienen
+        stmt = select(GarmentModel)
+        existing_garments = (await session.execute(stmt)).scalars().all()
+        seeds_by_id = {g["id"]: g for g in INITIAL_GARMENTS}
+        updated_any = False
+        for eg in existing_garments:
+            s_data = seeds_by_id.get(eg.id)
+            if s_data and (eg.photo_front is None or eg.photo_back is None):
+                eg.photo_front = s_data.get("photo_front")
+                eg.photo_back = s_data.get("photo_back")
+                updated_any = True
+        if updated_any:
+            await session.commit()
 
     # 2. Sembrar órdenes de taller iniciales si no hay ninguna
     orders_count = (await session.execute(select(func.count()).select_from(OrderModel))).scalar() or 0
@@ -172,3 +204,15 @@ async def seed_database_if_empty(session: AsyncSession) -> None:
         )
         session.add(showcase_order)
         await session.commit()
+
+    # 3. Sembrar secciones iniciales de contenido editorial (CMS) si no existen
+    content_count = (await session.execute(select(func.count()).select_from(SiteSectionContentModel))).scalar() or 0
+    if content_count == 0:
+        for section_key, payload_dict in DEFAULT_SECTIONS_CONTENT.items():
+            section_model = SiteSectionContentModel(
+                section_key=section_key,
+                payload_json=json.dumps(payload_dict, ensure_ascii=False)
+            )
+            session.add(section_model)
+        await session.commit()
+

@@ -6,8 +6,10 @@
 import { apiService } from './services/api.js';
 import { CustomizerStudio } from './components/customizer.js';
 import { CatalogComponent } from './components/catalog.js';
+import { ProductCarousel } from './components/carousel.js';
 import { CartController } from './components/cart.js';
 import { AdminWorkshopPortal } from './components/admin.js';
+import './components/motion_effects.js';
 
 class SeikoApp {
   constructor() {
@@ -20,6 +22,17 @@ class SeikoApp {
     });
     
     this.customizer = new CustomizerStudio('customizerContainer', {
+      onAddToCart: (item) => this.cart.addItem(item)
+    });
+
+    this.carousel = new ProductCarousel('carouselContainer', {
+      onSelectForCustomizer: (garmentId, options = {}) => {
+        this.customizer.setGarmentById(garmentId, options);
+        const customizerSec = document.getElementById('personalizador');
+        if (customizerSec) {
+          customizerSec.scrollIntoView({ behavior: 'smooth' });
+        }
+      },
       onAddToCart: (item) => this.cart.addItem(item)
     });
 
@@ -47,17 +60,40 @@ class SeikoApp {
 
       await this.customizer.init(this.garments);
       this.catalog.init(this.garments);
+      this.carousel.init(this.garments);
+
+      // Hidratación progresiva del contenido CMS sobre el HTML semántico
+      await this.hydrateSiteContent();
+
+      // Notificar al subsistema de animaciones que el DOM dinámico está listo
+      window.dispatchEvent(new CustomEvent('senkai:dom-updated'));
 
       window.addEventListener('hashchange', () => this.handleRouting());
       this.handleRouting();
 
-      this.setupGlobalEvents();
-      this.setupMouseSpotlight();
+      // Escuchar eventos en vivo emitidos al guardar en el panel administrativo
+      window.addEventListener('senkai:cms-updated', () => {
+        this.hydrateSiteContent();
+        window.dispatchEvent(new CustomEvent('senkai:dom-updated'));
+      });
 
-      console.log("⚡ Seiko DTF Studio Frontend iniciado.");
+      window.addEventListener('senkai:catalog-updated', async () => {
+        try {
+          this.garments = (await apiService.getGarments()) || this.garments;
+          this.catalog.init(this.garments);
+          this.carousel.init(this.garments);
+          this.customizer.init(this.garments);
+          window.dispatchEvent(new CustomEvent('senkai:dom-updated'));
+        } catch (err) {
+          console.error("Error al refrescar catálogo:", err);
+        }
+      });
+
+      this.setupGlobalEvents();
     } catch (err) {
       console.error("Error iniciando Seiko App:", err);
     }
+
   }
 
   handleRouting() {
@@ -72,7 +108,7 @@ class SeikoApp {
       this.adminView.style.display = "none";
       this.storefrontView.style.display = "block";
 
-      document.querySelectorAll('.nav-link').forEach(link => {
+      document.querySelectorAll('.nav-link, .mobile-nav-link').forEach(link => {
         if (link.getAttribute('href') === hash) {
           link.classList.add('active');
         } else {
@@ -96,19 +132,29 @@ class SeikoApp {
       });
     }
 
+    const filterProducts = (query) => {
+      const cards = document.querySelectorAll('.collection-card-pro, .collection-card');
+      cards.forEach(card => {
+        const text = card.textContent.toLowerCase();
+        if (!query || text.includes(query)) {
+          card.style.display = "";
+        } else {
+          card.style.display = "none";
+        }
+      });
+    };
+
     const searchInput = document.getElementById('globalSearchInput');
     if (searchInput) {
       searchInput.addEventListener('input', (e) => {
-        const query = e.target.value.toLowerCase().trim();
-        const cards = document.querySelectorAll('.collection-card');
-        cards.forEach(card => {
-          const text = card.textContent.toLowerCase();
-          if (!query || text.includes(query)) {
-            card.style.display = "flex";
-          } else {
-            card.style.display = "none";
-          }
-        });
+        filterProducts(e.target.value.toLowerCase().trim());
+      });
+    }
+
+    const mobileSearchInput = document.getElementById('mobileSearchInput');
+    if (mobileSearchInput) {
+      mobileSearchInput.addEventListener('input', (e) => {
+        filterProducts(e.target.value.toLowerCase().trim());
       });
     }
 
@@ -121,19 +167,6 @@ class SeikoApp {
     }
   }
 
-  setupMouseSpotlight() {
-    // Iluminación reactiva al cursor sobre tarjetas de cristal
-    document.addEventListener('mousemove', (e) => {
-      document.querySelectorAll('.glass-card, .collection-card, .hero-main-glass-card, .hero-side-card, .product-card').forEach(card => {
-        const rect = card.getBoundingClientRect();
-        const x = e.clientX - rect.left;
-        const y = e.clientY - rect.top;
-        card.style.setProperty('--mouse-x', `${x}px`);
-        card.style.setProperty('--mouse-y', `${y}px`);
-      });
-    });
-  }
-
   showOrderSuccessModal(order) {
     const modal = document.getElementById('orderSuccessModal');
     const orderNumEl = document.getElementById('successOrderNumber');
@@ -142,11 +175,11 @@ class SeikoApp {
     if (orderNumEl) orderNumEl.textContent = order.order_number;
     if (orderDetailsEl) {
       orderDetailsEl.innerHTML = `
-        <div style="margin-top: 1rem; padding: 1.25rem; background: var(--bg-surface-elevated); border-radius: var(--radius-xs); border: 1px solid var(--glass-border); text-align: left; font-family: var(--font-body);">
+        <div style="margin-top: 1rem; padding: 1.25rem; background: var(--bg-surface-elevated); border-radius: var(--radius-sm); border: 1px solid var(--border-subtle); text-align: left; font-family: var(--font-body);">
           <p style="font-size: 0.9rem; color: var(--text-primary);"><strong>Cliente:</strong> ${order.customer.full_name}</p>
           <p style="font-size: 0.9rem; color: var(--text-primary);"><strong>Modalidad:</strong> ${order.customer.delivery_method === 'pickup' ? 'Retiro en Taller Providencia' : 'Despacho Express a Domicilio'}</p>
           <p style="font-size: 0.9rem; color: var(--text-primary);"><strong>Fecha estimada:</strong> ${order.estimated_delivery}</p>
-          <p style="font-size: 0.9rem; color: var(--accent-cyan); margin-top: 0.5rem; font-family: var(--font-mono);"><strong>Estado de Producción:</strong> ${order.status.toUpperCase()}</p>
+          <p style="font-size: 0.9rem; color: var(--accent-primary); margin-top: 0.5rem; font-family: var(--font-mono);"><strong>Estado de Producción:</strong> ${order.status.toUpperCase()}</p>
         </div>
       `;
     }
@@ -167,11 +200,11 @@ class SeikoApp {
         composition: "100% Algodón Peinado Ringspun",
         base_price: 12990,
         colors: [
-          { name: "Obsidian Black", hex_code: "#121212", in_stock: true },
-          { name: "Vintage Chalk White", hex_code: "#F4F4F0", in_stock: true },
-          { name: "Slate Washed Gray", hex_code: "#3D404A", in_stock: true },
-          { name: "Forest Deep Green", hex_code: "#1E3329", in_stock: true },
-          { name: "Raw Terracotta", hex_code: "#8D4330", in_stock: true }
+          { name: "Negro", hex_code: "#121212", in_stock: true },
+          { name: "Gris", hex_code: "#61646B", in_stock: true },
+          { name: "Azul", hex_code: "#142036", in_stock: true },
+          { name: "Rojo", hex_code: "#B21B24", in_stock: true },
+          { name: "Blanco", hex_code: "#FFFFFF", in_stock: true }
         ],
         sizes: ["S", "M", "L", "XL", "XXL"],
         image_front_template: "/assets/templates/tshirt_front.svg",
@@ -187,9 +220,11 @@ class SeikoApp {
         composition: "100% Algodón Jersey",
         base_price: 8990,
         colors: [
-          { name: "Obsidian Black", hex_code: "#121212", in_stock: true },
-          { name: "Pure White", hex_code: "#FFFFFF", in_stock: true },
-          { name: "Navy Deep Blue", hex_code: "#101D2D", in_stock: true }
+          { name: "Negro", hex_code: "#121212", in_stock: true },
+          { name: "Gris", hex_code: "#61646B", in_stock: true },
+          { name: "Azul", hex_code: "#142036", in_stock: true },
+          { name: "Rojo", hex_code: "#B21B24", in_stock: true },
+          { name: "Blanco", hex_code: "#FFFFFF", in_stock: true }
         ],
         sizes: ["S", "M", "L", "XL"],
         image_front_template: "/assets/templates/tshirt_front.svg",
@@ -205,9 +240,11 @@ class SeikoApp {
         composition: "80% Algodón / 20% Poliéster",
         base_price: 24990,
         colors: [
-          { name: "Obsidian Black", hex_code: "#121212", in_stock: true },
-          { name: "Cement Gray", hex_code: "#7A7D84", in_stock: true },
-          { name: "Deep Olive Green", hex_code: "#2B3629", in_stock: true }
+          { name: "Negro", hex_code: "#121212", in_stock: true },
+          { name: "Gris", hex_code: "#61646B", in_stock: true },
+          { name: "Azul", hex_code: "#142036", in_stock: true },
+          { name: "Rojo", hex_code: "#B21B24", in_stock: true },
+          { name: "Blanco", hex_code: "#FFFFFF", in_stock: true }
         ],
         sizes: ["S", "M", "L", "XL", "XXL"],
         image_front_template: "/assets/templates/hoodie_front.svg",
@@ -223,8 +260,11 @@ class SeikoApp {
         composition: "80% Algodón / 20% Poliéster",
         base_price: 21990,
         colors: [
-          { name: "Obsidian Black", hex_code: "#121212", in_stock: true },
-          { name: "Heather Gray", hex_code: "#61646B", in_stock: true }
+          { name: "Negro", hex_code: "#121212", in_stock: true },
+          { name: "Gris", hex_code: "#61646B", in_stock: true },
+          { name: "Azul", hex_code: "#142036", in_stock: true },
+          { name: "Rojo", hex_code: "#B21B24", in_stock: true },
+          { name: "Blanco", hex_code: "#FFFFFF", in_stock: true }
         ],
         sizes: ["S", "M", "L", "XL"],
         image_front_template: "/assets/templates/crewneck_front.svg",
@@ -233,7 +273,189 @@ class SeikoApp {
       }
     ];
   }
+
+  /**
+   * Consulta los contenidos vigentes al backend e hidrata reactivamente la vitrina pública.
+   * Evita reescrituras agresivas preservando el layout inicial y SEO.
+   */
+  async hydrateSiteContent() {
+    try {
+      const content = await apiService.getSiteContent();
+      if (!content) return;
+      this.applyContentToDOM(content);
+    } catch (err) {
+      console.warn("Fallo de hidratación CMS:", err);
+    }
+  }
+
+  applyContentToDOM(content) {
+    if (!content) return;
+
+    // 1. Barra de Anuncios
+    if (content.announcement) {
+      const bar = document.getElementById('topAnnouncementBar');
+      const text = document.getElementById('topAnnouncementText');
+      if (bar) bar.style.display = content.announcement.is_active ? '' : 'none';
+      if (text) {
+        text.innerHTML = `<span class="live-pulse-dot"></span> ${this.escapeHtml(content.announcement.text)}`;
+      }
+    }
+
+    // 2. Hero Principal
+    if (content.hero) {
+      const title = document.getElementById('heroTitle');
+      const sub = document.getElementById('heroSubtitle');
+      const ctaText = document.getElementById('heroCtaText');
+      const ctaLink = document.getElementById('heroCtaLink');
+      const sideTop = document.getElementById('heroSideTopTag');
+      const sideBottom = document.getElementById('heroSideBottomTag');
+
+      if (title) {
+        title.innerHTML = this.escapeHtml(content.hero.headline).replace(/\n/g, '<br>');
+      }
+      if (sub) sub.textContent = content.hero.subtitle;
+      if (ctaText) ctaText.textContent = content.hero.cta_text;
+      if (ctaLink && content.hero.cta_url) {
+        ctaLink.setAttribute('href', content.hero.cta_url);
+      }
+      if (sideTop && content.hero.side_card_top_tag) {
+        sideTop.textContent = content.hero.side_card_top_tag;
+      }
+      if (sideBottom && content.hero.side_card_bottom_tag) {
+        sideBottom.textContent = content.hero.side_card_bottom_tag;
+      }
+    }
+
+    // 2.1 Cinta Deslizante Marquee
+    if (content.marquee) {
+      const wrap = document.getElementById('marqueeWrap');
+      const contentEl = document.getElementById('marqueeContent');
+      if (wrap) wrap.style.display = content.marquee.is_active ? '' : 'none';
+      if (contentEl && content.marquee.items && content.marquee.items.length > 0) {
+        const doubleItems = content.marquee.items.concat(content.marquee.items);
+        contentEl.innerHTML = doubleItems.map(it => `
+          <div class="marquee-item">${this.escapeHtml(it)}</div>
+          <div class="marquee-item">✦</div>
+        `).join('');
+      }
+    }
+
+    // 2.2 Encabezados de Sección (Colección & Atelier)
+    if (content.headers) {
+      const catTitle = document.querySelector('.collection-title-main');
+      const catTag = document.querySelector('.collection-header-center .badge');
+      const custTitle = document.getElementById('customizerSectionTitle');
+      const custDesc = document.getElementById('customizerSectionDesc');
+
+      if (catTitle && content.headers.catalog_title) catTitle.textContent = content.headers.catalog_title;
+      if (catTag && content.headers.catalog_tag) catTag.textContent = content.headers.catalog_tag;
+      if (custTitle && content.headers.customizer_title) custTitle.textContent = content.headers.customizer_title;
+      if (custDesc && content.headers.customizer_desc) custDesc.textContent = content.headers.customizer_desc;
+    }
+
+    // 3. Métricas y Parámetros Técnicos
+    if (content.stats) {
+      const dpi = document.getElementById('stat-dpi');
+      const minOrder = document.getElementById('stat-min-order');
+      const lavados = document.getElementById('stat-lavados');
+      const temp = document.getElementById('stat-temp');
+      if (dpi) dpi.textContent = content.stats.dpi;
+      if (minOrder) minOrder.textContent = content.stats.min_order;
+      if (lavados) lavados.textContent = `+${content.stats.wash_cycles}`;
+      if (temp) temp.textContent = `${content.stats.curing_temp}°C`;
+    }
+
+    // 4. Manifiesto y Statement
+    if (content.statement) {
+      const headline = document.getElementById('statementHeadline');
+      const body = document.getElementById('statementBody');
+      if (headline) headline.textContent = content.statement.headline;
+      if (body) body.textContent = content.statement.body;
+    }
+
+    // 5. Narrativa Editorial (Misión & Visión)
+    if (content.editorial) {
+      const mTag = document.getElementById('editorialMissionTag');
+      const mTitle = document.getElementById('editorialMissionTitle');
+      const mBody = document.getElementById('editorialMissionBody');
+      const vTag = document.getElementById('editorialVisionTag');
+      const vTitle = document.getElementById('editorialVisionTitle');
+      const vBody = document.getElementById('editorialVisionBody');
+
+      if (mTag) mTag.textContent = content.editorial.mission_tag;
+      if (mTitle) mTitle.textContent = content.editorial.mission_title;
+      if (mBody) mBody.textContent = content.editorial.mission_body;
+      if (vTag) vTag.textContent = content.editorial.vision_tag;
+      if (vTitle) vTitle.textContent = content.editorial.vision_title;
+      if (vBody) vBody.textContent = content.editorial.vision_body;
+    }
+
+    // 6. Protocolo de Producción (3 Pasos)
+    if (content.protocol) {
+      const pBadge = document.getElementById('protocolBadgeTag');
+      const pTitle = document.getElementById('protocolTitle');
+      const pDesc = document.getElementById('protocolDesc');
+
+      if (pBadge && content.protocol.section_tag) pBadge.textContent = content.protocol.section_tag;
+      if (pTitle) pTitle.textContent = content.protocol.section_title;
+      if (pDesc) pDesc.textContent = content.protocol.section_desc;
+
+      if (content.protocol.steps && Array.isArray(content.protocol.steps)) {
+        content.protocol.steps.forEach((step, idx) => {
+          const st = document.getElementById(`protocolStepTitle${idx}`);
+          const sd = document.getElementById(`protocolStepDesc${idx}`);
+          if (st) st.textContent = step.title;
+          if (sd) sd.textContent = step.description;
+        });
+      }
+    }
+
+    // 7. Footer & Ubicación
+    if (content.contact) {
+      const addr = document.getElementById('footerAddressLine');
+      if (addr) {
+        addr.textContent = `Estudio de Estampado Textil de Precisión • ${content.contact.workshop_city} • ${content.contact.address}`;
+      }
+      const hours = document.getElementById('footerHours');
+      if (hours && content.contact.business_hours) {
+        hours.textContent = content.contact.business_hours;
+      }
+      const waLink = document.getElementById('footerWhatsappLink');
+      const waText = document.getElementById('footerWhatsappText');
+      if (waText && content.contact.whatsapp_number) {
+        waText.textContent = content.contact.whatsapp_number;
+      }
+      if (waLink && content.contact.whatsapp_number) {
+        const cleanNum = content.contact.whatsapp_number.replace(/[^0-9]/g, '');
+        waLink.href = `https://wa.me/${cleanNum}`;
+      }
+      const igLink = document.getElementById('footerInstagramLink');
+      const igText = document.getElementById('footerInstagramText');
+      if (igText && content.contact.instagram) {
+        igText.textContent = content.contact.instagram;
+      }
+      if (igLink && content.contact.instagram) {
+        const handle = content.contact.instagram.replace('@', '');
+        igLink.href = `https://instagram.com/${handle}`;
+      }
+      const copy = document.getElementById('footerCopyright');
+      if (copy && content.contact.copyright_text) {
+        copy.textContent = `© 2026 ${content.contact.copyright_text}`;
+      }
+    }
+  }
+
+  escapeHtml(str) {
+    if (!str) return '';
+    return str
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;")
+      .replace(/'/g, "&#039;");
+  }
 }
+
 
 document.addEventListener('DOMContentLoaded', () => {
   const app = new SeikoApp();

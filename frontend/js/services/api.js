@@ -114,6 +114,17 @@ export const apiService = {
     return await res.json();
   },
 
+  async getWorkshopAnalytics(days = 30) {
+    const res = await fetch(`${API_BASE}/admin/analytics?days=${days}`, {
+      headers: this._getAuthHeaders()
+    });
+    if (!res.ok) {
+      if (res.status === 401) throw new Error("UNAUTHORIZED");
+      throw new Error("Error al obtener analítica de taller");
+    }
+    return await res.json();
+  },
+
   async updateOrderStatus(orderId, newStatus, trackingCode = null) {
     const res = await fetch(`${API_BASE}/admin/orders/${orderId}/status`, {
       method: "PATCH",
@@ -131,5 +142,56 @@ export const apiService = {
       throw new Error("Error al actualizar estado del pedido");
     }
     return await res.json();
+  },
+
+  // =========================================================================
+  // GESTIÓN DE CONTENIDO CMS & VITRINA PÚBLICA
+  // =========================================================================
+  async getSiteContent() {
+    try {
+      const res = await fetch(`${API_BASE}/content`);
+      if (!res.ok) throw new Error("Error al obtener contenido de la tienda");
+      return await res.json();
+    } catch (err) {
+      console.warn("Fallo al consultar CMS; operando con contenido estático:", err);
+      return null;
+    }
+  },
+
+  async updateSiteSection(sectionKey, payload) {
+    const res = await fetch(`${API_BASE}/admin/content/${encodeURIComponent(sectionKey)}`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+        ...this._getAuthHeaders()
+      },
+      body: JSON.stringify(payload)
+    });
+
+    if (!res.ok) {
+      if (res.status === 401) throw new Error("UNAUTHORIZED");
+      const errBody = await res.json().catch(() => ({}));
+      throw new Error(errBody.detail || "Error al actualizar la sección editorial");
+    }
+    return await res.json();
+  },
+
+  async updateGarment(garmentId, payload) {
+    const res = await fetch(`${API_BASE}/admin/garments/${encodeURIComponent(garmentId)}`, {
+      method: "PATCH",
+      headers: {
+        "Content-Type": "application/json",
+        ...this._getAuthHeaders()
+      },
+      body: JSON.stringify(payload)
+    });
+
+    if (!res.ok) {
+      if (res.status === 401) throw new Error("UNAUTHORIZED");
+      const errBody = await res.json().catch(() => ({}));
+      throw new Error(errBody.detail || "Error al actualizar la prenda del catálogo");
+    }
+    return await res.json();
   }
 };
+

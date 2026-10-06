@@ -50,6 +50,32 @@ class OrderRepository:
         result = await session.execute(stmt)
         return result.scalar() or 0
 
+    async def get_next_order_number(self, session: AsyncSession, year: int = 2026) -> str:
+        """
+        Determina de manera robusta el siguiente número de orden para el año dado (ej: SNK-2026-0005).
+        Busca el mayor sufijo numérico registrado que comience con el prefijo anual para evitar colisiones
+        si se han borrado registros o si existen saltos en la numeración.
+        """
+        prefix = f"SNK-{year}-"
+        stmt = select(OrderModel.order_number).where(
+            OrderModel.order_number.like(f"{prefix}%")
+        ).order_by(OrderModel.order_number.desc()).limit(100)
+        result = await session.execute(stmt)
+        numbers = result.scalars().all()
+
+        max_seq = 0
+        for num in numbers:
+            try:
+                seq_part = num.replace(prefix, "").split("-")[0]
+                seq_int = int(seq_part)
+                if seq_int > max_seq:
+                    max_seq = seq_int
+            except (ValueError, IndexError):
+                continue
+
+        next_seq = max_seq + 1
+        return f"{prefix}{next_seq:04d}"
+
     async def create(
         self,
         session: AsyncSession,

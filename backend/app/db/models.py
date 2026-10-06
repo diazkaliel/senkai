@@ -37,6 +37,8 @@ class GarmentModel(Base):
     base_price: Mapped[int] = mapped_column(Integer, nullable=False)
     image_front_template: Mapped[str] = mapped_column(String(255), nullable=False)
     image_back_template: Mapped[str] = mapped_column(String(255), nullable=False)
+    photo_front: Mapped[Optional[str]] = mapped_column(String(255), nullable=True)
+    photo_back: Mapped[Optional[str]] = mapped_column(String(255), nullable=True)
     is_active: Mapped[bool] = mapped_column(Boolean, default=True, index=True)
 
     # Relación con variantes de color, talla y stock físico
@@ -163,3 +165,28 @@ class IdempotencyRecordModel(Base):
     response_payload: Mapped[str] = mapped_column(Text, nullable=False)
     status_code: Mapped[int] = mapped_column(Integer, default=201)
     created_at: Mapped[datetime] = mapped_column(DateTime, default=utc_now)
+
+
+class SiteSectionContentModel(Base):
+    """
+    Entidad para contenido editorial y textos dinámicos de la vitrina pública.
+    Diseñado bajo un esquema seccional (section_key) que desacopla cada bloque (hero, stats, banner)
+    para permitir validaciones independientes en runtime sin requerir migraciones DDL por cada texto nuevo.
+    """
+    __tablename__ = "site_sections_content"
+
+    section_key: Mapped[str] = mapped_column(String(50), primary_key=True, index=True)
+    payload_json: Mapped[str] = mapped_column(Text, nullable=False)
+    updated_at: Mapped[datetime] = mapped_column(DateTime, default=utc_now, onupdate=utc_now)
+
+    @property
+    def payload(self) -> Dict[str, Any]:
+        try:
+            return json.loads(self.payload_json)
+        except (ValueError, TypeError):
+            return {}
+
+    @payload.setter
+    def payload(self, data: Dict[str, Any]):
+        self.payload_json = json.dumps(data, ensure_ascii=False)
+

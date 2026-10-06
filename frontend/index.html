@@ -13,28 +13,16 @@
   <link href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;600;700;800;900&display=swap" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
 
-  <!-- Hojas de Estilos Modulares Glassmorphic -->
+  <!-- Hojas de Estilos Modulares — Dark Industrial Editorial -->
   <link rel="stylesheet" href="/static/css/variables.css">
   <link rel="stylesheet" href="/static/css/base.css">
   <link rel="stylesheet" href="/static/css/components.css">
   <link rel="stylesheet" href="/static/css/customizer.css">
   <link rel="stylesheet" href="/static/css/admin.css">
+  <link rel="stylesheet" href="/static/css/motion.css">
 </head>
 <body>
 
-  <!-- =========================================================================
-       ESCENA AMBIENTAL DINÁMICA (ORBES DE LUZ FLOTANTES)
-       ========================================================================= -->
-  <div class="ambient-scene" aria-hidden="true">
-    <div class="ambient-orb orb-1"></div>
-    <div class="ambient-orb orb-2"></div>
-    <div class="ambient-orb orb-3"></div>
-    <div class="ambient-orb orb-4"></div>
-  </div>
-
-  <!-- =========================================================================
-       BARRA DE NAVEGACIÓN FLOTANTE GLASSMORPHIC
-       ========================================================================= -->
   <header class="navbar">
     <div class="container navbar-inner">
       <a href="#inicio" class="brand-logo" aria-label="Senkai Estudio Textil DTF">
@@ -44,72 +32,141 @@
       <nav>
         <ul class="nav-links">
           <li><a href="#inicio" class="nav-link active">Inicio</a></li>
-          <li><a href="#personalizador" class="nav-link">Diseñar</a></li>
           <li><a href="#catalogo" class="nav-link">Colecciones</a></li>
-          <li><a href="#protocolo" class="nav-link">Nosotros</a></li>
+          <li><a href="#personalizador" class="nav-link">Diseñar</a></li>
+          <li><a href="#protocolo" class="nav-link">Taller</a></li>
         </ul>
       </nav>
 
       <div class="nav-actions">
-        <div class="nav-search-wrap">
-          <span class="material-symbols-outlined" style="font-size: 16px; color: var(--text-muted);">search</span>
+        <div class="nav-search-wrap hide-mobile">
+          <span class="material-symbols-outlined nav-search-icon">search</span>
           <input type="text" placeholder="Buscar..." class="nav-search-input" id="globalSearchInput">
         </div>
 
         <button class="cart-btn" id="cartTriggerBtn" aria-label="Abrir Carrito">
-          <span class="material-symbols-outlined" style="font-size: 18px;">shopping_bag</span>
-          <span>CARRITO</span>
+          <span class="material-symbols-outlined cart-btn-icon">shopping_bag</span>
+          <span class="hide-mobile">CARRITO</span>
           <span class="cart-counter" id="cartCounter" style="display: none;">0</span>
         </button>
 
-        <button class="admin-switch-btn" id="adminToggleBtn" title="Panel de Taller">
-          ⚡ Taller
+        <button class="admin-switch-btn hide-mobile" id="adminToggleBtn" title="Panel de Taller">
+          TALLER
+        </button>
+
+        <button class="nav-hamburger hide-desktop" id="navHamburger" aria-label="Abrir menú de navegación">
+          <span class="hamburger-line"></span>
+          <span class="hamburger-line"></span>
+          <span class="hamburger-line"></span>
         </button>
       </div>
     </div>
   </header>
 
-  <!-- =========================================================================
-       VISTA PÚBLICA (TIENDA Y ESTUDIO)
-       ========================================================================= -->
+  <!-- Mobile Navigation Drawer -->
+  <div class="mobile-nav-backdrop" id="mobileNavBackdrop"></div>
+  <aside class="mobile-nav-drawer" id="mobileNavDrawer">
+    <div class="mobile-nav-header">
+      <img src="/static/assets/senkai_navbar_brand.png" alt="Senkai" class="mobile-nav-logo">
+      <button class="mobile-nav-close" id="mobileNavClose" aria-label="Cerrar menú">&times;</button>
+    </div>
+    <nav class="mobile-nav-body">
+      <a href="#inicio" class="mobile-nav-link">Inicio</a>
+      <a href="#catalogo" class="mobile-nav-link">Colecciones</a>
+      <a href="#personalizador" class="mobile-nav-link">Diseñar</a>
+      <a href="#protocolo" class="mobile-nav-link">Taller</a>
+      <div class="mobile-nav-divider"></div>
+      <a href="#admin" class="mobile-nav-link mobile-nav-link-muted">Panel de Taller</a>
+    </nav>
+    <div class="mobile-nav-footer">
+      <div class="mobile-nav-search">
+        <span class="material-symbols-outlined nav-search-icon">search</span>
+        <input type="text" placeholder="Buscar producto..." class="nav-search-input" id="mobileSearchInput">
+      </div>
+    </div>
+  </aside>
+
   <main id="storefrontView">
     
-    <!-- 1. HERO SECTION ASIMÉTRICO (ESTILO DE LA REFERENCIA) -->
-    <section class="hero" id="inicio">
+    <section class="hero section-animate" id="inicio">
       <div class="container hero-grid-ref">
         
-        <!-- Tarjeta Principal Izquierda -->
-        <div class="hero-main-glass-card">
-          <div class="hero-mockup-wrap">
-            <img src="/static/assets/hero_main_tshirt.png" alt="Personaliza tu estilo" style="width: 100%; height: auto; object-fit: contain; filter: drop-shadow(0 20px 40px rgba(0, 0, 0, 0.85));">
-          </div>
+        <div class="hero-main-card">
+          <div class="hero-workbench-layout">
+            
+            <div class="hero-content-side">
+              <h1 class="hero-ref-title hero-enter-anim" id="heroTitle" style="--hero-enter-order: 0;">
+                TU DISEÑO,<br>NUESTRA TÉCNICA
+              </h1>
 
-          <div class="hero-content-side">
-            <h1 class="hero-ref-title">
-              PERSONALIZA<br>TU ESTILO
-            </h1>
-            <p class="hero-ref-subtitle">
-              Crea tu polera única con nuestro diseñador online.
-            </p>
-            <a href="#personalizador" class="hero-ref-cta-btn">
-              Personalizar Ahora
-            </a>
+              <p class="hero-ref-subtitle hero-enter-anim" id="heroSubtitle" style="--hero-enter-order: 2;">
+                Estampado textil DTF de alta densidad sobre bases heavyweight seleccionadas. Sin mínimos de producción y con precisión artesanal.
+              </p>
+
+              <div class="hero-cta-group hero-enter-anim" style="--hero-enter-order: 3;">
+                <a href="#personalizador" class="hero-ref-cta-btn btn-magnetic" id="heroCtaLink">
+                  <span id="heroCtaText">DISEÑAR AHORA</span>
+                  <span class="cta-arrow">→</span>
+                </a>
+                <a href="#catalogo" class="hero-secondary-cta">
+                  <span>[ VER LOOKBOOK ]</span>
+                </a>
+              </div>
+
+              <div class="hero-specs-row hero-enter-anim" style="--hero-enter-order: 4;">
+                <div class="hero-spec-item">
+                  <span class="hero-spec-bullet">✦</span>
+                  <span>300 DPI Ultra HD</span>
+                </div>
+                <div class="hero-spec-item">
+                  <span class="hero-spec-bullet">✦</span>
+                  <span>Curado a 160°C</span>
+                </div>
+                <div class="hero-spec-item">
+                  <span class="hero-spec-bullet">✦</span>
+                  <span>Cero Mínimo</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="hero-mockup-wrap parallax-slow">
+              <div class="hero-mockup-halo" aria-hidden="true"></div>
+              <img src="/static/assets/hero_main_tshirt.png" alt="Prenda Base Heavyweight Senkai" class="hero-main-img">
+              <div class="hero-mockup-badge">
+                <span class="badge-dot"></span>
+                <span>ALGODÓN PEINADO 240 GSM</span>
+              </div>
+            </div>
+
           </div>
         </div>
 
-        <!-- Tarjetas Apiladas Derecha -->
         <div class="hero-stacked-column">
-          <!-- Tarjeta Superior: Modelo Minimalista Azul -->
-          <a href="#personalizador" class="hero-side-card" title="Personalizar Modelo Minimalista">
+          <a href="#personalizador" class="hero-side-card reveal-up" title="Personalizar Modelo Minimalista" style="--reveal-delay: 200ms;">
+            <div class="side-card-header">
+              <span class="side-card-ref">REF. 01 // OVERSIZED</span>
+              <span class="side-card-pill">240 GSM</span>
+            </div>
             <div class="hero-side-mockup">
-              <img src="/static/assets/hero_side_top.png" alt="Modelo Minimalista Azul" style="width: 100%; height: auto; object-fit: contain; filter: drop-shadow(0 15px 28px rgba(0, 0, 0, 0.75));">
+              <img src="/static/assets/hero_side_top.png" alt="Modelo Heavyweight 240g" class="hero-side-img">
+            </div>
+            <div class="side-card-footer">
+              <span class="hero-side-tag" id="heroSideTopTag">HEAVYWEIGHT 240G</span>
+              <span class="side-card-action">CONFIGURAR ↗</span>
             </div>
           </a>
 
-          <!-- Tarjeta Inferior: Modelo Urbana Blanco -->
-          <a href="#personalizador" class="hero-side-card" title="Personalizar Modelo Urbana">
+          <a href="#personalizador" class="hero-side-card reveal-up" title="Personalizar Modelo Urbana" style="--reveal-delay: 350ms;">
+            <div class="side-card-header">
+              <span class="side-card-ref">REF. 02 // FLEECE</span>
+              <span class="side-card-pill">320 GSM</span>
+            </div>
             <div class="hero-side-mockup">
-              <img src="/static/assets/hero_side_bottom.png" alt="Modelo Urbana Blanco" style="width: 100%; height: auto; object-fit: contain; filter: drop-shadow(0 15px 28px rgba(0, 0, 0, 0.75));">
+              <img src="/static/assets/hero_side_bottom.png" alt="Modelo Fleece 320g" class="hero-side-img">
+            </div>
+            <div class="side-card-footer">
+              <span class="hero-side-tag" id="heroSideBottomTag">FLEECE 320G</span>
+              <span class="side-card-action">CONFIGURAR ↗</span>
             </div>
           </a>
         </div>
@@ -117,34 +174,143 @@
       </div>
     </section>
 
-    <!-- 2. MARQUEE / TICKER CONTINUO INDUSTRIAL -->
-    <div class="marquee-container" aria-hidden="true">
-      <div class="marquee-content">
-        <div class="marquee-item">✦ <span class="highlight">ESTAMPADO TEXTIL DTF 300 DPI</span></div>
-        <div class="marquee-item">✦ ALGODÓN PEINADO HEAVYWEIGHT 240G</div>
-        <div class="marquee-item">✦ <span class="highlight">CERO PEDIDO MÍNIMO</span></div>
-        <div class="marquee-item">✦ RESISTENCIA COMPROBADA +50 LAVADOS</div>
-        <div class="marquee-item">✦ <span class="highlight">TERMOFIJADO A 160°C</span></div>
-        <div class="marquee-item">✦ TALLER INDUSTRIAL SEIKO</div>
-        <div class="marquee-item">✦ <span class="highlight">DESPACHOS A TODO CHILE</span></div>
-        <!-- Duplicado para loop infinito -->
-        <div class="marquee-item">✦ <span class="highlight">ESTAMPADO TEXTIL DTF 300 DPI</span></div>
-        <div class="marquee-item">✦ ALGODÓN PEINADO HEAVYWEIGHT 240G</div>
-        <div class="marquee-item">✦ <span class="highlight">CERO PEDIDO MÍNIMO</span></div>
-        <div class="marquee-item">✦ RESISTENCIA COMPROBADA +50 LAVADOS</div>
-        <div class="marquee-item">✦ <span class="highlight">TERMOFIJADO A 160°C</span></div>
-        <div class="marquee-item">✦ TALLER INDUSTRIAL SEIKO</div>
-        <div class="marquee-item">✦ <span class="highlight">DESPACHOS A TODO CHILE</span></div>
+    <section class="stats-band section-animate" id="stats" aria-label="Métricas del taller">
+      <div class="container">
+        <div class="stats-band-grid stagger-children">
+          <div class="stat-item" data-count="300" data-suffix=" DPI">
+            <span class="stat-number" id="stat-dpi">300</span>
+            <span class="stat-suffix"> DPI</span>
+            <span class="stat-label">Resolución de Impresión</span>
+          </div>
+          <div class="stat-divider"></div>
+          <div class="stat-item">
+            <span class="stat-number" id="stat-min-order">0</span>
+            <span class="stat-label">Pedido Mínimo</span>
+          </div>
+          <div class="stat-divider"></div>
+          <div class="stat-item" data-count="50" data-prefix="+">
+            <span class="stat-number" id="stat-lavados">+50</span>
+            <span class="stat-label">Lavados de Durabilidad</span>
+          </div>
+          <div class="stat-divider"></div>
+          <div class="stat-item" data-count="160" data-suffix="°C">
+            <span class="stat-number" id="stat-temp">160°C</span>
+            <span class="stat-label">Temperatura de Curado</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="brand-statement-section section-animate">
+      <div class="container">
+        <div class="statement-container">
+          <h2 class="statement-headline reveal-up" id="statementHeadline">CALIDAD SIN CONCESIONES</h2>
+          <p class="statement-body reveal-up" id="statementBody" style="--reveal-delay: 160ms;">
+            CADA ESTAMPA ES UNA PIEZA ÚNICA. COMBINAMOS BASES TEXTILES DE ALTO GRAMAJE CON MICRO-INYECCIÓN DTF Y PIGMENTOS INDUSTRIALES, CONCEBIDAS PARA RESISTIR MÁS DE 50 LAVADOS SIN DEGRADACIÓN.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <div class="marquee-dual-wrap" id="marqueeWrap" aria-hidden="true">
+      <div class="marquee-container">
+        <div class="marquee-content" id="marqueeContent">
+          <div class="marquee-item">CONFECCIÓN PESADA 240G</div>
+          <div class="marquee-item">✦</div>
+          <div class="marquee-item">DTF 300 DPI ULTRA HD</div>
+          <div class="marquee-item">✦</div>
+          <div class="marquee-item">ALGODÓN PEINADO</div>
+          <div class="marquee-item">✦</div>
+          <div class="marquee-item">SIN PEDIDO MÍNIMO</div>
+          <div class="marquee-item">✦</div>
+          <div class="marquee-item">SENKAI ATELIER</div>
+          <div class="marquee-item">✦</div>
+          <div class="marquee-item">CURADO TÉRMICO 160°C</div>
+          <div class="marquee-item">✦</div>
+          <div class="marquee-item">CONFECCIÓN PESADA 240G</div>
+          <div class="marquee-item">✦</div>
+          <div class="marquee-item">DTF 300 DPI ULTRA HD</div>
+          <div class="marquee-item">✦</div>
+          <div class="marquee-item">ALGODÓN PEINADO</div>
+          <div class="marquee-item">✦</div>
+          <div class="marquee-item">SIN PEDIDO MÍNIMO</div>
+          <div class="marquee-item">✦</div>
+          <div class="marquee-item">SENKAI ATELIER</div>
+          <div class="marquee-item">✦</div>
+          <div class="marquee-item">CURADO TÉRMICO 160°C</div>
+        </div>
+      </div>
+      <div class="marquee-container marquee-track-reverse">
+        <div class="marquee-content-reverse" id="marqueeContentReverse">
+          <div class="marquee-item"><span class="highlight">RESISTENCIA +50 LAVADOS</span></div>
+          <div class="marquee-item">//</div>
+          <div class="marquee-item">POLÍMEROS DE ALTA ELASTICIDAD</div>
+          <div class="marquee-item">//</div>
+          <div class="marquee-item">SANTIAGO DE CHILE • DESPACHO 24H</div>
+          <div class="marquee-item">//</div>
+          <div class="marquee-item"><span class="highlight">OVERSIZED & HOODIES FLEECE</span></div>
+          <div class="marquee-item">//</div>
+          <div class="marquee-item">TALLER ACTIVO A DEMANDA</div>
+          <div class="marquee-item">//</div>
+          <div class="marquee-item"><span class="highlight">RESISTENCIA +50 LAVADOS</span></div>
+          <div class="marquee-item">//</div>
+          <div class="marquee-item">POLÍMEROS DE ALTA ELASTICIDAD</div>
+          <div class="marquee-item">//</div>
+          <div class="marquee-item">SANTIAGO DE CHILE • DESPACHO 24H</div>
+          <div class="marquee-item">//</div>
+          <div class="marquee-item"><span class="highlight">OVERSIZED & HOODIES FLEECE</span></div>
+          <div class="marquee-item">//</div>
+          <div class="marquee-item">TALLER ACTIVO A DEMANDA</div>
+        </div>
       </div>
     </div>
 
-    <!-- 3. ESTUDIO DE PERSONALIZACIÓN DTF EN VIVO -->
-    <section class="customizer-section" id="personalizador">
+    <!-- Carrusel Editorial de Lanzamientos Destacados -->
+    <section class="section section-animate reveal-cinematic" id="destacados">
+      <div class="container" id="carouselContainer"></div>
+    </section>
+
+    <section class="section section-animate" id="catalogo">
+      <div class="container" id="catalogContainer"></div>
+    </section>
+
+    <section class="editorial-narrative-section section-animate">
+      <div class="container">
+        <div class="narrative-row">
+          <div class="narrative-text-block reveal-left">
+            <h3 class="narrative-title" id="editorialMissionTitle">Matriz de Inyección DTF 300 DPI</h3>
+            <p class="narrative-description" id="editorialMissionBody">
+              Tolerancia milimétrica sin degradación. Fusionamos cortes estructurales heavyweight en algodón peinado (240g–320g) con micro-inyección de pigmento CMYK+White y polímeros elásticos de alta densidad, concebidos bajo estándar editorial industrial.
+            </p>
+            <a href="#personalizador" class="btn btn-secondary">CONFIGURAR PRENDA [DTF]</a>
+          </div>
+          <div class="narrative-media-block parallax-slow">
+            <img src="/static/assets/garments/hoodie_back.png" alt="Senkai Heavyweight Hoodie Studio" class="narrative-img">
+          </div>
+        </div>
+
+        <div class="narrative-row reverse">
+          <div class="narrative-media-block parallax-slow">
+            <img src="/static/assets/garments/tshirt_front.png" alt="Senkai Heavyweight T-Shirt Studio" class="narrative-img">
+          </div>
+          <div class="narrative-text-block reveal-right">
+            <h3 class="narrative-title" id="editorialVisionTitle">Curado Térmico a 160°C & +50 Lavados</h3>
+            <p class="narrative-description" id="editorialVisionBody">
+              Cero desprendimiento, cero agrietamiento. Curado de película polimérica a 160°C con presión neumática controlada. Cada pieza soporta flexión continua y ciclos de lavado industrial preservando saturación cromática y bordes nítidos.
+            </p>
+            <a href="#catalogo" class="btn btn-secondary">EXPLORAR CATÁLOGO [2026]</a>
+          </div>
+        </div>
+      </div>
+
+    </section>
+
+    <section class="customizer-section section-animate" id="personalizador">
       <div class="container">
         <div class="section-header">
           <div>
-            <h2 class="section-title">Estudio de Creación Senkai DTF</h2>
-            <p class="section-desc">Selecciona tu prenda streetwear, aplica colores en tiempo real, ubica tu estampa y cotiza al instante</p>
+            <h2 class="section-title" id="customizerSectionTitle">Mesa de Personalización DTF</h2>
+            <p class="section-desc" id="customizerSectionDesc">Selecciona la base textil, modula el color y calibra la estampa con cotización en tiempo real.</p>
           </div>
         </div>
 
@@ -152,53 +318,56 @@
       </div>
     </section>
 
-    <!-- 4. CATÁLOGO DE PRENDAS TEXTILES BASE -->
-    <section class="section" id="catalogo">
-      <div class="container" id="catalogContainer"></div>
-    </section>
-
-    <!-- 5. EL PROTOCOLO DE TALLER (3 PASOS TÉCNICOS) -->
-    <section class="section protocol-section" id="protocolo">
+    <section class="section protocol-section section-animate" id="protocolo">
       <div class="container">
-        <div class="section-header" style="justify-content: center; text-align: center;">
+        <div class="section-header protocol-header-center">
           <div>
-            <span class="badge badge-lime" style="margin-bottom: 0.5rem;">FLUJO DE PRODUCCIÓN</span>
-            <h2 class="section-title">El Protocolo de Taller</h2>
-            <p class="section-desc">Secuencia de fabricación industrial de alta precisión</p>
+            <h2 class="section-title" id="protocolTitle">Secuencia Operativa DTF</h2>
+            <p class="section-desc" id="protocolDesc">Flujo técnico desde rasterizado a 300 DPI hasta termofijación a 160°C y despacho.</p>
           </div>
         </div>
 
-        <div class="protocol-grid">
-          <!-- Paso 1 -->
-          <div class="protocol-card">
-            <div class="protocol-icon-wrap">
-              <span class="material-symbols-outlined" style="font-size: 32px;">palette</span>
+        <div class="protocol-timeline">
+          <div class="timeline-track">
+            <div class="timeline-fill" id="timelineFill"></div>
+          </div>
+
+          <div class="protocol-card reveal-card" style="--reveal-delay: 0ms;">
+            <div class="timeline-node">
+              <span class="timeline-node-number">01</span>
             </div>
-            <h3 class="protocol-step-title">01. Configura & Diseña</h3>
-            <p class="protocol-step-desc">
-              Elige tu prenda base (180g a 320g) y sube tus artes vectoriales o PNG transparente a 300 DPI en nuestro simulador en tiempo real.
+            <div class="protocol-icon-wrap">
+              <span class="material-symbols-outlined" style="font-size: 28px;">palette</span>
+            </div>
+            <h3 class="protocol-step-title" id="protocolStepTitle0">1. Separación de Canales CMYK+W</h3>
+            <p class="protocol-step-desc" id="protocolStepDesc0">
+              Rasterizado a 300 DPI con cálculo milimétrico de capa base blanca (underbase) según el color y gramaje de la base textil elegida.
             </p>
           </div>
 
-          <!-- Paso 2 -->
-          <div class="protocol-card">
-            <div class="protocol-icon-wrap">
-              <span class="material-symbols-outlined" style="font-size: 32px;">precision_manufacturing</span>
+          <div class="protocol-card reveal-card" style="--reveal-delay: 120ms;">
+            <div class="timeline-node">
+              <span class="timeline-node-number">02</span>
             </div>
-            <h3 class="protocol-step-title">02. Impresión & Termofijado</h3>
-            <p class="protocol-step-desc">
-              Imprimimos sobre film transfer con tintas CMYK+W y curamos con polvo de poliamida elastomérico a 160°C en prensa de calor industrial.
+            <div class="protocol-icon-wrap">
+              <span class="material-symbols-outlined" style="font-size: 28px;">precision_manufacturing</span>
+            </div>
+            <h3 class="protocol-step-title" id="protocolStepTitle1">2. Inyección & Polimerizado 160°C</h3>
+            <p class="protocol-step-desc" id="protocolStepDesc1">
+              Micro-inyección de pigmento sobre film PET, aplicación de poliamida termofusible y horneado para máxima elasticidad.
             </p>
           </div>
 
-          <!-- Paso 3 -->
-          <div class="protocol-card">
-            <div class="protocol-icon-wrap">
-              <span class="material-symbols-outlined" style="font-size: 32px;">local_shipping</span>
+          <div class="protocol-card reveal-card" style="--reveal-delay: 240ms;">
+            <div class="timeline-node">
+              <span class="timeline-node-number">03</span>
             </div>
-            <h3 class="protocol-step-title">03. Control & Despacho</h3>
-            <p class="protocol-step-desc">
-              Inspección óptica de adherencia y elasticidad. Empaque industrial protegido listo para retiro en taller o envío express a tu puerta.
+            <div class="protocol-icon-wrap">
+              <span class="material-symbols-outlined" style="font-size: 28px;">local_shipping</span>
+            </div>
+            <h3 class="protocol-step-title" id="protocolStepTitle2">3. Termofijado & Inspección Óptica</h3>
+            <p class="protocol-step-desc" id="protocolStepDesc2">
+              Prensado neumático a 5 bar para anclaje en fibra, prueba de elongación y empaque técnico antiestático con despacho express.
             </p>
           </div>
         </div>
@@ -206,21 +375,35 @@
     </section>
 
     <!-- FOOTER -->
-    <footer style="padding: 4.5rem 0 2.5rem; border-top: 1px solid var(--glass-border); background: var(--bg-surface-dim);">
-      <div class="container" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 2rem;">
-        <div>
-          <div class="brand-logo" style="margin-bottom: 0.75rem;">
-            <img src="/static/assets/senkai_navbar_brand.png" alt="Senkai Estudio Textil" class="brand-logo-img-full" style="height: 48px;">
-          </div>
-          <p style="font-size: 0.85rem; font-family: var(--font-mono); color: var(--text-muted);">
+    <footer class="site-footer">
+      <div class="container footer-grid">
+        <div class="footer-brand">
+          <a href="#inicio" class="brand-logo">
+            <img src="/static/assets/senkai_navbar_brand.png" alt="Senkai Estudio Textil" class="brand-logo-img-full">
+          </a>
+          <p class="footer-address" id="footerAddressLine">
             Estudio de Estampado Textil de Precisión • Santiago, Chile
           </p>
+          <p class="footer-hours" id="footerHours">
+            Lunes a Viernes 09:00 - 18:30 hrs
+          </p>
         </div>
-        <div style="display: flex; gap: 1.5rem; font-family: var(--font-mono); font-size: 0.775rem; color: var(--text-muted);">
-          <span>PRIVACIDAD</span>
-          <span>TÉRMINOS</span>
-          <span>ENVÍOS</span>
-          <span>FASTAPI + CLOUDFLARE</span>
+
+        <div class="footer-contact">
+          <span class="footer-contact-label">Contacto</span>
+          <a id="footerWhatsappLink" href="https://wa.me/56987654321" target="_blank" rel="noopener" class="footer-social-link">
+            <span>💬</span> <span id="footerWhatsappText">+56 9 8765 4321</span>
+          </a>
+          <a id="footerInstagramLink" href="https://instagram.com/senkai.dtf" target="_blank" rel="noopener" class="footer-social-link">
+            <span>📸</span> <span id="footerInstagramText">@senkai.dtf</span>
+          </a>
+        </div>
+
+        <div class="footer-legal">
+          <a href="#" class="footer-legal-link">PRIVACIDAD</a>
+          <a href="#" class="footer-legal-link">TÉRMINOS</a>
+          <a href="#" class="footer-legal-link">ENVÍOS</a>
+          <span class="footer-copyright" id="footerCopyright">© 2026 Senkai Atelier</span>
         </div>
       </div>
     </footer>
@@ -270,23 +453,23 @@
   <div class="modal-backdrop" id="checkoutModal">
     <div class="modal-card">
       <div style="margin-bottom: 2rem; text-align: center;">
-        <span class="badge badge-cyan" style="margin-bottom: 0.5rem;">FINALIZAR PEDIDO DTF</span>
+        <span class="badge badge-accent" style="margin-bottom: 0.5rem;">FINALIZAR PEDIDO DTF</span>
         <h2 style="font-size: 1.85rem;">Datos de Entrega y Facturación</h2>
         <p style="font-size: 0.875rem; color: var(--text-secondary); margin-top: 0.25rem;">
           Tu pedido ingresará directo al pipeline de impresión y curado térmico de nuestro taller.
         </p>
       </div>
 
-      <div style="background: var(--bg-surface-elevated); padding: 1.35rem; border-radius: var(--radius-xs); margin-bottom: 1.75rem; border: 1px solid var(--glass-border);">
+      <div style="background: var(--bg-surface-elevated); padding: 1.35rem; border-radius: var(--radius-sm); margin-bottom: 1.75rem; border: 1px solid var(--border-subtle);">
         <div style="font-size: 0.75rem; font-family: var(--font-mono); color: var(--text-muted); text-transform: uppercase; margin-bottom: 0.5rem;">
           Resumen de Producción:
         </div>
         <div id="checkoutItemsSummary"></div>
-        <div style="display: flex; justify-content: space-between; font-size: 0.85rem; font-family: var(--font-mono); color: var(--text-secondary); margin-top: 0.6rem; border-top: 1px dashed var(--glass-border); padding-top: 0.6rem;">
+        <div style="display: flex; justify-content: space-between; font-size: 0.85rem; font-family: var(--font-mono); color: var(--text-secondary); margin-top: 0.6rem; border-top: 1px dashed var(--border-subtle); padding-top: 0.6rem;">
           <span>Costo de Envío:</span>
           <span id="checkoutShippingVal" style="font-weight: 700;">$3.990 CLP</span>
         </div>
-        <div style="display: flex; justify-content: space-between; font-size: 1.35rem; font-weight: 800; font-family: var(--font-display); color: var(--accent-cyan); margin-top: 0.6rem;">
+        <div style="display: flex; justify-content: space-between; font-size: 1.35rem; font-weight: 800; font-family: var(--font-display); color: var(--accent-primary); margin-top: 0.6rem;">
           <span>Total a Pagar:</span>
           <span id="checkoutTotalVal">$0 CLP</span>
         </div>
@@ -348,18 +531,18 @@
        ========================================================================= -->
   <div class="modal-backdrop" id="orderSuccessModal">
     <div class="modal-card" style="text-align: center;">
-      <div style="width: 68px; height: 68px; border-radius: 50%; background: rgba(0, 255, 136, 0.15); border: 2px solid var(--accent-lime); display: flex; align-items: center; justify-content: center; margin: 0 auto 1.5rem; color: var(--accent-lime);">
+      <div style="width: 68px; height: 68px; border-radius: 50%; background: var(--accent-success-subtle); border: 2px solid var(--accent-success); display: flex; align-items: center; justify-content: center; margin: 0 auto 1.5rem; color: var(--accent-success);">
         <span class="material-symbols-outlined" style="font-size: 38px;">check_circle</span>
       </div>
 
-      <span class="badge badge-lime" style="margin-bottom: 0.5rem;">¡ORDEN GENERADA CON ÉXITO!</span>
+      <span class="badge badge-success" style="margin-bottom: 0.5rem;">¡ORDEN GENERADA CON ÉXITO!</span>
       <h2 style="font-size: 1.85rem; margin-bottom: 0.5rem;">Pedido en Cola de Taller</h2>
       <p style="font-size: 0.925rem; color: var(--text-secondary);">
         Tu orden ha sido registrada con el código de seguimiento:
       </p>
       
-      <div style="font-size: 2.25rem; font-weight: 800; font-family: var(--font-mono); color: var(--accent-cyan); margin: 0.85rem 0;" id="successOrderNumber">
-        SKO-2026-0001
+      <div style="font-size: 2.25rem; font-weight: 800; font-family: var(--font-mono); color: var(--accent-primary); margin: 0.85rem 0;" id="successOrderNumber">
+        SNK-2026-0001
       </div>
 
       <div id="successOrderDetails"></div>

@@ -1,72 +1,126 @@
-/* ==========================================================================
-   SENKAI // ESTUDIO TEXTIL DTF - SISTEMA DE DISEÑO GLASSMORPHIC AVANZADO
-   Atmósfera profunda, iluminación orgánica y tokens de alta gama — V3 PREMIUM
-   ========================================================================== */
-
 :root {
-  /* Fondo Base — Azul Pizarra Medianoche Profundo */
-  --bg-main: #07090f;
-  --bg-surface: #0d1420;
-  --bg-surface-elevated: #131e2e;
-  --bg-surface-dim: #040609;
+  /* ── Superficies ─────────────────────────────────────────────────────── */
+  --bg-main:              #08080a;
+  --bg-surface:           #0f0f12;
+  --bg-surface-elevated:  #16161b;
+  --bg-surface-dim:       #050506;
+  --bg-overlay:           rgba(0, 0, 0, 0.82);
 
-  /* Glassmorphism Orgánico Multi-Capa */
-  --glass-bg: rgba(15, 24, 38, 0.60);
-  --glass-bg-hover: rgba(22, 36, 56, 0.75);
-  --glass-bg-active: rgba(30, 48, 75, 0.88);
-  --glass-border: rgba(255, 255, 255, 0.09);
-  --glass-border-hover: rgba(0, 240, 255, 0.45);
-  --glass-border-light: rgba(255, 255, 255, 0.16);
+  /* ── Bordes ──────────────────────────────────────────────────────────── */
+  --border-subtle:        rgba(255, 255, 255, 0.07);
+  --border-default:       rgba(255, 255, 255, 0.12);
+  --border-strong:        rgba(255, 255, 255, 0.22);
+  --border-focus:         #ffffff;
 
-  --glass-blur-sm: blur(14px) saturate(160%);
-  --glass-blur-md: blur(28px) saturate(180%);
-  --glass-blur-lg: blur(48px) saturate(200%);
+  /* ── Cuadrícula Técnica & Drafting ───────────────────────────────────── */
+  --grid-size:            32px;
+  --grid-color:           rgba(255, 255, 255, 0.022);
+  --grid-color-dense:     rgba(255, 255, 255, 0.045);
+  --border-technical:     rgba(255, 255, 255, 0.16);
+  --border-technical-hi:  rgba(255, 255, 255, 0.38);
 
-  /* Paleta Cromática y Acentos */
-  --color-primary: #f1f5f9;
-  --color-secondary: #94a3b8;
-  --color-platinum: #e2e8f0;
+  /* ── Texto — WCAG AA/AAA en todas las combinaciones con bg-main ────── */
+  --text-primary:         #ffffff;
+  --text-secondary:       #a1a1aa;
+  --text-muted:           #71717a;
+  --text-dim:             #52525b;
+  --text-inverse:         #08080a;
 
-  --accent-cyan: #00f0ff;
-  --accent-cyan-glow: rgba(0, 240, 255, 0.45);
-  --accent-red: #e51d24;
-  --accent-red-vivid: #ff1a24;
-  --accent-red-glow: rgba(229, 29, 36, 0.5);
-  --accent-red-soft: rgba(229, 29, 36, 0.15);
-  --accent-crimson: #e51d24;
-  --accent-crimson-glow: rgba(229, 29, 36, 0.5);
-  --accent-amber: #ff9900;
-  --accent-lime: #00ff88;
-  --accent-indigo: #6366f1;
+  /* ── Acentos — Consolidados: rojo para store, cyan reservado admin ─── */
+  --accent-primary:       #ef4444;
+  --accent-primary-subtle: rgba(239, 68, 68, 0.12);
+  --accent-primary-hover: #dc2626;
+  --accent-success:       #22c55e;
+  --accent-success-subtle: rgba(34, 197, 94, 0.12);
+  --accent-warning:       #f59e0b;
+  --accent-warning-subtle: rgba(245, 158, 11, 0.12);
 
-  /* Textos y Jerarquía */
-  --text-primary: #f8fafc;
-  --text-secondary: #cbd5e1;
-  --text-muted: #64748b;
-  --text-dim: #475569;
+  /* Admin-only: cyan como acento funcional del taller */
+  --accent-admin:         #38bdf8;
+  --accent-admin-subtle:  rgba(56, 189, 248, 0.1);
 
-  /* Tipografías Urbanas / Streetwear */
-  --font-display: 'Space Grotesk', -apple-system, sans-serif;
-  --font-body: 'Geist', -apple-system, BlinkMacSystemFont, sans-serif;
-  --font-mono: 'JetBrains Mono', monospace;
+  /* ── Tipografía ──────────────────────────────────────────────────────── */
+  --font-display: 'Space Grotesk', -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-body:    'Geist', -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-mono:    'JetBrains Mono', monospace;
 
-  /* Sombras y Brillos */
-  --shadow-ambient: 0 24px 60px rgba(0, 0, 0, 0.8);
-  --shadow-glass: inset 0 1px 1px 0 rgba(255, 255, 255, 0.12), 0 20px 48px rgba(0, 0, 0, 0.65);
-  --shadow-glass-hover: inset 0 1px 2px 0 rgba(255, 255, 255, 0.28), 0 24px 60px rgba(0, 240, 255, 0.18);
-  --shadow-glow-cyan: 0 0 40px var(--accent-cyan-glow);
-  --shadow-glow-red: 0 0 40px var(--accent-red-glow);
-  --shadow-card-depth: 0 32px 64px rgba(0, 0, 0, 0.6), 0 8px 16px rgba(0, 0, 0, 0.4);
+  /* ── Escala tipográfica fluid (modular 1.25) ─────────────────────────── */
+  --text-xs:   clamp(0.65rem, 0.6rem + 0.15vw, 0.72rem);
+  --text-sm:   clamp(0.75rem, 0.7rem + 0.15vw, 0.82rem);
+  --text-base: clamp(0.875rem, 0.8rem + 0.2vw, 1rem);
+  --text-lg:   clamp(1rem, 0.9rem + 0.3vw, 1.15rem);
+  --text-xl:   clamp(1.25rem, 1rem + 0.5vw, 1.5rem);
+  --text-2xl:  clamp(1.75rem, 1.4rem + 0.8vw, 2.25rem);
+  --text-3xl:  clamp(2rem, 1.5rem + 1.2vw, 3rem);
+  --text-4xl:  clamp(2.5rem, 1.8rem + 1.8vw, 4rem);
+  --text-hero: clamp(2.8rem, 2rem + 2.5vw, 5rem);
 
-  /* Curvaturas */
-  --radius-xs: 4px;
-  --radius-sm: 8px;
-  --radius-md: 14px;
-  --radius-lg: 22px;
-  --radius-full: 9999px;
+  /* ── Espaciado — Múltiplos de 4px ────────────────────────────────────── */
+  --space-1:   0.25rem;   /*  4px */
+  --space-2:   0.5rem;    /*  8px */
+  --space-3:   0.75rem;   /* 12px */
+  --space-4:   1rem;      /* 16px */
+  --space-5:   1.25rem;   /* 20px */
+  --space-6:   1.5rem;    /* 24px */
+  --space-8:   2rem;      /* 32px */
+  --space-10:  2.5rem;    /* 40px */
+  --space-12:  3rem;      /* 48px */
+  --space-16:  4rem;      /* 64px */
+  --space-20:  5rem;      /* 80px */
+  --space-24:  6rem;      /* 96px */
 
-  /* Curvas de Aceleración */
-  --transition-fast: 0.18s cubic-bezier(0.16, 1, 0.3, 1);
-  --transition-normal: 0.32s cubic-bezier(0.16, 1, 0.3, 1);
-  --transition-spring: 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+  /* ── Geometría Estricta: 0px Estructural vs 75px Ghost Pill (DESIGN.md) ── */
+  --radius-none: 0px;
+  --radius-sm:   0px;   /* Erradicación de redondeos tímidos: 0px para maquinaria/brutalismo */
+  --radius-md:   0px;
+  --radius-lg:   0px;
+  --radius-pill: 75px;  /* Reservado exclusivamente para elementos táctiles de interacción */
+  --radius-full: 75px;
+
+  /* ── Sombras — Capas sólidas sin glow, profundidad con opacidad ────── */
+  --shadow-sm:       0 1px 2px rgba(0, 0, 0, 0.5);
+  --shadow-md:       0 4px 12px rgba(0, 0, 0, 0.5), 0 1px 3px rgba(0, 0, 0, 0.3);
+  --shadow-lg:       0 8px 24px rgba(0, 0, 0, 0.55), 0 2px 8px rgba(0, 0, 0, 0.3);
+  --shadow-xl:       0 16px 40px rgba(0, 0, 0, 0.6), 0 4px 12px rgba(0, 0, 0, 0.3);
+  --shadow-2xl:      0 24px 56px rgba(0, 0, 0, 0.7), 0 8px 16px rgba(0, 0, 0, 0.3);
+  --shadow-inner:    inset 0 1px 4px rgba(0, 0, 0, 0.5);
+  --shadow-card:     none; /* DESIGN.md: evitar elevación de sombras artificiales */
+
+  /* ── Cinemática Editorial: Aceleración instantánea + Desaceleración paciente ─ */
+  --ease-editorial:    cubic-bezier(0.19, 1, 0.22, 1);
+  --ease-out:          cubic-bezier(0.19, 1, 0.22, 1);
+  --ease-in-out:       cubic-bezier(0.19, 1, 0.22, 1);
+
+  --duration-instant:  80ms;
+  --duration-fast:     140ms;
+  --duration-normal:   240ms;
+  --duration-slow:     420ms;
+  --duration-slower:   600ms;
+  --duration-glide:    750ms;
+
+  --transition-fast:    var(--duration-fast) var(--ease-editorial);
+  --transition-normal:  var(--duration-normal) var(--ease-editorial);
+  --transition-slow:    var(--duration-slow) var(--ease-editorial);
+  --transition-glide:   var(--duration-glide) var(--ease-editorial);
+
+  /* Stagger base para animaciones escalonadas y sincronización de carrusel */
+  --stagger-delay:     80ms;
+  --carousel-interval: 4.5s;
+
+  /* ── Layout ──────────────────────────────────────────────────────────── */
+  --content-max-width:   1400px;
+  --content-padding:     2rem;
+  --navbar-height:       80px;
+  --navbar-height-scrolled: 64px;
+  --announcement-height: 0px;
+
+  /* ── Z-index ─────────────────────────────────────────────────────────── */
+  --z-base:         1;
+  --z-dropdown:     10;
+  --z-sticky:       50;
+  --z-navbar:       100;
+  --z-announcement: 101;
+  --z-drawer:       1000;
+  --z-modal:        1100;
+  --z-toast:        9999;
 }

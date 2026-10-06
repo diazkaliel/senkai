@@ -28,3 +28,18 @@ class InvalidStateTransitionException(SenkaiDomainException):
 class PricingCalculationException(SenkaiDomainException):
     """Se lanza cuando los parámetros de cotización violan restricciones de confección/estampado."""
     pass
+
+
+class InsufficientStockException(SenkaiDomainException):
+    """Se lanza cuando no hay existencias suficientes para satisfacer la orden."""
+    def __init__(self, garment_name: str, size: str, color: str, requested: int, available: int):
+        message = (
+            f"Stock insuficiente para '{garment_name}' ({color}, Talla {size}): "
+            f"solicitadas {requested} un., disponibles {available} un."
+        )
+        super().__init__(message)
+        self.garment_name = garment_name
+        self.size = size
+        self.color = color
+        self.requested = requested
+        self.available = available

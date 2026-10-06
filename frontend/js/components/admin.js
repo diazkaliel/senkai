@@ -5,6 +5,8 @@
 
 import { apiService } from '../services/api.js';
 import { SVG_GARMENTS, PRESET_ARTWORKS } from './svg_templates.js';
+import { ContentEditorComponent } from './admin/content_editor.js';
+import { AnalyticsDashboardComponent } from './admin/analytics_dashboard.js';
 
 const PRINT_DIMENSIONS = {
   A6: { width: 90, height: 90, cm: "10 x 10 cm" },
@@ -18,6 +20,12 @@ export class AdminWorkshopPortal {
     this.container = document.getElementById(containerId);
     this.orders = [];
     this.metrics = null;
+    this.garments = [];
+    this.activeTab = "kanban"; // "kanban" | "analytics" | "cms" | "inventory"
+
+    // Filtros de productividad para el tablero Kanban
+    this.kanbanSearchQuery = "";
+    this.kanbanFulfillmentFilter = "all"; // "all" | "pickup" | "shipping"
 
     // Estado para el visor de mockup técnico
     this.activeMockupOrder = null;
@@ -26,6 +34,24 @@ export class AdminWorkshopPortal {
 
     this.mockupModalEl = document.getElementById('adminMockupModal');
     this.mockupCardEl = document.getElementById('adminMockupCard');
+  }
+
+  formatTimeAgo(isoString) {
+    if (!isoString) return { text: "Reciente", isDelayed: false };
+    const date = new Date(isoString);
+    const diffMs = Date.now() - date.getTime();
+    if (isNaN(diffMs) || diffMs < 0) return { text: "Reciente", isDelayed: false };
+
+    const diffMins = Math.floor(diffMs / 60000);
+    if (diffMins < 60) {
+      return { text: `Hace ${Math.max(1, diffMins)}m`, isDelayed: false };
+    }
+    const diffHours = Math.floor(diffMins / 60);
+    if (diffHours < 24) {
+      return { text: `Hace ${diffHours}h`, isDelayed: false };
+    }
+    const diffDays = Math.floor(diffHours / 24);
+    return { text: `Hace ${diffDays}d`, isDelayed: diffDays >= 1 };
   }
 
   async init() {
@@ -41,6 +67,7 @@ export class AdminWorkshopPortal {
     try {
       this.orders = await apiService.getOrders();
       this.metrics = await apiService.getWorkshopMetrics();
+      this.garments = (await apiService.getGarments()) || [];
       this.render();
       this.attachEvents();
     } catch (err) {
@@ -56,7 +83,7 @@ export class AdminWorkshopPortal {
     if (!this.container) return;
     this.container.innerHTML = `
       <div class="admin-portal container" style="max-width: 460px; margin: 4rem auto; text-align: center;">
-        <div class="glass-card" style="padding: 2.5rem 2rem; border-radius: var(--radius-md); background: rgba(18, 18, 20, 0.9); backdrop-filter: blur(20px); border: 1px solid var(--glass-border); box-shadow: var(--shadow-glass);">
+        <div class="surface-card-elevated" style="padding: 2.5rem 2rem; border-radius: var(--radius-sm); background: var(--bg-surface-elevated); border: 1px solid var(--border-subtle); box-shadow: var(--shadow-xl);">
           <div style="font-size: 2.5rem; margin-bottom: 1rem;">🔒</div>
           <h2 style="font-family: var(--font-display); font-size: 1.5rem; margin-bottom: 0.5rem; letter-spacing: -0.02em;">Acceso Restringido al Taller</h2>
           <p style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 1.5rem;">
@@ -64,7 +91,7 @@ export class AdminWorkshopPortal {
           </p>
 
           ${errorMessage ? `
-            <div style="background: rgba(239, 68, 68, 0.15); border: 1px solid var(--accent-crimson); color: #fca5a5; padding: 0.75rem; border-radius: var(--radius-xs); font-size: 0.8rem; margin-bottom: 1.25rem;">
+            <div style="background: rgba(239, 68, 68, 0.15); border: 1px solid var(--accent-primary); color: #fca5a5; padding: 0.75rem; border-radius: var(--radius-sm); font-size: 0.8rem; margin-bottom: 1.25rem;">
               ⚠️ ${errorMessage}
             </div>
           ` : ''}
@@ -76,7 +103,7 @@ export class AdminWorkshopPortal {
               placeholder="Ingrese token de taller..." 
               required
               autofocus
-              style="padding: 0.85rem 1rem; border-radius: var(--radius-xs); border: 1px solid var(--glass-border); background: var(--bg-surface-elevated); color: var(--text-primary); font-family: var(--font-mono); font-size: 0.9rem;"
+              style="padding: 0.85rem 1rem; border-radius: var(--radius-sm); border: 1px solid var(--border-subtle); background: var(--bg-surface-elevated); color: var(--text-primary); font-family: var(--font-mono); font-size: 0.9rem;"
             />
             <button type="submit" class="btn btn-primary" style="padding: 0.85rem; width: 100%;">
               ⚡ Desbloquear Panel de Producción
@@ -95,7 +122,7 @@ export class AdminWorkshopPortal {
         e.preventDefault();
         const tokenInput = document.getElementById('workshopTokenInput');
         if (tokenInput) {
-          apiService.setWorkshopToken(tokenInput.value);
+          apiService.setWorkshopToken(tokenInput.value.trim());
           await this.refreshData();
         }
       });
@@ -108,6 +135,7 @@ export class AdminWorkshopPortal {
       });
     }
   }
+
 
   render() {
     if (!this.container) return;
@@ -129,7 +157,34 @@ export class AdminWorkshopPortal {
       entregado: { title: "5. COMPLETADO Y ENTREGADO", orders: [], badgeClass: "" }
     };
 
-    this.orders.forEach(order => {
+    // Filtrado predictivo y por método de entrega en el Kanban
+    const q = (this.kanbanSearchQuery || "").toLowerCase().trim();
+    const fFilter = this.kanbanFulfillmentFilter || "all";
+
+    const totalOrdersCount = this.orders.length;
+    const pickupOrdersCount = this.orders.filter(o => o.customer && o.customer.delivery_method === "pickup").length;
+    const shippingOrdersCount = this.orders.filter(o => o.customer && o.customer.delivery_method !== "pickup").length;
+
+    const filteredOrders = this.orders.filter(order => {
+      // Filtro de logística
+      if (fFilter === "pickup" && order.customer && order.customer.delivery_method !== "pickup") return false;
+      if (fFilter === "shipping" && order.customer && order.customer.delivery_method === "pickup") return false;
+
+      // Filtro de texto en tiempo real
+      if (q) {
+        const num = (order.order_number || "").toLowerCase();
+        const name = (order.customer && order.customer.full_name || "").toLowerCase();
+        const email = (order.customer && order.customer.email || "").toLowerCase();
+        const city = (order.customer && order.customer.shipping_city || "").toLowerCase();
+        const items = (order.items || []).map(i => i.garment_name.toLowerCase()).join(" ");
+        if (!num.includes(q) && !name.includes(q) && !email.includes(q) && !city.includes(q) && !items.includes(q)) {
+          return false;
+        }
+      }
+      return true;
+    });
+
+    filteredOrders.forEach(order => {
       const st = order.status;
       if (cols[st]) {
         cols[st].orders.push(order);
@@ -143,8 +198,7 @@ export class AdminWorkshopPortal {
         <!-- HEADER DE ADMINISTRACIÓN -->
         <div class="admin-header-row">
           <div class="admin-title-badge">
-            <span class="badge badge-cyan"><span class="pulse-indicator"></span> TALLER INDUSTRIAL ACTIVO</span>
-            <h2>Panel de Producción Seiko DTF</h2>
+            <h2>Panel de Producción & Editorial Seiko</h2>
           </div>
           <div style="display: flex; gap: 0.75rem;">
             <button class="btn btn-secondary" id="logoutWorkshopBtn" style="padding: 0.6rem 1rem; font-size: 0.8rem;" title="Cerrar Sesión de Taller">
@@ -159,114 +213,203 @@ export class AdminWorkshopPortal {
           </div>
         </div>
 
-        <!-- TARJETAS KPI DE TALLER -->
-        <div class="admin-kpi-grid">
-          <div class="kpi-card">
-            <div class="kpi-label">Pedidos en Cola DTF</div>
-            <div class="kpi-value">${m.pending_print_count}</div>
-            <div class="kpi-sub">Listos para software RIP</div>
-          </div>
-          <div class="kpi-card crimson">
-            <div class="kpi-label">En Plancha Térmica</div>
-            <div class="kpi-value">${m.heat_pressing_count}</div>
-            <div class="kpi-sub">Termofijado a 160°C / 15s</div>
-          </div>
-          <div class="kpi-card lime">
-            <div class="kpi-label">Metros Film DTF Usados</div>
-            <div class="kpi-value">${m.linear_meters_film_estimated} m</div>
-            <div class="kpi-sub">Bobina industrial 60 cm</div>
-          </div>
-          <div class="kpi-card amber">
-            <div class="kpi-label">Facturación Acumulada</div>
-            <div class="kpi-value">$${m.total_revenue_clp.toLocaleString('es-CL')}</div>
-            <div class="kpi-sub">CLP en pedidos activos</div>
-          </div>
+        <!-- BARRA MODULAR DE PESTAÑAS (ATELIER TABS) -->
+        <div class="admin-tabs-nav" role="tablist">
+          <button class="admin-tab-btn ${this.activeTab === 'kanban' ? 'active' : ''}" data-tab="kanban" role="tab" aria-selected="${this.activeTab === 'kanban'}">
+            <span>⚙️ Flujo de Taller</span>
+            <span class="tab-badge">${this.orders.length}</span>
+          </button>
+          <button class="admin-tab-btn ${this.activeTab === 'analytics' ? 'active' : ''}" data-tab="analytics" role="tab" aria-selected="${this.activeTab === 'analytics'}">
+            <span>📊 Analítica & Rendimiento</span>
+          </button>
+          <button class="admin-tab-btn ${this.activeTab === 'cms' ? 'active' : ''}" data-tab="cms" role="tab" aria-selected="${this.activeTab === 'cms'}">
+            <span>✍️ Editor de Contenido CMS</span>
+          </button>
+          <button class="admin-tab-btn ${this.activeTab === 'inventory' ? 'active' : ''}" data-tab="inventory" role="tab" aria-selected="${this.activeTab === 'inventory'}">
+            <span>📦 Inventario Base</span>
+          </button>
         </div>
 
-        <!-- TABLERO KANBAN DE ESTADOS DE PRODUCCIÓN -->
-        <div class="kanban-board-wrap">
-          <h3 class="kanban-section-title">
-            <span>Flujo de Fabricación Textil</span>
-            <span class="badge">${this.orders.length} Pedidos en Total</span>
-          </h3>
-
-          <div class="kanban-board">
-            ${Object.entries(cols).map(([colKey, colData]) => `
-              <div class="kanban-col" data-col-status="${colKey}">
-                <div class="kanban-col-header">
-                  <div class="kanban-col-title">
-                    <span class="badge ${colData.badgeClass}">${colData.title}</span>
-                  </div>
-                  <span class="kanban-col-count">${colData.orders.length}</span>
-                </div>
-                <div class="kanban-col-body">
-                  ${colData.orders.length === 0 ? `
-                    <div style="text-align: center; color: var(--text-muted); font-size: 0.8rem; padding: 3rem 0; font-family: var(--font-mono);">
-                      Sin pedidos en este estado
-                    </div>
-                  ` : colData.orders.map(order => this.renderKanbanOrderCard(order, colKey)).join('')}
-                </div>
-              </div>
-            `).join('')}
-          </div>
-        </div>
-
-        <!-- TABLA DE INVENTARIO DE PRENDAS BASE -->
-        <div class="inventory-card">
-          <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
-            <div>
-              <h3 style="font-size: 1.35rem; font-weight: 700; text-transform: uppercase;">Inventario de Prendas Base Lisas</h3>
-              <p style="font-size: 0.85rem; color: var(--text-muted);">Stock de poleras y polerones vírgenes para estampado inmediato</p>
+        <!-- VISTA KANBAN -->
+        ${this.activeTab === 'kanban' ? `
+          <!-- TARJETAS KPI DE TALLER -->
+          <div class="admin-kpi-grid">
+            <div class="kpi-card">
+              <div class="kpi-label">Pedidos en Cola DTF</div>
+              <div class="kpi-value">${m.pending_print_count}</div>
+              <div class="kpi-sub">Listos para software RIP</div>
             </div>
-            <span class="badge badge-lime">STOCK ÓPTIMO EN BODEGA</span>
+            <div class="kpi-card crimson">
+              <div class="kpi-label">En Plancha Térmica</div>
+              <div class="kpi-value">${m.heat_pressing_count}</div>
+              <div class="kpi-sub">Termofijado a 160°C / 15s</div>
+            </div>
+            <div class="kpi-card lime">
+              <div class="kpi-label">Metros Film DTF Usados</div>
+              <div class="kpi-value">${m.linear_meters_film_estimated} m</div>
+              <div class="kpi-sub">Bobina industrial 60 cm</div>
+            </div>
+            <div class="kpi-card amber">
+              <div class="kpi-label">Facturación Acumulada</div>
+              <div class="kpi-value">$${m.total_revenue_clp.toLocaleString('es-CL')}</div>
+              <div class="kpi-sub">CLP en pedidos activos</div>
+            </div>
           </div>
 
-          <div class="table-responsive">
-            <table class="admin-table">
-              <thead>
-                <tr>
-                  <th>Prenda / Gramaje</th>
-                  <th>Colores Base</th>
-                  <th>Tallas Disponibles</th>
-                  <th>Precio Venta Lisa</th>
-                  <th>Capacidad DTF Diaria</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td><strong>Polera Oversized Heavyweight 240g</strong><br><small>100% Algodón Peinado</small></td>
-                  <td>Obsidian, Chalk White, Washed Gray, Deep Green, Terracotta</td>
-                  <td>S, M, L, XL, XXL</td>
-                  <td>$12.990 CLP</td>
-                  <td><span class="badge badge-lime">150 prendas/día</span></td>
-                </tr>
-                <tr>
-                  <td><strong>Polera Clásica Regular Fit 180g</strong><br><small>100% Algodón Jersey</small></td>
-                  <td>Negro, Blanco Puro, Navy Deep, Burgundy</td>
-                  <td>S, M, L, XL</td>
-                  <td>$8.990 CLP</td>
-                  <td><span class="badge badge-lime">200 prendas/día</span></td>
-                </tr>
-                <tr>
-                  <td><strong>Polerón Canguro Hoodie Heavy 320g</strong><br><small>80/20 Algodón Afelpado</small></td>
-                  <td>Obsidian, Cement Gray, Deep Olive, Raw Bone</td>
-                  <td>S, M, L, XL, XXL</td>
-                  <td>$24.990 CLP</td>
-                  <td><span class="badge badge-crimson">80 prendas/día</span></td>
-                </tr>
-                <tr>
-                  <td><strong>Polerón Crewneck Cuello Redondo 300g</strong><br><small>80/20 Algodón Peinado</small></td>
-                  <td>Obsidian, Heather Gray, Midnight Navy</td>
-                  <td>S, M, L, XL</td>
-                  <td>$21.990 CLP</td>
-                  <td><span class="badge badge-lime">90 prendas/día</span></td>
-                </tr>
-              </tbody>
-            </table>
+          <!-- TABLERO KANBAN DE ESTADOS DE PRODUCCIÓN -->
+          <div class="kanban-board-wrap">
+            <div class="kanban-header-bar">
+              <h3 class="kanban-section-title">
+                <span>Flujo de Fabricación Textil</span>
+                <span class="badge">${this.orders.length} Pedidos en Total</span>
+              </h3>
+
+              <div class="kanban-results-count">
+                ${filteredOrders.length !== totalOrdersCount ? `
+                  <span>Mostrando <strong>${filteredOrders.length}</strong> de ${totalOrdersCount} pedidos</span>
+                ` : `
+                  <span><strong>${totalOrdersCount}</strong> pedidos activos</span>
+                `}
+              </div>
+            </div>
+
+            <!-- BARRA DE PRODUCTIVIDAD Y FILTRADO KANBAN -->
+            <div class="kanban-toolbar">
+              <div class="kanban-search-box">
+                <span class="kanban-search-icon">🔍</span>
+                <input 
+                  type="text" 
+                  id="kanbanSearchInput" 
+                  class="kanban-search-input" 
+                  placeholder="Buscar por código (SNK-...), cliente, ciudad o prenda..." 
+                  value="${this.kanbanSearchQuery || ''}"
+                />
+                ${this.kanbanSearchQuery ? `
+                  <button type="button" id="clearKanbanSearchBtn" class="kanban-clear-btn" title="Limpiar búsqueda">✕</button>
+                ` : ''}
+              </div>
+
+              <div class="kanban-filter-pills">
+                <button type="button" class="kanban-filter-pill ${fFilter === 'all' ? 'active' : ''}" data-fulfillment="all">
+                  Todos (${totalOrdersCount})
+                </button>
+                <button type="button" class="kanban-filter-pill ${fFilter === 'pickup' ? 'active' : ''}" data-fulfillment="pickup">
+                  📍 Retiro (${pickupOrdersCount})
+                </button>
+                <button type="button" class="kanban-filter-pill ${fFilter === 'shipping' ? 'active' : ''}" data-fulfillment="shipping">
+                  🚚 Despacho (${shippingOrdersCount})
+                </button>
+              </div>
+            </div>
+
+            ${filteredOrders.length === 0 ? `
+              <div class="kanban-empty-filter-state">
+                <div style="font-size: 2.2rem; margin-bottom: 0.5rem;">🔍</div>
+                <h4 style="font-size: 1.1rem; color: var(--text-primary); text-transform: uppercase;">Sin resultados para la búsqueda</h4>
+                <p style="font-size: 0.85rem; color: var(--text-secondary); margin: 0.25rem 0 1rem;">No se encontraron pedidos que coincidan con los filtros seleccionados.</p>
+                <button type="button" class="btn btn-secondary" id="resetKanbanFilterBtn" style="padding: 0.5rem 1.25rem; font-size: 0.8rem;">
+                  Limpiar Filtros
+                </button>
+              </div>
+            ` : `
+              <div class="kanban-board">
+                ${Object.entries(cols).map(([colKey, colData]) => `
+                  <div class="kanban-col" data-col-status="${colKey}">
+                    <div class="kanban-col-header">
+                      <div class="kanban-col-title">
+                        <span class="badge ${colData.badgeClass}">${colData.title}</span>
+                      </div>
+                      <span class="kanban-col-count">${colData.orders.length}</span>
+                    </div>
+                    <div class="kanban-col-body">
+                      ${colData.orders.length === 0 ? `
+                        <div style="text-align: center; color: var(--text-muted); font-size: 0.8rem; padding: 3rem 0; font-family: var(--font-mono);">
+                          Sin pedidos en este estado
+                        </div>
+                      ` : colData.orders.map(order => this.renderKanbanOrderCard(order, colKey)).join('')}
+                    </div>
+                  </div>
+                `).join('')}
+              </div>
+            `}
           </div>
-        </div>
+        ` : ''}
+
+        <!-- VISTA ANALÍTICA DE DATOS & INTELIGENCIA -->
+        ${this.activeTab === 'analytics' ? `
+          <div id="analyticsHost"></div>
+        ` : ''}
+
+        <!-- VISTA CMS EDITORIAL -->
+        ${this.activeTab === 'cms' ? `
+          <div id="cmsEditorHost"></div>
+        ` : ''}
+
+        <!-- VISTA GESTOR DE CATÁLOGO & INVENTARIO -->
+        ${this.activeTab === 'inventory' ? `
+          <div class="inventory-card">
+            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; margin-bottom: 2rem; border-bottom: 1px solid var(--border-subtle); padding-bottom: 1.25rem;">
+              <div>
+                <h3 style="font-size: 1.4rem; font-weight: 700; text-transform: uppercase; letter-spacing: -0.02em;">Gestor de Catálogo: Precios y Fotos Reales</h3>
+                <p style="font-size: 0.85rem; color: var(--text-muted); margin-top: 0.25rem;">
+                  Modifica los precios base oficiales en CLP y asigna fotografías reales de estudio (frontal y trasera) para cada prenda.
+                </p>
+              </div>
+              <span class="badge badge-lime">RECÁLCULO AUTORITATIVO ACTIVO</span>
+            </div>
+
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(360px, 1fr)); gap: 1.5rem;">
+              ${(this.garments || []).map(g => `
+                <div class="cms-card" style="padding: 1.5rem; background: var(--bg-surface-elevated); border: 1px solid var(--border-subtle); border-radius: var(--radius-sm);" data-garment-card="${g.id}">
+                  <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1rem; border-bottom: 1px solid var(--border-subtle); padding-bottom: 0.75rem;">
+                    <div>
+                      <span class="badge badge-admin" style="font-size: 0.7rem; margin-bottom: 0.35rem;">${g.weight_gsm}G // ${g.category.toUpperCase()}</span>
+                      <h4 style="font-size: 1.1rem; font-weight: 700; color: var(--text-primary); margin: 0;">${g.name}</h4>
+                      <small style="color: var(--text-muted); font-size: 0.75rem;">${g.composition}</small>
+                    </div>
+                  </div>
+
+                  <!-- Vista previa de fotos reales -->
+                  <div style="display: flex; gap: 1rem; align-items: center; background: var(--bg-surface); padding: 0.75rem; border-radius: var(--radius-sm); margin-bottom: 1rem; border: 1px solid var(--border-subtle);">
+                    <div style="text-align: center; flex: 1;">
+                      <div style="font-size: 0.7rem; color: var(--text-muted); margin-bottom: 0.25rem;">Foto Frente</div>
+                      <img id="preview-front-${g.id}" src="${g.photo_front || g.image_front_template || '/static/assets/garments/tshirt_front.png'}" alt="Frente" style="width: 75px; height: 75px; object-fit: contain; background: #141417; border-radius: 6px; padding: 4px; border: 1px solid var(--border-subtle);" onerror="this.src='/static/assets/garments/tshirt_front.png'">
+                    </div>
+                    <div style="text-align: center; flex: 1;">
+                      <div style="font-size: 0.7rem; color: var(--text-muted); margin-bottom: 0.25rem;">Foto Espalda</div>
+                      <img id="preview-back-${g.id}" src="${g.photo_back || g.image_back_template || '/static/assets/garments/tshirt_back.png'}" alt="Espalda" style="width: 75px; height: 75px; object-fit: contain; background: #141417; border-radius: 6px; padding: 4px; border: 1px solid var(--border-subtle);" onerror="this.src='/static/assets/garments/tshirt_back.png'">
+                    </div>
+                  </div>
+
+                  <div class="cms-field-group" style="margin-bottom: 0.75rem;">
+                    <label class="cms-label" for="price-${g.id}">Precio Base Lisa (CLP)</label>
+                    <div style="position: relative;">
+                      <span style="position: absolute; left: 1rem; top: 50%; transform: translateY(-50%); color: var(--accent-admin); font-weight: 700; font-family: var(--font-mono);">$</span>
+                      <input type="number" id="price-${g.id}" class="cms-input" style="padding-left: 2rem; font-family: var(--font-mono); font-weight: 700;" value="${g.base_price}" min="1000" step="500">
+                    </div>
+                  </div>
+
+                  <div class="cms-field-group" style="margin-bottom: 0.75rem;">
+                    <label class="cms-label" for="photo-front-${g.id}">Ruta o URL Foto Real Frente</label>
+                    <input type="text" id="photo-front-${g.id}" class="cms-input" style="font-size: 0.8rem; font-family: var(--font-mono);" value="${g.photo_front || ''}" placeholder="/static/assets/garments/...">
+                  </div>
+
+                  <div class="cms-field-group" style="margin-bottom: 1.25rem;">
+                    <label class="cms-label" for="photo-back-${g.id}">Ruta o URL Foto Real Espalda</label>
+                    <input type="text" id="photo-back-${g.id}" class="cms-input" style="font-size: 0.8rem; font-family: var(--font-mono);" value="${g.photo_back || ''}" placeholder="/static/assets/garments/...">
+                  </div>
+
+                  <button class="btn btn-primary btn-save-garment" data-garment-id="${g.id}" style="width: 100%; padding: 0.75rem; font-size: 0.85rem;">
+                    💾 Guardar Prenda
+                  </button>
+                </div>
+              `).join('')}
+            </div>
+          </div>
+        ` : ''}
       </div>
     `;
+
   }
 
   /**
@@ -329,12 +472,16 @@ export class AdminWorkshopPortal {
     };
 
     const nextAction = nextStatusMap[currentStatus];
+    const timeAgo = this.formatTimeAgo(order.updated_at || order.created_at);
+    const isCompleted = currentStatus === 'entregado';
 
     return `
       <div class="order-card" data-order-id="${order.id}">
         <div class="order-card-top">
           <span class="order-number">${order.order_number}</span>
-          <span style="font-size: 0.75rem; font-family: var(--font-mono); color: var(--text-muted);">${new Date(order.created_at).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</span>
+          <span class="order-sla-chip ${timeAgo.isDelayed && !isCompleted ? 'warning' : ''}" title="Tiempo transcurrido en producción">
+            ⏱️ ${timeAgo.text}
+          </span>
         </div>
         
         <div class="order-customer-name">${order.customer.full_name}</div>
@@ -351,14 +498,14 @@ export class AdminWorkshopPortal {
           return `
             <div class="order-item-chip">
               <strong>${i.quantity}x ${i.garment_name}</strong> (${i.selected_size} - ${i.selected_color.name})<br>
-              <span style="color: var(--accent-cyan); font-size: 0.725rem;">${dtfSummary}</span>
+              <span style="color: var(--accent-admin); font-size: 0.725rem;">${dtfSummary}</span>
             </div>
           `;
         }).join('')}
 
         <div style="display: flex; justify-content: space-between; font-size: 0.85rem; font-weight: 700; margin-top: 0.5rem;">
           <span style="color: var(--text-muted);">Total:</span>
-          <span style="color: var(--accent-cyan); font-family: var(--font-display); font-size: 1rem;">$${order.total_amount.toLocaleString('es-CL')} CLP</span>
+          <span style="color: var(--accent-admin); font-family: var(--font-display); font-size: 1rem;">$${order.total_amount.toLocaleString('es-CL')} CLP</span>
         </div>
 
         <div class="order-card-actions">
@@ -398,7 +545,92 @@ export class AdminWorkshopPortal {
       });
     }
 
+    // Navegación reactiva entre pestañas modulares (Taller, CMS, Inventario)
+    this.container.querySelectorAll('.admin-tab-btn').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        const tab = e.currentTarget.dataset.tab;
+        if (tab && tab !== this.activeTab) {
+          this.activeTab = tab;
+          this.render();
+          this.attachEvents();
+        }
+      });
+    });
+
+    // Montar el dashboard de analítica si la pestaña activa es 'analytics'
+    if (this.activeTab === 'analytics') {
+      const analyticsHost = this.container.querySelector('#analyticsHost');
+      if (analyticsHost) {
+        new AnalyticsDashboardComponent(analyticsHost).init();
+      }
+    }
+
+    // Montar el editor CMS si la pestaña activa es 'cms'
+    if (this.activeTab === 'cms') {
+      const cmsHost = this.container.querySelector('#cmsEditorHost');
+      if (cmsHost) {
+        new ContentEditorComponent(cmsHost).init();
+      }
+    }
+
+    // Controles de productividad Kanban (Buscador en vivo y filtros de logística)
+    if (this.activeTab === 'kanban') {
+      const searchInput = this.container.querySelector('#kanbanSearchInput');
+      if (searchInput) {
+        searchInput.addEventListener('input', (e) => {
+          this.kanbanSearchQuery = e.target.value;
+          this.render();
+          this.attachEvents();
+          const restoredInput = this.container.querySelector('#kanbanSearchInput');
+          if (restoredInput) {
+            restoredInput.focus();
+            const len = restoredInput.value.length;
+            restoredInput.setSelectionRange(len, len);
+          }
+        });
+
+        searchInput.addEventListener('keydown', (e) => {
+          if (e.key === 'Escape') {
+            this.kanbanSearchQuery = "";
+            this.render();
+            this.attachEvents();
+          }
+        });
+      }
+
+      const clearSearchBtn = this.container.querySelector('#clearKanbanSearchBtn');
+      if (clearSearchBtn) {
+        clearSearchBtn.addEventListener('click', () => {
+          this.kanbanSearchQuery = "";
+          this.render();
+          this.attachEvents();
+        });
+      }
+
+      const resetFilterBtn = this.container.querySelector('#resetKanbanFilterBtn');
+      if (resetFilterBtn) {
+        resetFilterBtn.addEventListener('click', () => {
+          this.kanbanSearchQuery = "";
+          this.kanbanFulfillmentFilter = "all";
+          this.render();
+          this.attachEvents();
+        });
+      }
+
+      this.container.querySelectorAll('.kanban-filter-pill').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          const mode = e.currentTarget.dataset.fulfillment;
+          if (mode && mode !== this.kanbanFulfillmentFilter) {
+            this.kanbanFulfillmentFilter = mode;
+            this.render();
+            this.attachEvents();
+          }
+        });
+      });
+    }
+
     // Botones de avance de estado Kanban
+
     this.container.querySelectorAll('.advance-status-btn').forEach(btn => {
       btn.addEventListener('click', async (e) => {
         const orderId = e.currentTarget.dataset.orderId;
@@ -432,6 +664,69 @@ export class AdminWorkshopPortal {
         }
       });
     }
+
+    // Botones de guardado de prenda (Precios y Fotos Reales)
+    this.container.querySelectorAll('.btn-save-garment').forEach(btn => {
+      btn.addEventListener('click', async (e) => {
+        const garmentId = e.currentTarget.dataset.garmentId;
+        const priceInput = this.container.querySelector(`#price-${garmentId}`);
+        const frontInput = this.container.querySelector(`#photo-front-${garmentId}`);
+        const backInput = this.container.querySelector(`#photo-back-${garmentId}`);
+
+        const newPrice = parseInt(priceInput ? priceInput.value : 0, 10);
+        const newPhotoFront = frontInput ? frontInput.value.trim() : null;
+        const newPhotoBack = backInput ? backInput.value.trim() : null;
+
+        if (isNaN(newPrice) || newPrice < 1000) {
+          alert("⚠️ El precio base debe ser un valor numérico válido mayor a $1.000 CLP.");
+          return;
+        }
+
+        const originalText = btn.textContent;
+        btn.disabled = true;
+        btn.textContent = "Guardando...";
+
+        try {
+          await apiService.updateGarment(garmentId, {
+            base_price: newPrice,
+            photo_front: newPhotoFront || null,
+            photo_back: newPhotoBack || null
+          });
+
+          // Actualizar estado local
+          const targetG = this.garments.find(g => g.id === garmentId);
+          if (targetG) {
+            targetG.base_price = newPrice;
+            targetG.photo_front = newPhotoFront;
+            targetG.photo_back = newPhotoBack;
+          }
+
+          // Actualizar previews
+          const frontImg = this.container.querySelector(`#preview-front-${garmentId}`);
+          const backImg = this.container.querySelector(`#preview-back-${garmentId}`);
+          if (frontImg && newPhotoFront) frontImg.src = newPhotoFront;
+          if (backImg && newPhotoBack) backImg.src = newPhotoBack;
+
+          // Disparar evento para hidratar catálogo y personalizador en tiempo real
+          window.dispatchEvent(new CustomEvent('senkai:catalog-updated', {
+            detail: {
+              garmentId,
+              base_price: newPrice,
+              photo_front: newPhotoFront,
+              photo_back: newPhotoBack
+            }
+          }));
+
+          alert(`✅ Prenda actualizada exitosamente:\n• Precio Base: $${newPrice.toLocaleString('es-CL')} CLP\n• Fotos reales sincronizadas con catálogo.`);
+        } catch (err) {
+          console.error("Error al actualizar prenda:", err);
+          alert(`⚠️ Error al actualizar prenda: ${err.message || err}`);
+        } finally {
+          btn.disabled = false;
+          btn.textContent = originalText;
+        }
+      });
+    });
   }
 
   // =========================================================================
@@ -557,7 +852,7 @@ export class AdminWorkshopPortal {
 
             <!-- Capas de estampas registradas para la cara activa -->
             ${printsForCurrentView.length === 0 ? `
-              <div style="position: absolute; bottom: 1.5rem; background: rgba(0,0,0,0.7); padding: 5px 12px; border-radius: 4px; font-size: 0.75rem; font-family: var(--font-mono); color: var(--text-muted); pointer-events: none; border: 1px solid var(--glass-border);">
+              <div style="position: absolute; bottom: 1.5rem; background: rgba(0,0,0,0.7); padding: 5px 12px; border-radius: 4px; font-size: 0.75rem; font-family: var(--font-mono); color: var(--text-muted); pointer-events: none; border: 1px solid var(--border-subtle);">
                 Sin estampas registradas en cara ${this.activeMockupView === 'front' ? 'frontal' : 'trasera'}
               </div>
             ` : printsForCurrentView.map(p => {
@@ -597,6 +892,11 @@ export class AdminWorkshopPortal {
                 <span style="font-size: 0.8rem; font-family: var(--font-mono); color: var(--text-muted);">
                   Color: <strong>${currentItem.selected_color.name}</strong> • Talla: <strong>${currentItem.selected_size}</strong> • Cantidad: <strong>${currentItem.quantity} un.</strong>
                 </span>
+                ${currentItem.preview_front_summary || currentItem.preview_back_summary ? `
+                  <div style="font-size: 0.75rem; font-family: var(--font-mono); color: var(--text-secondary); margin-top: 0.35rem;">
+                    Frente: <strong style="color: var(--text-primary);">${currentItem.preview_front_summary || 'Cara Lisa'}</strong> &bull; Espalda: <strong style="color: var(--text-primary);">${currentItem.preview_back_summary || 'Cara Lisa'}</strong>
+                  </div>
+                ` : ''}
               </div>
             </div>
           </div>
@@ -626,13 +926,20 @@ export class AdminWorkshopPortal {
                     const dim = PRINT_DIMENSIONS[p.print_size] || PRINT_DIMENSIONS.A4;
                     return `
                       <tr>
-                        <td><span class="badge ${p.view === 'front' ? 'badge-cyan' : 'badge-crimson'}" style="font-size: 0.65rem;">${p.view === 'front' ? 'FRONTAL' : 'ESPALDA'}</span></td>
+                        <td><span class="badge ${p.view === 'front' ? 'badge-admin' : 'badge-accent'}" style="font-size: 0.65rem;">${p.view === 'front' ? 'FRONTAL' : 'ESPALDA'}</span></td>
                         <td><strong>${p.print_size}</strong><br><small style="color: var(--text-muted);">${dim.cm}</small></td>
                         <td>X: <strong>${Math.round(p.offset_x_pct)}%</strong><br>Y: <strong>${Math.round(p.offset_y_pct)}%</strong></td>
-                        <td><strong>${p.scale_factor.toFixed(2)}x</strong></td>
-                        <td>${p.design_name || `Estampa #${idx + 1}`}</td>
+                        <td>
+                          <strong>${p.design_name || `Estampa #${idx + 1}`}</strong>
+                          ${p.design_image_url ? `
+                            <br><a href="${p.design_image_url}" download="senkai_art_${order.order_number}_${p.print_size}.png" target="_blank" style="display: inline-flex; align-items: center; gap: 4px; font-size: 0.7rem; font-family: var(--font-mono); color: var(--accent-admin); text-decoration: underline; margin-top: 4px;">
+                              📥 Descargar Arte RIP
+                            </a>
+                          ` : ''}
+                        </td>
                       </tr>
                     `;
+
                   }).join('')}
                 </tbody>
               </table>
@@ -660,7 +967,7 @@ export class AdminWorkshopPortal {
               </div>
               <div class="mockup-thermal-item">
                 <div class="param-label">Tipo de Despegue</div>
-                <div class="param-value" style="color: var(--accent-cyan);">Cold Peel (En Frío)</div>
+                <div class="param-value" style="color: var(--accent-admin);">Cold Peel (En Frío)</div>
               </div>
             </div>
             <p style="font-size: 0.725rem; font-family: var(--font-mono); color: var(--text-muted); margin-top: 0.75rem;">

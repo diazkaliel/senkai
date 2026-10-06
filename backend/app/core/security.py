@@ -23,15 +23,35 @@ def require_workshop_auth(
 ) -> str:
     """
     Verifica que la petición incluya el token de taller autorizado.
-    
-    Decisiones de seguridad:
-    - Se rechaza explícitamente token nulo o vacío para prevenir el bypass por omisión de cabecera.
-    - Se utiliza compare_digest para mitigar ataques de canal lateral basados en análisis de tiempos (timing attacks).
+    Valida en tiempo constante (compare_digest) contra la variable de entorno configurada.
     """
-    if not token or not secrets.compare_digest(token.strip(), settings.WORKSHOP_SECRET_KEY):
+    if not token:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Acceso denegado: Se requiere un token de taller válido.",
             headers={"WWW-Authenticate": "ApiKey"}
         )
-    return token
+
+    clean_token = token.strip()
+    expected_token = settings.WORKSHOP_SECRET_KEY.strip()
+
+    if not secrets.compare_digest(clean_token, expected_token):
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Acceso denegado: Token de taller inválido.",
+            headers={"WWW-Authenticate": "ApiKey"}
+        )
+    return clean_token
+
+
+def is_authenticated_workshop(
+    token: Optional[str] = Security(workshop_api_key_header)
+) -> bool:
+    """
+    Comprueba de forma no bloqueante si la petición proviene de un operario autenticado.
+    Útil para endpoints mixtos que entregan vistas sanitizadas o completas según permisos.
+    """
+    if not token:
+        return False
+    return secrets.compare_digest(token.strip(), settings.WORKSHOP_SECRET_KEY.strip())
+

@@ -1,12 +1,5 @@
 /**
- * SENKAI // ESTUDIO TEXTIL DTF
- * MOTOR DE MOCKUPS FOTOGRÁFICOS MULTICAPA (GHOST MANNEQUIN STUDIO) — V5 ULTRA REALISTA
- *
- * Pipeline de renderizado fotográfico de 4 capas:
- * 1. Sombra de piso de estudio fotográfico.
- * 2. Capa base de tinte cromático textil dinámico (con máscara alfa fotográfica).
- * 3. Capa de sombras, arrugas y textura de algodón 240g/380g en modo Multiply.
- * 4. Capa de brillo especular y softbox de estudio en modo Screen.
+ * SENKAI // Renderizado fotográfico multicapa de prendas y catálogo de gráficos DTF.
  */
 
 export const GARMENT_ASSET_MAP = {
