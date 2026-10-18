@@ -7,7 +7,8 @@ from typing import List, Optional
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.schemas.domain import (
-    GarmentBase, GarmentCategory, GarmentSize, ColorVariant, GarmentUpdatePayload
+    GarmentBase, GarmentCategory, GarmentSize, ColorVariant, GarmentUpdatePayload,
+    GarmentVariantDetail, VariantStockUpdatePayload
 )
 from app.repositories.catalog_repository import catalog_repository, CatalogRepository
 from app.core.exceptions import EntityNotFoundException
@@ -33,10 +34,6 @@ class CatalogService:
                 base_price=12990,
                 colors=[
                     ColorVariant(name="Negro", hex_code="#121212", in_stock=True),
-                    ColorVariant(name="Gris", hex_code="#61646B", in_stock=True),
-                    ColorVariant(name="Azul", hex_code="#142036", in_stock=True),
-                    ColorVariant(name="Rojo", hex_code="#B21B24", in_stock=True),
-                    ColorVariant(name="Blanco", hex_code="#FFFFFF", in_stock=True),
                 ],
                 sizes=[GarmentSize.S, GarmentSize.M, GarmentSize.L, GarmentSize.XL, GarmentSize.XXL],
                 image_front_template="/assets/templates/tshirt_front.svg",
@@ -53,10 +50,6 @@ class CatalogService:
                 base_price=8990,
                 colors=[
                     ColorVariant(name="Negro", hex_code="#121212", in_stock=True),
-                    ColorVariant(name="Gris", hex_code="#61646B", in_stock=True),
-                    ColorVariant(name="Azul", hex_code="#142036", in_stock=True),
-                    ColorVariant(name="Rojo", hex_code="#B21B24", in_stock=True),
-                    ColorVariant(name="Blanco", hex_code="#FFFFFF", in_stock=True),
                 ],
                 sizes=[GarmentSize.S, GarmentSize.M, GarmentSize.L, GarmentSize.XL],
                 image_front_template="/assets/templates/tshirt_front.svg",
@@ -73,10 +66,6 @@ class CatalogService:
                 base_price=24990,
                 colors=[
                     ColorVariant(name="Negro", hex_code="#121212", in_stock=True),
-                    ColorVariant(name="Gris", hex_code="#61646B", in_stock=True),
-                    ColorVariant(name="Azul", hex_code="#142036", in_stock=True),
-                    ColorVariant(name="Rojo", hex_code="#B21B24", in_stock=True),
-                    ColorVariant(name="Blanco", hex_code="#FFFFFF", in_stock=True),
                 ],
                 sizes=[GarmentSize.S, GarmentSize.M, GarmentSize.L, GarmentSize.XL, GarmentSize.XXL],
                 image_front_template="/assets/templates/hoodie_front.svg",
@@ -93,10 +82,6 @@ class CatalogService:
                 base_price=21990,
                 colors=[
                     ColorVariant(name="Negro", hex_code="#121212", in_stock=True),
-                    ColorVariant(name="Gris", hex_code="#61646B", in_stock=True),
-                    ColorVariant(name="Azul", hex_code="#142036", in_stock=True),
-                    ColorVariant(name="Rojo", hex_code="#B21B24", in_stock=True),
-                    ColorVariant(name="Blanco", hex_code="#FFFFFF", in_stock=True),
                 ],
                 sizes=[GarmentSize.S, GarmentSize.M, GarmentSize.L, GarmentSize.XL],
                 image_front_template="/assets/templates/crewneck_front.svg",
@@ -136,6 +121,58 @@ class CatalogService:
         if not updated_model:
             raise EntityNotFoundException(f"Prenda con ID '{garment_id}' no encontrada para actualizar.")
         return self.repository.to_schema(updated_model)
+
+    async def get_garment_variants_async(
+        self,
+        session: AsyncSession,
+        garment_id: str
+    ) -> List[GarmentVariantDetail]:
+        """Recupera la lista de variantes tipadas para una prenda del catálogo."""
+        variants = await self.repository.get_variants_by_garment(session, garment_id)
+        return [
+            GarmentVariantDetail(
+                id=v.id,
+                garment_id=v.garment_id,
+                color_name=v.color_name,
+                color_hex=v.color_hex,
+                size=GarmentSize(v.size),
+                stock_quantity=v.stock_quantity,
+                custom_price=v.custom_price,
+                is_active=v.is_active
+            )
+            for v in variants
+        ]
+
+    async def update_variant_stock_async(
+        self,
+        session: AsyncSession,
+        garment_id: str,
+        variant_id: str,
+        payload: VariantStockUpdatePayload
+    ) -> GarmentVariantDetail:
+        """Actualiza existencias, precio por talla y disponibilidad de una variante física de bodega."""
+        updated = await self.repository.update_variant_stock(
+            session=session,
+            garment_id=garment_id,
+            variant_id=variant_id,
+            stock_quantity=payload.stock_quantity,
+            is_active=payload.is_active,
+            custom_price=payload.custom_price,
+            clear_custom_price=bool(payload.clear_custom_price)
+        )
+        if not updated:
+            raise EntityNotFoundException(f"Variante '{variant_id}' de prenda '{garment_id}' no encontrada.")
+
+        return GarmentVariantDetail(
+            id=updated.id,
+            garment_id=updated.garment_id,
+            color_name=updated.color_name,
+            color_hex=updated.color_hex,
+            size=GarmentSize(updated.size),
+            stock_quantity=updated.stock_quantity,
+            custom_price=updated.custom_price,
+            is_active=updated.is_active
+        )
 
     # Métodos sincrónicos compatibles
     def get_all_garments(self) -> List[GarmentBase]:

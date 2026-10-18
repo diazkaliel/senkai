@@ -1,9 +1,10 @@
-/**
- * SEIKO // CONTROLADOR DE CARRITO Y CHECKOUT
- * Manejo de estado del carrito, cálculo de subtotales y envío de orden a taller.
- */
+// Carrito de compras y pasarela de checkout.
+// Manejo los productos seleccionados, cálculo de totales (con o sin envío) y envío del pedido a taller.
 
 import { apiService } from '../services/api.js';
+import { notificationService } from '../services/notification_service.js';
+
+const CART_STORAGE_KEY = 'senkai_cart_items_v1';
 
 export class CartController {
   constructor(options = {}) {
@@ -18,23 +19,55 @@ export class CartController {
     this.itemsListEl = document.getElementById('cartItemsList');
     this.checkoutModalEl = document.getElementById('checkoutModal');
 
+    this.loadFromStorage();
     this.attachDOMEvents();
+    this.updateUI();
+  }
+
+  loadFromStorage() {
+    try {
+      const raw = localStorage.getItem(CART_STORAGE_KEY);
+      if (raw) {
+        const parsed = JSON.parse(raw);
+        if (Array.isArray(parsed)) {
+          this.items = parsed;
+        }
+      }
+    } catch (e) {
+      console.warn("Error recuperando carrito de localStorage:", e);
+      this.items = [];
+    }
+  }
+
+  saveToStorage() {
+    try {
+      if (this.items && this.items.length > 0) {
+        localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(this.items));
+      } else {
+        localStorage.removeItem(CART_STORAGE_KEY);
+      }
+    } catch (e) {
+      console.warn("Error guardando carrito en localStorage:", e);
+    }
   }
 
   addItem(item) {
     this.items.push(item);
+    this.saveToStorage();
     this.updateUI();
     this.openDrawer();
-    this.showToast(`✨ Prenda agregada a la orden de trabajo: ${item.garment_name}`);
+    notificationService.success(`✨ Prenda agregada a la orden de trabajo: ${item.garment_name}`);
   }
 
   removeItem(index) {
     this.items.splice(index, 1);
+    this.saveToStorage();
     this.updateUI();
   }
 
   clear() {
     this.items = [];
+    this.saveToStorage();
     this.updateUI();
   }
 
@@ -67,7 +100,7 @@ export class CartController {
 
   openCheckoutModal() {
     if (this.items.length === 0) {
-      alert("Tu carrito está vacío. Agrega una prenda o estampa personalizada.");
+      notificationService.warning("Tu carrito está vacío. Agrega una prenda o estampa personalizada.");
       return;
     }
     this.closeDrawer();
@@ -94,10 +127,10 @@ export class CartController {
 
     if (this.items.length === 0) {
       this.itemsListEl.innerHTML = `
-        <div style="text-align: center; padding: 4rem 1rem; color: var(--text-muted);">
-          <span class="material-symbols-outlined" style="font-size: 48px; opacity: 0.35; margin-bottom: 1rem;">shopping_bag</span>
-          <p style="font-size: 1rem; font-weight: 600; color: var(--text-primary);">Tu carrito está vacío</p>
-          <p style="font-size: 0.825rem; margin-top: 0.25rem;">Selecciona una prenda en el catálogo o configúrala en el personalizador DTF.</p>
+        <div class="cart-empty-state">
+          <span class="material-symbols-outlined cart-empty-icon">shopping_bag</span>
+          <p class="cart-empty-title">Tu carrito de taller está vacío</p>
+          <p class="cart-empty-desc">Selecciona una prenda en el catálogo o configúrala en la mesa de personalización DTF.</p>
         </div>
       `;
     } else {
@@ -268,9 +301,9 @@ export class CartController {
       this.closeCheckoutModal();
       this.clear();
       this.onOrderSuccess(createdOrder);
-      this.showToast(`🎉 ¡Pedido #${createdOrder.order_number} ingresado con éxito!`);
+      notificationService.success(`🎉 ¡Pedido #${createdOrder.order_number} ingresado con éxito!`);
     } catch (err) {
-      alert("Hubo un error al procesar tu pedido. Intenta nuevamente.");
+      notificationService.error("Hubo un problema al procesar tu pedido. Por favor intenta nuevamente.");
       console.error(err);
     } finally {
       if (submitBtn) {
@@ -280,23 +313,7 @@ export class CartController {
     }
   }
 
-  showToast(message) {
-    const toast = document.createElement('div');
-    toast.className = 'toast';
-    toast.innerHTML = `
-      <span class="pulse-indicator"></span>
-      <span>${message}</span>
-    `;
-    let container = document.getElementById('toastContainer');
-    if (!container) {
-      container = document.createElement('div');
-      container.id = 'toastContainer';
-      container.className = 'toast-container';
-      document.body.appendChild(container);
-    }
-    container.appendChild(toast);
-    setTimeout(() => {
-      toast.remove();
-    }, 4000);
+  showToast(message, type = 'info') {
+    notificationService.show(message, type);
   }
 }

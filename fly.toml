@@ -1,0 +1,29 @@
+# =============================================================================
+# SENKAI // CONFIGURACIÓN FLY.IO - REGIÓN SANTIAGO DE CHILE (scl)
+# =============================================================================
+
+app = "senkaistore"
+primary_region = "gru"  # Datacenter en São Paulo (América del Sur)
+
+[build]
+  dockerfile = "Dockerfile"
+
+[env]
+  ENVIRONMENT = "production"
+  PORT = "8000"
+  DATABASE_URL = "sqlite+aiosqlite:////app/storage/senkai_studio.db"
+
+[http_service]
+  internal_port = 8000
+  force_https = true
+  auto_stop_machines = 'stop'
+  auto_start_machines = true
+  min_machines_running = 1  # Evita que se duerma en horario comercial
+
+[[mounts]]
+  source = "senkai_storage"
+  destination = "/app/storage"
+
+[[vm]]
+  size = "shared-cpu-1x"
+  memory = "512mb"

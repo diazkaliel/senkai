@@ -17,6 +17,7 @@ from app.schemas.domain import (
     EditorialSectionPayload,
     ProtocolSectionPayload,
     ContactSectionPayload,
+    LookbookSectionPayload,
     SiteContentConsolidated
 )
 from app.core.exceptions import SenkaiDomainException
@@ -38,8 +39,12 @@ DEFAULT_SECTIONS_CONTENT: Dict[str, Dict[str, Any]] = {
         "subtitle": "Estampado textil DTF de alta densidad sobre bases heavyweight seleccionadas. Sin mínimos de producción y con precisión artesanal.",
         "cta_text": "DISEÑAR AHORA",
         "cta_url": "#personalizador",
+        "hero_main_image": "/static/assets/hero_main_tshirt.png",
+        "hero_badge_text": "ALGODÓN PEINADO 240 GSM",
         "side_card_top_tag": "HEAVYWEIGHT 240G",
-        "side_card_bottom_tag": "FLEECE 320G"
+        "side_card_top_image": "/static/assets/hero_side_top.png",
+        "side_card_bottom_tag": "FLEECE 320G",
+        "side_card_bottom_image": "/static/assets/hero_side_bottom.png"
     },
     "marquee": {
         "items": [
@@ -49,11 +54,11 @@ DEFAULT_SECTIONS_CONTENT: Dict[str, Dict[str, Any]] = {
         "is_active": True
     },
     "headers": {
-        "catalog_tag": "",
-        "catalog_title": "Bases y Prendas de Taller",
+        "catalog_tag": "LOOKBOOK 2026 // EDICIÓN LIMITADA",
+        "catalog_title": "Streetwear Heavyweight Exclusivo",
         "catalog_desc": "Confección en algodón pesado de 240g a 320g con estampados DTF de alta resolución.",
         "customizer_title": "Mesa de Personalización DTF",
-        "customizer_desc": "Selecciona la prenda base, modula el color y calibra tu arte con cotización en tiempo real."
+        "customizer_desc": "Selecciona tu silueta textil, personaliza las estampas DTF y calibra tu arte con cotización en tiempo real."
     },
     "stats": {
         "dpi": 300,
@@ -69,29 +74,37 @@ DEFAULT_SECTIONS_CONTENT: Dict[str, Dict[str, Any]] = {
         "mission_tag": "",
         "mission_title": "Matriz de Inyección DTF 300 DPI",
         "mission_body": "Tolerancia milimétrica sin degradación. Fusionamos cortes estructurales heavyweight en algodón peinado (240g–320g) con micro-inyección de pigmento CMYK+White y polímeros elásticos de alta densidad.",
+        "mission_image": "/static/assets/garments/hoodie_back.png",
         "vision_tag": "",
         "vision_title": "Curado Térmico a 160°C & +50 Lavados",
         "vision_body": "Cero desprendimiento, cero agrietamiento. Curado de película polimérica a 160°C con presión neumática controlada. Cada pieza soporta flexión continua y ciclos de lavado industrial.",
+        "vision_image": "/static/assets/garments/tshirt_front.png"
     },
     "protocol": {
-        "section_tag": "",
-        "section_title": "Secuencia Operativa DTF",
-        "section_desc": "Flujo técnico desde rasterizado a 300 DPI hasta termofijación a 160°C y despacho.",
+        "section_tag": "PLIEGO LEGAL & TÉCNICO // VIGENCIA 2026",
+        "section_title": "Términos y Condiciones de Taller",
+        "section_desc": "Normativa operativa de estampado DTF, garantías de fijación térmica, políticas de despacho y condiciones comerciales de Senkai Atelier.",
+        "legal_footer": "Al confirmar una orden de producción en Senkai Studio, el cliente declara conocer y aceptar las presentes especificaciones técnicas y condiciones de confección bajo demanda.",
         "steps": [
             {
                 "step_number": "01",
-                "title": "1. Elige Prenda y Diseño",
-                "description": "Selecciona tu polera o polerón, color y talla. Sube tu arte en alta resolución o utiliza nuestras plantillas disponibles."
+                "title": "Confección a Pedido y Tolerancias DTF",
+                "description": "Toda prenda personalizada se produce bajo demanda según las coordenadas y archivos aprobados en la Mesa de Diseño. Se requieren matrices en PNG/SVG a 300 DPI sin fondo; el taller aplica una tolerancia de posicionamiento mecánico de ±8 mm."
             },
             {
                 "step_number": "02",
-                "title": "2. Impresión y Fijación",
-                "description": "Impresión directa sobre film con tintas textiles CMYK+Blanco y termofijado a 160°C para una alta resistencia al lavado."
+                "title": "Garantía de Curado Térmico y Lavado",
+                "description": "Nuestras estampas DTF son termofijadas a 160°C con prensa neumática (5 bar), garantizando más de 50 ciclos de lavado. Para mantener la garantía, lavar del revés con agua fría (máx. 30°C), sin cloro, sin secadora industrial y sin planchar sobre el polímero."
             },
             {
                 "step_number": "03",
-                "title": "3. Control y Despacho",
-                "description": "Inspección de acabado y elasticidad. Empaque seguro listo para retiro directo en taller o despacho express a todo Chile."
+                "title": "Plazos de Producción, Despacho y Retiro",
+                "description": "El tiempo de procesamiento en cola de taller es de 24 a 48 horas hábiles tras confirmar el pedido. Los envíos se despachan vía courier con código de seguimiento. Los pedidos con Retiro en Taller cuentan con 15 días corridos de custodia."
+            },
+            {
+                "step_number": "04",
+                "title": "Cambios, Devoluciones y Garantía Legal",
+                "description": "Por tratarse de prendas confeccionadas bajo especificaciones exclusivas del cliente (Ley N° 19.496), no aplica derecho a retracto ni cambio por error de talla elegida. La garantía cubre fallas comprobables de costura, gramaje o desprendimiento prematuro."
             }
         ]
     },
@@ -104,6 +117,98 @@ DEFAULT_SECTIONS_CONTENT: Dict[str, Dict[str, Any]] = {
         "whatsapp_number": "+56 9 8765 4321",
         "business_hours": "Lunes a Viernes 09:00 - 18:30 hrs",
         "copyright_text": "Estudio de Estampado Textil de Precisión • Santiago, Chile"
+    },
+    "lookbook": {
+        "categories": [
+            {
+                "id": "urbanas",
+                "label": "Poleras Oversized (240G)",
+                "subcategories": ["Drop Shoulder 240g", "Gráfica Cyberpunk", "Heavy Acid Wash"]
+            },
+            {
+                "id": "hoodies",
+                "label": "Polerones & Hoodies (320G)",
+                "subcategories": ["Hoodie Canguro 320g", "Crewneck 300g", "Fleece Térmico"]
+            },
+            {
+                "id": "minimalista",
+                "label": "Línea Regular (180G)",
+                "subcategories": ["Regular Fit 180g", "Esenciales Taller", "Monocromo"]
+            },
+            {
+                "id": "propios",
+                "label": "Colecciones de Taller",
+                "subcategories": ["Stealth Edition", "Series Limitadas", "Archivo Senkai"]
+            }
+        ],
+        "items": [
+            {
+                "id": "col-polera-cyber-kanji",
+                "name": "Polera Oversized 'Cyber Kanji 2026'",
+                "badge": "240g Peinado • Heavyweight",
+                "category": "urbanas",
+                "subcategory": "Gráfica Cyberpunk",
+                "price": 22990,
+                "garment_id": "garment-polera-heavyweight-240",
+                "photo_front": "/static/assets/garments/tshirt_front.png",
+                "photo_back": "/static/assets/garments/tshirt_back.png"
+            },
+            {
+                "id": "col-hoodie-mecha-unit",
+                "name": "Hoodie Canguro 'Mecha Unit Eva-01'",
+                "badge": "320g Afelpado • Heavyweight",
+                "category": "hoodies",
+                "subcategory": "Hoodie Canguro 320g",
+                "price": 34990,
+                "garment_id": "garment-poleron-hoodie-320",
+                "photo_front": "/static/assets/garments/hoodie_front.png",
+                "photo_back": "/static/assets/garments/hoodie_back.png"
+            },
+            {
+                "id": "col-polera-acid-street",
+                "name": "Polera Heavy 'Acid Type Streetwear'",
+                "badge": "240g Peinado • Drop Shoulder",
+                "category": "urbanas",
+                "subcategory": "Drop Shoulder 240g",
+                "price": 21990,
+                "garment_id": "garment-polera-heavyweight-240",
+                "photo_front": "/static/assets/garments/tshirt_front.png",
+                "photo_back": "/static/assets/garments/tshirt_back.png"
+            },
+            {
+                "id": "col-crewneck-tokyo-minimal",
+                "name": "Crewneck 'Tokyo Minimalist Studio'",
+                "badge": "300g Peinado • Cuello Redondo",
+                "category": "hoodies",
+                "subcategory": "Crewneck 300g",
+                "price": 29990,
+                "garment_id": "garment-poleron-crewneck-300",
+                "photo_front": "/static/assets/garments/crewneck_front.png",
+                "photo_back": "/static/assets/garments/crewneck_back.png"
+            },
+            {
+                "id": "col-polera-classic-regular",
+                "name": "Polera Clásica Regular 'Senkai Original'",
+                "badge": "180g Jersey • Regular Fit",
+                "category": "minimalista",
+                "subcategory": "Regular Fit 180g",
+                "price": 16990,
+                "garment_id": "garment-polera-classic-180",
+                "photo_front": "/static/assets/garments/tshirt_front.png",
+                "photo_back": "/static/assets/garments/tshirt_back.png"
+            },
+            {
+                "id": "col-hoodie-cyberpunk-stealth",
+                "name": "Hoodie Heavy 'Senkai Stealth Edition'",
+                "badge": "320g Afelpado • Edición Taller",
+                "category": "propios",
+                "subcategory": "Stealth Edition",
+                "price": 35990,
+                "garment_id": "garment-poleron-hoodie-320",
+                "photo_front": "/static/assets/garments/hoodie_front.png",
+                "photo_back": "/static/assets/garments/hoodie_back.png"
+            }
+        ]
     }
 }
 
@@ -118,6 +223,7 @@ SECTION_VALIDATORS = {
     "editorial": EditorialSectionPayload,
     "protocol": ProtocolSectionPayload,
     "contact": ContactSectionPayload,
+    "lookbook": LookbookSectionPayload,
 }
 
 

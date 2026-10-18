@@ -1,0 +1,609 @@
+/* ==========================================================================
+   SENKAI // RESPONSIVE WORKSHOP ATELIER & CMS DASHBOARD
+   Optimizacin integral para pantallas tctiles, tablets de produccin y mviles.
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   ESTILOS BASE DEL ENCABEZADO Y CONTENEDORES ADMIN
+   -------------------------------------------------------------------------- */
+.admin-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.surface-card-elevated {
+  background: var(--bg-surface-elevated);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  box-shadow: var(--shadow-xl);
+}
+
+.tab-text-full {
+  display: inline;
+}
+
+.tab-text-short {
+  display: none;
+}
+
+/* --------------------------------------------------------------------------
+   TABLET & PANTALLAS MEDIANAS (<= 1024px)
+   -------------------------------------------------------------------------- */
+@media (max-width: 1024px) {
+  .admin-portal {
+    padding: 135px 0 50px;
+  }
+
+  /* Kanban Snap Scroll en Tablet */
+  .kanban-board:not(.single-phase-view) {
+    display: flex;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
+    gap: 1rem;
+    padding-bottom: 1.5rem;
+  }
+
+  .kanban-board:not(.single-phase-view) .kanban-col {
+    flex: 0 0 80vw;
+    max-width: 360px;
+    scroll-snap-align: start;
+    min-height: 500px;
+  }
+
+  .inventory-main-layout {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 1.5rem;
+  }
+
+  .analytics-grid-two-cols {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 1.5rem;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   MÓVILES & TABLETS VERTICALES (<= 768px)
+   -------------------------------------------------------------------------- */
+@media (max-width: 768px) {
+  .admin-portal {
+    padding: 130px 0 35px;
+  }
+
+  /* Cabecera Principal y Botones de Accin */
+  .admin-header-row {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 1.25rem;
+    margin-bottom: 1.5rem;
+    padding-bottom: 1.25rem;
+  }
+
+  .admin-title-badge h2 {
+    font-size: clamp(1.3rem, 4.8vw, 1.7rem);
+    line-height: 1.2;
+    margin-top: 0.25rem;
+  }
+
+  .admin-header-actions {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0.5rem;
+    width: 100%;
+  }
+
+  .admin-header-actions .btn {
+    width: 100%;
+    padding: 0.55rem 0.25rem;
+    font-size: 0.74rem;
+    font-weight: 700;
+    justify-content: center;
+    min-height: 42px;
+    white-space: nowrap;
+    gap: 0.35rem;
+  }
+
+  .admin-header-actions .btn .material-symbols-outlined {
+    font-size: 16px;
+  }
+
+  /* Navegacin Modular por Pestaas (4 Columnas Compactas) */
+  .admin-tabs-nav {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 4px;
+    padding: 4px;
+    margin-bottom: 1.5rem;
+    overflow-x: visible;
+  }
+
+  .admin-tab-btn {
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 0.5rem 0.2rem;
+    min-height: 54px;
+    font-size: 0.72rem;
+    gap: 3px;
+    border-radius: var(--radius-xs);
+    text-align: center;
+    white-space: normal;
+    line-height: 1.1;
+  }
+
+  .admin-tab-btn .tab-icon {
+    font-size: 19px;
+  }
+
+  .admin-tab-btn .tab-badge {
+    font-size: 0.6875rem;
+    padding: 1px 5px;
+    margin-top: 1px;
+  }
+
+  .tab-text-full {
+    display: none;
+  }
+
+  .tab-text-short {
+    display: inline;
+  }
+
+  /* Grillas de KPIs Unificadas (2 Columnas en Mobile) */
+  .admin-kpi-grid,
+  .analytics-kpi-row,
+  .inventory-kpi-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.75rem;
+    margin-bottom: 1.75rem;
+  }
+
+  .kpi-card,
+  .analytics-kpi-card,
+  .inventory-kpi-card {
+    padding: 1.1rem 1.15rem;
+  }
+
+  .kpi-value,
+  .kpi-main-val,
+  .inventory-kpi-card .kpi-val {
+    font-size: 1.65rem;
+  }
+
+  .kpi-label,
+  .kpi-micro-label {
+    font-size: 0.6875rem;
+  }
+
+  /* ------------------------------------------------------------------------
+     TAB 1: TABLERO KANBAN DE TALLER
+     ------------------------------------------------------------------------ */
+  .kanban-toolbar {
+    padding: 0.75rem;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.75rem;
+    margin-bottom: 1.25rem;
+  }
+
+  .kanban-search-box {
+    flex: 1 1 100%;
+    width: 100%;
+    min-width: 0;
+  }
+
+  .kanban-filter-pills {
+    width: 100%;
+    overflow-x: auto;
+    padding-bottom: 4px;
+    flex-wrap: nowrap;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .kanban-filter-pills::-webkit-scrollbar {
+    display: none;
+  }
+
+  .kanban-filter-pill {
+    flex-shrink: 0;
+    white-space: nowrap;
+    padding: 0.4rem 0.8rem;
+    font-size: 0.72rem;
+  }
+
+  .kanban-phase-bar {
+    width: 100%;
+    overflow-x: auto;
+    padding-bottom: 6px;
+    flex-wrap: nowrap;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .kanban-phase-bar::-webkit-scrollbar {
+    display: none;
+  }
+
+  .kanban-phase-pill {
+    flex-shrink: 0;
+    white-space: nowrap;
+    padding: 0.4rem 0.85rem;
+    font-size: 0.72rem;
+  }
+
+  .order-card {
+    padding: 1rem;
+  }
+
+  .order-card-actions {
+    flex-direction: column;
+    gap: 0.45rem;
+  }
+
+  .order-action-btn {
+    width: 100%;
+    min-height: 42px;
+    justify-content: center;
+    font-size: 0.74rem;
+  }
+
+  /* ------------------------------------------------------------------------
+     TAB 2: ANALTICA & RENDIMIENTO
+     ------------------------------------------------------------------------ */
+  .analytics-top-bar {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 1rem;
+    padding-bottom: 1.25rem;
+  }
+
+  .analytics-title-group h3 {
+    font-size: 1.35rem;
+  }
+
+  .analytics-controls {
+    width: 100%;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.65rem;
+  }
+
+  .analytics-pills-group {
+    width: 100%;
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+  }
+
+  .analytics-pill-btn {
+    width: 100%;
+    justify-content: center;
+    font-size: 0.72rem;
+    padding: 0.45rem 0.25rem;
+  }
+
+  .btn-export-csv {
+    width: 100%;
+    justify-content: center;
+    min-height: 40px;
+  }
+
+  .analytics-chart-panel {
+    padding: 1.15rem 1rem;
+  }
+
+  .chart-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.75rem;
+  }
+
+  .chart-toggle-group {
+    width: 100%;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  .chart-toggle-btn {
+    width: 100%;
+    justify-content: center;
+    text-align: center;
+  }
+
+  .chart-viewport-box {
+    height: 220px;
+  }
+
+  .analytics-sub-panel {
+    padding: 1.15rem 1rem;
+  }
+
+  .logistics-visual-box {
+    padding: 1rem;
+  }
+
+  /* ------------------------------------------------------------------------
+     TAB 3: EDITOR EDITORIAL CMS
+     ------------------------------------------------------------------------ */
+  .cms-panel-wrap {
+    gap: 1.5rem;
+    margin-bottom: 2.5rem;
+  }
+
+  .cms-intro-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.75rem;
+    padding-bottom: 1rem;
+  }
+
+  .cms-intro-header h3 {
+    font-size: 1.3rem;
+  }
+
+  /* Cinta de Accesos Rpidos Flotante con Scroll Tctil */
+  .cms-quick-nav-bar {
+    padding: 0.85rem 1rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .cms-quick-nav-buttons {
+    display: flex;
+    overflow-x: auto;
+    flex-wrap: nowrap;
+    gap: 0.45rem;
+    padding-bottom: 6px;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .cms-quick-nav-buttons::-webkit-scrollbar {
+    display: none;
+  }
+
+  .btn-cms-jump {
+    flex-shrink: 0;
+    white-space: nowrap;
+    padding: 0.4rem 0.8rem;
+    font-size: 0.72rem;
+  }
+
+  .cms-grid {
+    grid-template-columns: 1fr;
+    gap: 1.25rem;
+  }
+
+  .cms-card {
+    padding: 1.25rem 1rem;
+    border-radius: var(--radius-xs);
+    gap: 1rem;
+  }
+
+  .cms-card-header {
+    gap: 0.5rem;
+  }
+
+  .cms-card-title {
+    font-size: 0.95rem;
+  }
+
+  /* Colapso de Grillas Internas a 1 Columna en Mobile */
+  .cms-form-row-2col,
+  .cms-form-row-3col,
+  .cms-form-row-custom,
+  .cms-grid-2 {
+    grid-template-columns: 1fr !important;
+    gap: 0.85rem;
+  }
+
+  /* Componente Multimedia Responsivo */
+  .cms-media-row,
+  .cms-media-uploader {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.75rem;
+    padding: 0.75rem;
+  }
+
+  .cms-media-thumb-wrap {
+    width: 100%;
+    height: 100px;
+    align-self: center;
+    background: #06090d;
+  }
+
+  .cms-media-body {
+    width: 100%;
+  }
+
+  .cms-media-actions {
+    width: 100%;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.5rem;
+  }
+
+  .btn-cms-upload,
+  .btn-cms-clear {
+    width: 100%;
+    justify-content: center;
+    min-height: 38px;
+    font-size: 0.75rem;
+  }
+
+  /* Lookbook Items en Mobile */
+  .cms-lookbook-list {
+    grid-template-columns: 1fr;
+    gap: 1.25rem;
+  }
+
+  .cms-lookbook-item-card {
+    padding: 1.15rem 1rem;
+  }
+
+  .cms-card-footer {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    padding-top: 1rem;
+  }
+
+  .btn-cms-save {
+    width: 100%;
+    min-height: 46px;
+    justify-content: center;
+    font-size: 0.825rem;
+  }
+
+  .cms-toast {
+    left: 1rem;
+    right: 1rem;
+    bottom: 1rem;
+    max-width: calc(100% - 2rem);
+    justify-content: center;
+    text-align: center;
+    font-size: 0.8rem;
+    padding: 0.85rem 1rem;
+    transform: translateY(30px);
+  }
+
+  /* ------------------------------------------------------------------------
+     TAB 4: INVENTARIO FSICO & BODEGA
+     ------------------------------------------------------------------------ */
+  .inventory-top-row {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 1rem;
+    padding-bottom: 1.25rem;
+  }
+
+  .inventory-title {
+    font-size: 1.35rem;
+  }
+
+  .inventory-garment-tabs {
+    width: 100%;
+    overflow-x: auto;
+    padding-bottom: 0.5rem;
+    flex-wrap: nowrap;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .inventory-model-pill {
+    flex-shrink: 0;
+    white-space: nowrap;
+    padding: 0.45rem 0.95rem;
+    font-size: 0.74rem;
+  }
+
+  .inventory-matrix-card,
+  .inventory-garment-settings-card {
+    padding: 1.25rem 1rem;
+  }
+
+  .matrix-card-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+
+  .inventory-photos-preview {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.75rem;
+  }
+
+  .inventory-help-callout {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.75rem;
+  }
+
+  .inventory-jump-to-cms-btn {
+    width: 100%;
+    justify-content: center;
+    white-space: normal;
+    text-align: center;
+    line-height: 1.3;
+    padding: 0.6rem 0.75rem;
+  }
+
+  /* ------------------------------------------------------------------------
+     MODAL DE FICHA TCNICA CAD & PRODUCCIN
+     ------------------------------------------------------------------------ */
+  .modal-card.modal-card-xl {
+    width: 100%;
+    max-width: 100%;
+    height: 100vh;
+    max-height: 100vh;
+    padding: 1.25rem 1rem;
+    border-radius: 0;
+    border: none;
+    overflow-y: auto;
+  }
+
+  .mockup-modal-top h2 {
+    font-size: 1.25rem;
+  }
+
+  .mockup-thermal-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .mockup-modal-footer {
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  .mockup-modal-footer button {
+    width: 100%;
+    min-height: 44px;
+    justify-content: center;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   MVILES ULTRA PEQUEOS (<= 480px)
+   -------------------------------------------------------------------------- */
+@media (max-width: 480px) {
+  .admin-header-actions {
+    grid-template-columns: 1fr;
+    gap: 0.4rem;
+  }
+
+  .admin-tabs-nav {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 4px;
+  }
+
+  .admin-tab-btn {
+    flex-direction: row;
+    min-height: 44px;
+    padding: 0.45rem 0.5rem;
+    font-size: 0.74rem;
+    gap: 0.4rem;
+  }
+
+  .admin-kpi-grid,
+  .analytics-kpi-row,
+  .inventory-kpi-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .kanban-board:not(.single-phase-view) .kanban-col {
+    flex: 0 0 calc(100vw - 2.5rem);
+    max-width: calc(100vw - 2.5rem);
+    min-height: 460px;
+  }
+
+  .admin-auth-wrap {
+    margin: 1.5rem auto !important;
+    padding: 0 0.5rem;
+  }
+}

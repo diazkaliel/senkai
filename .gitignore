@@ -48,6 +48,19 @@ Desktop.ini
 
 # SQLite Local Databases & Pytest cache
 *.db
+*.db-shm
+*.db-wal
 *.sqlite
+*.sqlite-shm
+*.sqlite-wal
 *.sqlite3
 .pytest_cache/
+
+# Backups de base de datos
+backups/
+*.gz
+
+# Archivos multimedia subidos por usuarios y taller (preservar estructura con .gitkeep)
+frontend/assets/uploads/*
+!frontend/assets/uploads/.gitkeep
+

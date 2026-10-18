@@ -4,7 +4,7 @@ Contratos estrictos para prendas base, configuración DTF, pedidos y métricas d
 """
 
 from enum import Enum
-from typing import List, Optional
+from typing import List, Optional, Dict
 from pydantic import BaseModel, Field
 
 
@@ -63,6 +63,7 @@ class GarmentBase(BaseModel):
     weight_gsm: int = Field(..., description="Gramaje de la tela en g/m² (ej: 180g, 240g, 320g)")
     composition: str = "100% Algodón Peinado"
     base_price: int = Field(..., description="Precio base de la prenda lisa en CLP")
+    size_prices: Dict[str, int] = Field(default_factory=dict, description="Precios específicos por talla en CLP cuando difieren del precio base")
     colors: List[ColorVariant]
     sizes: List[GarmentSize]
     image_front_template: str
@@ -72,11 +73,32 @@ class GarmentBase(BaseModel):
     is_active: bool = True
 
 
+class GarmentVariantDetail(BaseModel):
+    """Información completa de variante física para la gestión de taller."""
+    id: str
+    garment_id: str
+    color_name: str
+    color_hex: str
+    size: GarmentSize
+    stock_quantity: int
+    custom_price: Optional[int] = Field(default=None, description="Precio personalizado opcional para esta talla en CLP")
+    is_active: bool
+
+
+class VariantStockUpdatePayload(BaseModel):
+    """Payload de ajuste de existencias físicas y precio opcional por variante para operarios."""
+    stock_quantity: Optional[int] = Field(None, ge=0, le=10000, description="Existencias físicas en bodega")
+    is_active: Optional[bool] = Field(None, description="Disponibilidad para la venta en vitrina")
+    custom_price: Optional[int] = Field(None, ge=1000, le=1000000, description="Precio personalizado opcional para esta talla en CLP")
+    clear_custom_price: Optional[bool] = Field(default=False, description="Si es True, restablece el precio de la talla al precio base")
+
+
 class GarmentUpdatePayload(BaseModel):
-    """Payload administrativo para actualizar precios, fotos reales y metadatos de prendas."""
+    """Payload administrativo para actualizar precios, valores por talla, fotos reales y metadatos de prendas."""
     name: Optional[str] = Field(None, min_length=3, max_length=120)
     description: Optional[str] = Field(None, max_length=1000)
     base_price: Optional[int] = Field(None, ge=1000, le=1000000, description="Precio base en CLP")
+    size_prices: Optional[Dict[str, Optional[int]]] = Field(None, description="Precios diferenciados por talla en CLP (ej: {'XL': 14990, 'XXL': 15990})")
     photo_front: Optional[str] = Field(None, max_length=255, description="Ruta o URL de foto frontal de estudio")
     photo_back: Optional[str] = Field(None, max_length=255, description="Ruta o URL de foto trasera de estudio")
     is_active: Optional[bool] = None
@@ -279,8 +301,12 @@ class HeroSectionPayload(BaseModel):
     subtitle: str = Field(..., min_length=10, max_length=300, description="Subtítulo descriptivo técnico")
     cta_text: str = Field(..., min_length=2, max_length=30, description="Texto del botón CTA principal")
     cta_url: str = Field(default="#personalizador", max_length=100, description="Destino del CTA")
+    hero_main_image: Optional[str] = Field(default="/static/assets/hero_main_tshirt.png", max_length=255, description="Imagen principal de la polera o prenda central")
+    hero_badge_text: Optional[str] = Field(default="ALGODÓN PEINADO 240 GSM", max_length=60, description="Etiqueta flotante del mockup principal")
     side_card_top_tag: str = Field(default="HEAVYWEIGHT 240G", max_length=50, description="Etiqueta tarjeta lateral superior")
+    side_card_top_image: Optional[str] = Field(default="/static/assets/hero_side_top.png", max_length=255, description="Imagen tarjeta lateral superior")
     side_card_bottom_tag: str = Field(default="FLEECE 320G", max_length=50, description="Etiqueta tarjeta lateral inferior")
+    side_card_bottom_image: Optional[str] = Field(default="/static/assets/hero_side_bottom.png", max_length=255, description="Imagen tarjeta lateral inferior")
 
 
 class MarqueeSectionPayload(BaseModel):
@@ -301,7 +327,7 @@ class SectionHeadersPayload(BaseModel):
     catalog_title: str = Field(default="Colección Textil Streetwear", max_length=100)
     catalog_desc: str = Field(default="Prendas de alta gama confeccionadas en algodón pesado de 240g a 320g con estampados DTF de alta resolución.", max_length=300)
     customizer_title: str = Field(default="Atelier de Personalización DTF", max_length=100)
-    customizer_desc: str = Field(default="Selecciona la prenda base, modula el color y posiciona tu arte con cotización en tiempo real.", max_length=300)
+    customizer_desc: str = Field(default="Selecciona tu silueta textil, personaliza las estampas DTF y calibra la posición de tu arte con cotización en tiempo real.", max_length=300)
 
 
 class StatsSectionPayload(BaseModel):
@@ -320,22 +346,31 @@ class EditorialSectionPayload(BaseModel):
     mission_tag: str = Field(default="MANIFIESTO TÉCNICO", max_length=50)
     mission_title: str = Field(default="Our Mission", max_length=80)
     mission_body: str = Field(..., min_length=20, max_length=500)
+    mission_image: Optional[str] = Field(default="/static/assets/garments/hoodie_back.png", max_length=255, description="Imagen bloque de misión técnica")
     vision_tag: str = Field(default="ESTÁNDAR DE TALLER", max_length=50)
     vision_title: str = Field(default="Our Vision", max_length=80)
     vision_body: str = Field(..., min_length=20, max_length=500)
+    vision_image: Optional[str] = Field(default="/static/assets/garments/tshirt_front.png", max_length=255, description="Imagen bloque de visión y curado")
 
 
 class ProtocolStepItem(BaseModel):
-    step_number: str = Field(..., max_length=4)
-    title: str = Field(..., max_length=80)
-    description: str = Field(..., max_length=300)
+    step_number: str = Field(..., max_length=10, description="Código o numeral de la cláusula (ej. 01, 02)")
+    title: str = Field(..., max_length=120, description="Título de la cláusula de Términos y Condiciones")
+    description: str = Field(..., max_length=800, description="Detalle normativo, técnico o legal de la cláusula")
 
 
 class ProtocolSectionPayload(BaseModel):
-    section_tag: str = Field(default="CÓMO TRABAJAMOS", max_length=50)
-    section_title: str = Field(default="Proceso de Estampado", max_length=80)
-    section_desc: str = Field(..., max_length=200)
-    steps: List[ProtocolStepItem] = Field(..., min_length=3, max_length=3)
+    section_tag: str = Field(default="NORMATIVA & GARANTÍAS // TALLER SENKAI", max_length=80)
+    section_title: str = Field(default="Términos y Condiciones", max_length=120)
+    section_desc: str = Field(
+        default="Condiciones comerciales, tolerancias técnicas de producción DTF, políticas de garantía y despacho.",
+        max_length=400
+    )
+    legal_footer: Optional[str] = Field(
+        default="Al confirmar una orden en Senkai Studio, el cliente acepta las presentes especificaciones técnicas y condiciones de confección bajo demanda.",
+        max_length=500
+    )
+    steps: List[ProtocolStepItem] = Field(..., min_length=1, max_length=12)
 
 
 class ContactSectionPayload(BaseModel):
@@ -349,6 +384,35 @@ class ContactSectionPayload(BaseModel):
     copyright_text: str = Field(default="Estudio de Estampado Textil de Precisión • Santiago, Chile", max_length=150)
 
 
+class CatalogCategoryItem(BaseModel):
+    """Definición de categoría principal y sus subcategorías para el filtrado del catálogo."""
+    id: str = Field(..., min_length=1, max_length=50, description="Identificador único / slug de la categoría")
+    label: str = Field(..., min_length=2, max_length=80, description="Nombre visible de la categoría en el filtro")
+    subcategories: List[str] = Field(default_factory=list, description="Lista de subcategorías asociadas")
+
+
+class LookbookItemPayload(BaseModel):
+    """Pieza destacada del Lookbook / Colección pública con soporte de fotos, categorías, subcategorías y metadatos."""
+    id: str = Field(..., max_length=60)
+    name: str = Field(..., min_length=2, max_length=120)
+    badge: str = Field(..., max_length=60)
+    category: str = Field(default="urbanas", max_length=50)
+    subcategory: Optional[str] = Field(default="Drop Shoulder 240g", max_length=60, description="Subcategoría técnica o de estilo")
+    price: int = Field(default=22990, ge=1000, le=1000000)
+    garment_id: str = Field(default="garment-polera-heavyweight-240", max_length=64)
+    photo_front: Optional[str] = Field(default=None, max_length=255, description="URL o ruta de foto frontal de la pieza")
+    photo_back: Optional[str] = Field(default=None, max_length=255, description="URL o ruta de foto trasera de la pieza")
+
+
+class LookbookSectionPayload(BaseModel):
+    """Colección, catálogo de piezas destacadas y taxonomía de categorías/subcategorías."""
+    items: List[LookbookItemPayload] = Field(default_factory=list)
+    categories: Optional[List[CatalogCategoryItem]] = Field(
+        default=None,
+        description="Taxonomía configurable de categorías y subcategorías del catálogo"
+    )
+
+
 class SiteContentConsolidated(BaseModel):
     """Agregado con todas las secciones de contenido para consumo de la vitrina pública."""
     announcement: AnnouncementPayload
@@ -360,4 +424,6 @@ class SiteContentConsolidated(BaseModel):
     editorial: EditorialSectionPayload
     protocol: ProtocolSectionPayload
     contact: ContactSectionPayload
+    lookbook: Optional[LookbookSectionPayload] = None
+
 

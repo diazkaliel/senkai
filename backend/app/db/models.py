@@ -39,6 +39,7 @@ class GarmentModel(Base):
     image_back_template: Mapped[str] = mapped_column(String(255), nullable=False)
     photo_front: Mapped[Optional[str]] = mapped_column(String(255), nullable=True)
     photo_back: Mapped[Optional[str]] = mapped_column(String(255), nullable=True)
+    size_prices_json: Mapped[Optional[str]] = mapped_column(Text, default="{}", nullable=True)
     is_active: Mapped[bool] = mapped_column(Boolean, default=True, index=True)
 
     # Relación con variantes de color, talla y stock físico
@@ -47,6 +48,34 @@ class GarmentModel(Base):
         cascade="all, delete-orphan",
         lazy="selectin"
     )
+
+    @property
+    def size_prices(self) -> Dict[str, int]:
+        if not self.size_prices_json:
+            return {}
+        try:
+            data = json.loads(self.size_prices_json)
+            if isinstance(data, dict):
+                return {str(k): int(v) for k, v in data.items() if v is not None and int(v) > 0}
+            return {}
+        except (ValueError, TypeError):
+            return {}
+
+    @size_prices.setter
+    def size_prices(self, value: Optional[Dict[str, Any]]):
+        if not value or not isinstance(value, dict):
+            self.size_prices_json = "{}"
+            return
+        cleaned = {}
+        for k, v in value.items():
+            if v is not None:
+                try:
+                    iv = int(v)
+                    if iv > 0:
+                        cleaned[str(k)] = iv
+                except (ValueError, TypeError):
+                    pass
+        self.size_prices_json = json.dumps(cleaned, ensure_ascii=False)
 
 
 class GarmentVariantModel(Base):
@@ -61,6 +90,7 @@ class GarmentVariantModel(Base):
     color_hex: Mapped[str] = mapped_column(String(10), nullable=False)
     size: Mapped[str] = mapped_column(String(10), nullable=False, index=True)
     stock_quantity: Mapped[int] = mapped_column(Integer, default=50, nullable=False)
+    custom_price: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
     is_active: Mapped[bool] = mapped_column(Boolean, default=True)
 
     garment: Mapped["GarmentModel"] = relationship(back_populates="variants")

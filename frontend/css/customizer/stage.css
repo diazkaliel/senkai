@@ -1,0 +1,686 @@
+/* Escenario textil, tapete de calibración, siluetas vectoriales y volteo 3D frente/espalda. */
+
+/* ==========================================================================
+   SENKAI // ATELIER DE PERSONALIZACIÓN TEXTIL DTF
+   Studio Split Inmersivo (60% / 40%) con Flip 3D y Micro-Interacciones
+   Estética: Dark Luxury Streetwear Brutalist
+   ========================================================================== */
+
+.customizer-section {
+  padding: 3.5rem 0 6rem;
+  position: relative;
+  overflow-x: clip;
+}
+
+.customizer-layout {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 2rem;
+  align-items: start;
+  width: 100%;
+}
+
+@media (min-width: 1025px) {
+  .customizer-layout {
+    grid-template-columns: 1.15fr 0.85fr;
+    gap: 2.5rem;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   1. COLUMNA IZQUIERDA: CANVAS TEXTIL STICKY CON FLIP 3D
+   -------------------------------------------------------------------------- */
+.customizer-stage-column,
+.customizer-inspector-column {
+  width: 100%;
+  min-width: 0;
+}
+
+@media (min-width: 1025px) {
+  .customizer-stage-column {
+    position: sticky;
+    top: 96px;
+  }
+}
+
+.visualizer-card {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  border-radius: 0;
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.7);
+  transition: transform 0.35s var(--ease-editorial, cubic-bezier(0.19, 1, 0.22, 1)), border-color var(--transition-fast);
+  will-change: transform;
+}
+
+.visualizer-toolbar {
+  width: 100%;
+  display: flex;
+  flex-wrap: wrap; /* En móviles las acciones bajan de línea en vez de ensanchar la página */
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.25rem;
+  gap: 0.75rem;
+}
+
+.view-toggle-group {
+  display: flex;
+  min-width: 0;
+  background: #09090b;
+  border: 1px solid var(--border-subtle);
+  padding: 2px;
+}
+
+.visualizer-actions-right {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  min-width: 0;
+}
+
+.view-toggle-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-height: 36px;
+  padding: 0.5rem 1.15rem;
+  background: transparent;
+  border: none;
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.view-toggle-btn:hover {
+  color: var(--text-primary);
+}
+
+.view-toggle-btn.active {
+  background: var(--bg-surface-elevated);
+  color: #ffffff;
+  border: 1px solid var(--border-strong);
+}
+
+.view-count-pill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 4px;
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--text-secondary);
+  font-size: 0.6875rem;
+  font-weight: 700;
+  font-family: var(--font-mono);
+}
+
+.view-toggle-btn.active .view-count-pill {
+  background: var(--accent-primary);
+  color: #ffffff;
+}
+
+.canvas-action-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  min-height: 36px;
+  padding: 0.45rem 0.85rem;
+  background: #09090b;
+  border: 1px solid var(--border-subtle);
+  color: var(--text-secondary);
+  font-family: var(--font-mono);
+  font-size: 0.725rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.canvas-action-btn:hover {
+  background: var(--bg-surface-elevated);
+  color: var(--text-primary);
+  border-color: var(--border-strong);
+}
+
+/* Escenario Textil — Tapete de corte y calibración técnica (Fondo contrastante para prendas negras) */
+.canvas-viewport {
+  width: 100%;
+  aspect-ratio: 1 / 1.05;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  user-select: none;
+  background: var(--bg-garment-stage, radial-gradient(circle at 50% 42%, #e6e6ec 0%, #c4c4cf 100%));
+  background-color: var(--bg-garment-stage-solid, #d4d4de);
+  border: 1px solid var(--border-default);
+}
+
+.canvas-viewport::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(to right, var(--grid-garment-stage, rgba(15, 15, 22, 0.065)) 1px, transparent 1px),
+    linear-gradient(to bottom, var(--grid-garment-stage, rgba(15, 15, 22, 0.065)) 1px, transparent 1px);
+  background-size: 24px 24px;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.atelier-stage-halo {
+  display: none;
+}
+
+.garment-floor-shadow {
+  position: absolute;
+  bottom: 4%;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 58%;
+  height: 24px;
+  background: radial-gradient(ellipse at center, rgba(0, 0, 0, 0.85) 0%, rgba(0, 0, 0, 0.3) 40%, transparent 75%);
+  filter: blur(8px);
+  z-index: 1;
+  pointer-events: none;
+}
+
+/* Contenedor Flip 3D de la Prenda */
+.garment-flip-container {
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  inset: 0;
+  perspective: 1400px;
+  transform-style: preserve-3d;
+  transition: transform 0.65s var(--ease-editorial, cubic-bezier(0.19, 1, 0.22, 1));
+  z-index: 2;
+}
+
+.garment-flip-container.is-flipped {
+  transform: rotateY(180deg);
+}
+
+.garment-flip-face {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+}
+
+/* Control estricto de visibilidad, capas z-index y oclusión entre caras */
+.garment-card-flipper:not(.is-flipped) .face-front,
+.garment-flip-container:not(.is-flipped) .face-front,
+.garment-flip-face.face-front.is-active-face {
+  transform: rotateY(0deg);
+  z-index: 5;
+  visibility: visible;
+  pointer-events: auto;
+}
+
+.garment-card-flipper:not(.is-flipped) .face-back,
+.garment-flip-container:not(.is-flipped) .face-back,
+.garment-flip-face.face-back.is-inactive-face {
+  transform: rotateY(180deg);
+  z-index: 1;
+  visibility: hidden;
+  pointer-events: none;
+}
+
+.garment-card-flipper.is-flipped .face-front,
+.garment-flip-container.is-flipped .face-front,
+.garment-flip-face.face-front.is-inactive-face {
+  transform: rotateY(0deg);
+  z-index: 1;
+  visibility: hidden;
+  pointer-events: none;
+}
+
+.garment-card-flipper.is-flipped .face-back,
+.garment-flip-container.is-flipped .face-back,
+.garment-flip-face.face-back.is-active-face {
+  transform: rotateY(180deg);
+  z-index: 5;
+  visibility: visible;
+  pointer-events: auto;
+}
+
+.garment-svg-wrapper {
+  width: 88%;
+  height: 88%;
+  max-width: 520px;
+  max-height: 520px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  z-index: 2;
+  pointer-events: none;
+}
+
+.garment-svg-wrapper svg {
+  width: 100%;
+  height: 100%;
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+  filter: drop-shadow(0 16px 32px rgba(0, 0, 0, 0.45));
+}
+
+/* Área máxima recomendada para termo-fijado */
+.safe-print-boundary {
+  position: absolute;
+  top: 18%;
+  left: 20%;
+  width: 60%;
+  height: 64%;
+  border: 1px dashed rgba(255, 255, 255, 0.28);
+  pointer-events: none;
+  z-index: 3;
+  transition: border-color var(--transition-fast);
+}
+
+.safe-print-boundary::before {
+  content: "ÁREA ÚTIL PLANCHA [40 × 50 CM]";
+  position: absolute;
+  top: -22px;
+  left: 0;
+  font-family: var(--font-mono);
+  font-size: 0.55rem;
+  letter-spacing: 0.08em;
+  color: #f4f4f5;
+  background: rgba(9, 9, 11, 0.78);
+  padding: 2px 6px;
+  text-transform: uppercase;
+}
+
+/* Capa de Mockup Fotográfico Multicapa */
+.photorealistic-garment-stage {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+}
+
+.garment-floor-shadow {
+  position: absolute;
+  bottom: 2%;
+  left: 14%;
+  right: 14%;
+  height: 30px;
+  background: radial-gradient(ellipse at center, rgba(0, 0, 0, 0.55) 0%, transparent 70%);
+  filter: blur(10px);
+  z-index: 1;
+}
+
+.garment-color-base {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  -webkit-mask-size: contain;
+  mask-size: contain;
+  -webkit-mask-position: center;
+  mask-position: center;
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  z-index: 2;
+  transition: background-color 0.2s ease;
+  filter: drop-shadow(0 15px 30px rgba(0, 0, 0, 0.45));
+}
+
+.garment-photo-layer {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  pointer-events: none;
+}
+
+.garment-photo-layer.garment-multiply {
+  z-index: 3;
+  mix-blend-mode: multiply;
+  filter: contrast(1.15) brightness(0.96);
+  opacity: 0.95;
+}
+
+.garment-photo-layer.garment-screen {
+  z-index: 4;
+  mix-blend-mode: screen;
+  filter: grayscale(100%) contrast(1.3) brightness(0.22);
+  opacity: 0.8;
+}
+
+/* Capa de Estampa Arrastrable */
+.dtf-print-draggable {
+  position: absolute;
+  cursor: grab;
+  user-select: none;
+  touch-action: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  transition: transform 0.1s ease-out;
+}
+
+.dtf-print-draggable:active,
+.dtf-print-draggable.is-dragging {
+  cursor: grabbing;
+  z-index: 20;
+}
+
+.dtf-print-draggable.active-print {
+  outline: 1px dashed rgba(255, 255, 255, 0.6);
+  outline-offset: 3px;
+}
+
+.dtf-print-draggable img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  pointer-events: none;
+  filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.5));
+}
+
+.dtf-print-draggable svg {
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.5));
+}
+
+/* Gizmo y Manejadores de Estampa */
+.print-gizmo-badge {
+  position: absolute;
+  bottom: calc(100% + 8px);
+  left: 50%;
+  transform: translateX(-50%);
+  background: #09090b;
+  border: 1px solid var(--border-strong);
+  color: #ffffff;
+  padding: 3px 8px;
+  font-family: var(--font-mono);
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  white-space: nowrap;
+  pointer-events: none;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.6);
+}
+
+.gizmo-handle {
+  position: absolute;
+  width: 8px;
+  height: 8px;
+  background: #ffffff;
+  border: 1px solid #000000;
+  pointer-events: none;
+}
+
+.gizmo-handle.handle-tl { top: -4px; left: -4px; }
+.gizmo-handle.handle-tr { top: -4px; right: -4px; }
+.gizmo-handle.handle-bl { bottom: -4px; left: -4px; }
+.gizmo-handle.handle-br { bottom: -4px; right: -4px; }
+
+/* Barra Informativa Inferior del Canvas */
+.canvas-badge-info {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: rgba(9, 9, 11, 0.95);
+  border-top: 1px solid var(--border-subtle);
+  padding: 0.65rem 1rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-family: var(--font-mono);
+  font-size: 0.725rem;
+  color: var(--text-secondary);
+  z-index: 5;
+}
+
+.canvas-info-left {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+}
+
+.canvas-garment-title {
+  font-weight: 700;
+  color: #ffffff;
+}
+
+.canvas-color-dot {
+  width: 10px;
+  height: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  display: inline-block;
+}
+
+.canvas-info-sep {
+  color: var(--text-muted);
+}
+
+.canvas-active-print-tag {
+  color: var(--text-muted);
+}
+
+/* ── Dual Preview / Captura Frente y Espalda ─────────────────────────── */
+.visualizer-dual-capture {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.75rem;
+  width: 100%;
+  margin-top: 1rem;
+}
+
+.capture-card {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.65rem 0.85rem;
+  background: var(--bg-surface-elevated);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  text-align: left;
+}
+
+.capture-card:hover {
+  border-color: var(--border-strong);
+  background: #18181f;
+}
+
+.capture-card.active {
+  border-color: var(--accent-primary);
+  background: var(--accent-primary-subtle);
+}
+
+.capture-thumb {
+  width: 42px;
+  height: 42px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg-garment-stage, #d4d4de);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  flex-shrink: 0;
+  position: relative;
+}
+
+.capture-thumb svg {
+  width: 32px;
+  height: 32px;
+}
+
+.mini-print-indicator {
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  background: var(--accent-primary);
+  border-radius: 50%;
+  border: 1.5px solid #ffffff;
+  pointer-events: none;
+  transform: translate(-50%, -50%);
+}
+
+.capture-meta {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  overflow: hidden;
+}
+
+.capture-title {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  font-weight: 800;
+  color: var(--text-primary);
+  letter-spacing: 0.05em;
+}
+
+.capture-desc {
+  font-size: 0.68rem;
+  color: var(--text-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* ── Estado Vacío de Cara (Prenda Lisa) ───────────────────────────────── */
+.face-empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: 1.5rem 1rem;
+  background: var(--bg-surface-elevated);
+  border: 1px dashed var(--border-subtle);
+  border-radius: var(--radius-sm);
+  margin-bottom: 0.75rem;
+}
+
+.face-empty-icon {
+  font-size: 1.85rem;
+  color: var(--text-muted);
+  margin-bottom: 0.4rem;
+}
+
+.face-empty-title {
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 0.25rem;
+}
+
+.face-empty-desc {
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+  max-width: 320px;
+  margin-bottom: 0.85rem;
+}
+
+.btn-add-face-print {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.65rem 1.25rem;
+  background: var(--text-primary);
+  color: var(--bg-main);
+  border: none;
+  border-radius: var(--radius-sm);
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  font-weight: 800;
+  cursor: pointer;
+  letter-spacing: 0.05em;
+  transition: all var(--transition-fast);
+}
+
+.btn-add-face-print:hover {
+  background: #e4e4e7;
+}
+
+.btn-remove-face-print {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.5rem 0.85rem;
+  background: transparent;
+  color: #f87171;
+  border: 1px solid rgba(239, 68, 68, 0.35);
+  border-radius: var(--radius-sm);
+  font-family: var(--font-mono);
+  font-size: 0.725rem;
+  font-weight: 700;
+  cursor: pointer;
+  letter-spacing: 0.04em;
+  transition: all var(--transition-fast);
+  margin-top: 0.5rem;
+}
+
+.btn-remove-face-print:hover {
+  background: rgba(239, 68, 68, 0.12);
+  border-color: #ef4444;
+  color: #ffffff;
+}
+
+.order-multi-item-tip {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  padding: 0.85rem 1rem;
+  margin-top: 1.25rem;
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  line-height: 1.45;
+}
+
+.order-multi-item-tip p {
+  margin: 0;
+}
+
+.order-multi-item-tip strong {
+  color: var(--text-primary);
+}
+
+.order-multi-item-tip-icon {
+  font-size: 18px;
+  color: var(--accent-primary);
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+

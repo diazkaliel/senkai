@@ -14,6 +14,8 @@ html {
   color-scheme: dark;
   text-size-adjust: 100%;
   -webkit-text-size-adjust: 100%;
+  overflow-x: clip;
+  max-width: 100%;
 }
 
 /* ── Textura Atmosférica Textil / Grano Analógico (SVG Noise Puro) ─────── */
@@ -41,7 +43,9 @@ body {
   font-size: var(--text-base);
   line-height: 1.5;
   min-height: 100dvh;
-  overflow-x: hidden;
+  width: 100%;
+  max-width: 100vw;
+  overflow-x: clip;
   position: relative;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
@@ -56,6 +60,7 @@ h1, h2, h3, h4, h5, h6 {
   color: var(--text-primary);
   text-transform: uppercase;
   text-wrap: balance;
+  overflow-wrap: break-word;
 }
 
 h1 { font-size: var(--text-hero); font-weight: 800; }
@@ -286,6 +291,7 @@ img {
   background: var(--accent-primary);
   color: #ffffff;
   border: 1px solid var(--accent-primary);
+  border-radius: var(--radius-pill);
 }
 
 .btn-accent:hover {

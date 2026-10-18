@@ -4,6 +4,7 @@ Soporta SQLite asíncrono con aiosqlite y permite migración transparente a Post
 """
 
 from typing import AsyncGenerator
+from sqlalchemy import event
 from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker, AsyncSession
 
 from app.core.config import settings
@@ -16,6 +17,17 @@ engine = create_async_engine(
     future=True
 )
 
+# Concurrencia y resiliencia para SQLite (WAL mode, timeouts y llaves foráneas)
+if "sqlite" in settings.DATABASE_URL:
+    @event.listens_for(engine.sync_engine, "connect")
+    def set_sqlite_pragma(dbapi_connection, connection_record):
+        cursor = dbapi_connection.cursor()
+        cursor.execute("PRAGMA journal_mode = WAL")
+        cursor.execute("PRAGMA busy_timeout = 5000")
+        cursor.execute("PRAGMA synchronous = NORMAL")
+        cursor.execute("PRAGMA foreign_keys = ON")
+        cursor.close()
+
 # Fábrica de sesiones asíncronas
 async_session_factory = async_sessionmaker(
     bind=engine,
@@ -25,6 +37,35 @@ async_session_factory = async_sessionmaker(
 )
 
 
+def _ensure_schema_columns(sync_conn) -> None:
+    """
+    Asegura migración suave e idempotente de columnas nuevas en bases SQLite existentes.
+    """
+    if "sqlite" not in settings.DATABASE_URL:
+        return
+    try:
+        garment_cols = [
+            row[1] for row in sync_conn.exec_driver_sql("PRAGMA table_info(garments)").fetchall()
+        ]
+        if garment_cols:
+            if "photo_front" not in garment_cols:
+                sync_conn.exec_driver_sql("ALTER TABLE garments ADD COLUMN photo_front VARCHAR(255)")
+            if "photo_back" not in garment_cols:
+                sync_conn.exec_driver_sql("ALTER TABLE garments ADD COLUMN photo_back VARCHAR(255)")
+            if "size_prices_json" not in garment_cols:
+                sync_conn.exec_driver_sql("ALTER TABLE garments ADD COLUMN size_prices_json TEXT DEFAULT '{}'")
+            if "is_active" not in garment_cols:
+                sync_conn.exec_driver_sql("ALTER TABLE garments ADD COLUMN is_active BOOLEAN DEFAULT 1")
+
+        variant_cols = [
+            row[1] for row in sync_conn.exec_driver_sql("PRAGMA table_info(garment_variants)").fetchall()
+        ]
+        if variant_cols and "custom_price" not in variant_cols:
+            sync_conn.exec_driver_sql("ALTER TABLE garment_variants ADD COLUMN custom_price INTEGER")
+    except Exception:
+        pass
+
+
 async def init_db():
     """
     Inicializa las tablas de la base de datos si no existen al arrancar la aplicación.
@@ -32,6 +73,7 @@ async def init_db():
     """
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
+        await conn.run_sync(_ensure_schema_columns)
 
 
 async def get_db() -> AsyncGenerator[AsyncSession, None]:

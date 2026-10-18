@@ -1,0 +1,193 @@
+/* Adaptabilidad responsiva para tablets y smartphones de la mesa de personalización. */
+
+/* --------------------------------------------------------------------------
+   3. RESPONSIVIDAD INTEGRAL
+   -------------------------------------------------------------------------- */
+@media (max-width: 1024px) {
+  .customizer-layout {
+    grid-template-columns: 1fr;
+    gap: 2rem;
+  }
+
+  .customizer-stage-column {
+    position: static;
+    max-width: 600px;
+    margin: 0 auto;
+  }
+
+  .customizer-inspector-column {
+    max-width: 600px;
+    margin: 0 auto;
+  }
+}
+
+@media (max-width: 768px) {
+  .customizer-section {
+    padding: 2.5rem 0 4rem;
+  }
+
+  .visualizer-card {
+    padding: 1rem;
+  }
+
+  .inspector-section {
+    padding: 1.25rem;
+  }
+
+  .garment-cards-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .size-cards-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .fine-tuning-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .tuning-field-full {
+    grid-column: span 1;
+  }
+
+  .specs-box {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .quote-total-block {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .btn-add-cart {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+@media (max-width: 480px) {
+  .visualizer-toolbar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .view-toggle-group {
+    width: 100%;
+  }
+
+  .view-toggle-btn {
+    flex: 1;
+    justify-content: center;
+    padding: 0.6rem 0.5rem;
+    min-height: 40px;
+  }
+
+  .visualizer-actions-right {
+    justify-content: stretch;
+  }
+
+  .visualizer-actions-right .canvas-action-btn {
+    flex: 1;
+    justify-content: center;
+    min-height: 40px;
+  }
+
+  .canvas-viewport {
+    aspect-ratio: 1 / 1;
+    max-height: 400px;
+  }
+
+  .garment-cards-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.5rem;
+  }
+
+  .garment-card-btn {
+    padding: 0.55rem 0.5rem;
+    gap: 0.5rem;
+  }
+
+  .garment-card-thumb {
+    width: 36px;
+    height: 36px;
+  }
+
+  .garment-card-thumb svg {
+    width: 28px;
+    height: 28px;
+  }
+
+  .garment-card-title {
+    font-size: 0.725rem;
+  }
+
+  .garment-card-meta {
+    font-size: 0.6875rem;
+  }
+
+  .color-swatches-row {
+    gap: 0.5rem;
+  }
+
+  .color-swatch-btn {
+    width: 36px;
+    height: 36px;
+  }
+
+  .size-pills-row {
+    grid-template-columns: repeat(5, 1fr);
+    gap: 0.25rem;
+  }
+
+  .size-pill-btn {
+    padding: 0.5rem 0.1rem;
+    font-size: 0.7rem;
+  }
+
+  .preset-pos-row {
+    flex-direction: column;
+  }
+
+  .qty-selector-row {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .atelier-tab-btn {
+    padding: 0.75rem 0.25rem;
+    gap: 0.15rem;
+  }
+
+  .atelier-tab-num {
+    font-size: 0.6875rem;
+  }
+
+  .atelier-tab-label {
+    font-size: 0.6875rem;
+    letter-spacing: 0.02em;
+  }
+
+  .atelier-tab-body {
+    padding: 1rem;
+    min-height: auto;
+  }
+
+  .live-quote-dock {
+    padding: 1rem;
+  }
+
+  .quote-dock-row {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+
+  .quote-dock-price {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .quote-dock-total {
+    font-size: 1.25rem;
+  }
+}

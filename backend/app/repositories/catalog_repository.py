@@ -17,14 +17,12 @@ class CatalogRepository:
     """Acceso a datos para prendas base y variantes de inventario."""
 
     async def list_active_garments(self, session: AsyncSession) -> List[GarmentModel]:
-        stmt = select(GarmentModel).where(GarmentModel.is_active == True)
+        stmt = select(GarmentModel)
         result = await session.execute(stmt)
         return list(result.scalars().all())
 
     async def get_by_id(self, session: AsyncSession, garment_id: str) -> Optional[GarmentModel]:
-        stmt = select(GarmentModel).where(
-            (GarmentModel.id == garment_id) & (GarmentModel.is_active == True)
-        )
+        stmt = select(GarmentModel).where(GarmentModel.id == garment_id)
         result = await session.execute(stmt)
         return result.scalar_one_or_none()
 
@@ -114,10 +112,13 @@ class CatalogRepository:
         # Agrupar colores únicos con estado de stock agregado
         colors_map = {}
         sizes_set = set()
+        raw_size_prices = dict(model.size_prices or {})
 
         for v in model.variants:
             if v.is_active:
                 sizes_set.add(v.size)
+                if v.custom_price is not None and v.custom_price >= 1000:
+                    raw_size_prices[v.size] = int(v.custom_price)
                 if v.color_name not in colors_map:
                     colors_map[v.color_name] = {
                         "name": v.color_name,
@@ -127,11 +128,24 @@ class CatalogRepository:
                 elif v.stock_quantity > 0:
                     colors_map[v.color_name]["in_stock"] = True
 
-        colors = [ColorVariant(**c) for c in colors_map.values()]
+        # Senkai Atelier: Confección y catálogo exclusivo en Negro Industrial (#121212)
+        black_colors = [
+            ColorVariant(**c) for c in colors_map.values()
+            if c["hex_code"].lower() == "#121212" or c["name"].lower() == "negro"
+        ]
+        colors = black_colors if black_colors else [
+            ColorVariant(name="Negro", hex_code="#121212", in_stock=True)
+        ]
         
         # Orden canónico de tallas
         size_order = ["S", "M", "L", "XL", "XXL"]
         sizes = [GarmentSize(s) for s in size_order if s in sizes_set]
+
+        size_prices = {
+            str(sz): int(price)
+            for sz, price in raw_size_prices.items()
+            if price is not None and int(price) >= 1000
+        }
 
         return GarmentBase(
             id=model.id,
@@ -141,6 +155,7 @@ class CatalogRepository:
             weight_gsm=model.weight_gsm,
             composition=model.composition,
             base_price=model.base_price,
+            size_prices=size_prices,
             colors=colors,
             sizes=sizes,
             image_front_template=model.image_front_template,
@@ -161,13 +176,92 @@ class CatalogRepository:
         if not garment:
             return None
 
+        has_size_prices_key = "size_prices" in update_dict
+        raw_size_prices = update_dict.pop("size_prices", None)
+
         for key, value in update_dict.items():
             if value is not None and hasattr(garment, key):
                 setattr(garment, key, value)
 
+        if has_size_prices_key:
+            cleaned_sp: Dict[str, int] = {}
+            if isinstance(raw_size_prices, dict):
+                for sz, val in raw_size_prices.items():
+                    if val is not None:
+                        try:
+                            iv = int(val)
+                            if iv >= 1000:
+                                cleaned_sp[str(sz).strip().upper()] = iv
+                        except (ValueError, TypeError):
+                            pass
+            garment.size_prices = cleaned_sp
+            for v in garment.variants:
+                v.custom_price = cleaned_sp.get(v.size, None)
+
         await session.commit()
         await session.refresh(garment)
         return garment
+
+    async def get_variants_by_garment(
+        self,
+        session: AsyncSession,
+        garment_id: str
+    ) -> List[GarmentVariantModel]:
+        """Obtiene todas las variantes de una prenda para supervisión de bodega."""
+        stmt = (
+            select(GarmentVariantModel)
+            .where(GarmentVariantModel.garment_id == garment_id)
+            .order_by(GarmentVariantModel.color_name, GarmentVariantModel.size)
+        )
+        result = await session.execute(stmt)
+        return list(result.scalars().all())
+
+    async def update_variant_stock(
+        self,
+        session: AsyncSession,
+        garment_id: str,
+        variant_id: str,
+        stock_quantity: Optional[int] = None,
+        is_active: Optional[bool] = None,
+        custom_price: Optional[int] = None,
+        clear_custom_price: bool = False
+    ) -> Optional[GarmentVariantModel]:
+        """Actualiza el stock físico y/o el valor diferenciado por talla de una variante de forma atómica."""
+        stmt = select(GarmentVariantModel).where(
+            (GarmentVariantModel.id == variant_id) &
+            (GarmentVariantModel.garment_id == garment_id)
+        )
+        result = await session.execute(stmt)
+        variant = result.scalar_one_or_none()
+        if not variant:
+            return None
+
+        if stock_quantity is not None:
+            variant.stock_quantity = stock_quantity
+        if is_active is not None:
+            variant.is_active = is_active
+
+        if clear_custom_price or custom_price is not None:
+            garment = await self.get_by_id(session, garment_id)
+            current_sp = dict(garment.size_prices or {}) if garment else {}
+            base_val = garment.base_price if garment else 0
+
+            if clear_custom_price or (custom_price is not None and custom_price == base_val):
+                variant.custom_price = None
+                current_sp.pop(variant.size, None)
+            elif custom_price is not None and custom_price >= 1000:
+                variant.custom_price = int(custom_price)
+                current_sp[variant.size] = int(custom_price)
+
+            if garment:
+                garment.size_prices = current_sp
+                for v in garment.variants:
+                    if v.size == variant.size:
+                        v.custom_price = variant.custom_price
+
+        await session.commit()
+        await session.refresh(variant)
+        return variant
 
 
 catalog_repository = CatalogRepository()

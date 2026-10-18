@@ -1,5 +1,5 @@
 """
-Punto de entrada principal para el backend FastAPI de Seiko DTF Studio.
+Punto de entrada principal para el backend FastAPI de Senkai DTF Studio.
 Soporta endpoints REST, documentación OpenAPI y entrega de la Single Page Application (SPA).
 """
 
@@ -7,15 +7,19 @@ import os
 from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.middleware.gzip import GZipMiddleware
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse, JSONResponse
-from fastapi import Request, status
+from fastapi import Request, status, Depends
+from sqlalchemy import text
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.config import settings
 from app.core.exceptions import EntityNotFoundException, SenkaiDomainException, InvalidStateTransitionException
-from app.core.middleware import CorrelationIdMiddleware
+from app.core.middleware import CorrelationIdMiddleware, SecurityHeadersMiddleware, CacheControlMiddleware
+from app.core.rate_limiter import RateLimitMiddleware
 from app.api.v1.router import api_router
-from app.db.session import init_db, async_session_factory
+from app.db.session import init_db, async_session_factory, get_db
 from app.db.seeds import seed_database_if_empty
 
 
@@ -38,14 +42,30 @@ app = FastAPI(
     lifespan=lifespan
 )
 
+# Middleware de compresión de respuestas HTTP (GZip) para alto rendimiento
+app.add_middleware(GZipMiddleware, minimum_size=1000)
+
 # Middleware de observabilidad y Correlation ID
 app.add_middleware(CorrelationIdMiddleware)
 
-# Configuración de CORS segura (específica para evitar rechazo de navegadores ante credentials)
+# Middleware de seguridad HTTP (OWASP: nosniff, DENY iframes, referrer policy)
+app.add_middleware(SecurityHeadersMiddleware)
+
+# Middleware de control de caché (Cache-Control para API, SPA y estáticos)
+app.add_middleware(CacheControlMiddleware)
+
+# Middleware de protección contra abusos y DoS por IP (Rate Limiter)
+app.add_middleware(RateLimitMiddleware)
+
+# Configuración de CORS: en producción se restringe estrictamente a ALLOWED_ORIGINS sin regex permisivo
+cors_origin_regex = None
+if settings.ENVIRONMENT != "production":
+    cors_origin_regex = r"^https?://(localhost|127\.0\.0\.1)(:[0-9]+)?$|^https://.*\.pages\.dev$"
+
 app.add_middleware(
     CORSMiddleware,
     allow_origins=settings.ALLOWED_ORIGINS,
-    allow_origin_regex=r"^https?://(localhost|127\.0\.0\.1)(:[0-9]+)?$|^https://.*\.pages\.dev$",
+    allow_origin_regex=cors_origin_regex,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -81,18 +101,39 @@ app.include_router(api_router, prefix=settings.API_V1_PREFIX)
 
 
 @app.get("/health", tags=["Healthcheck"])
-def health_check():
-    return {
-        "status": "healthy",
-        "service": settings.PROJECT_NAME,
-        "version": settings.VERSION
-    }
+async def health_check(session: AsyncSession = Depends(get_db)):
+    """
+    Sonda de salud profunda (Deep Healthcheck) para balanceadores y monitoreo de uptime.
+    Verifica conectividad activa con el motor de base de datos relacional.
+    """
+    db_status = "connected"
+    try:
+        await session.execute(text("SELECT 1"))
+    except Exception as e:
+        db_status = f"unhealthy: {str(e)}"
+
+    is_healthy = db_status == "connected"
+    return JSONResponse(
+        status_code=status.HTTP_200_OK if is_healthy else status.HTTP_503_SERVICE_UNAVAILABLE,
+        content={
+            "status": "healthy" if is_healthy else "degraded",
+            "database": db_status,
+            "environment": settings.ENVIRONMENT,
+            "service": settings.PROJECT_NAME,
+            "version": settings.VERSION
+        }
+    )
 
 
 # Ruta hacia el frontend
 FRONTEND_DIR = os.path.abspath(os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), "frontend"))
 
 if os.path.exists(FRONTEND_DIR):
+    storage_uploads = "/app/storage/uploads"
+    if os.path.isdir("/app/storage"):
+        os.makedirs(storage_uploads, exist_ok=True)
+        app.mount("/static/assets/uploads", StaticFiles(directory=storage_uploads), name="storage_uploads")
+
     app.mount("/static", StaticFiles(directory=FRONTEND_DIR), name="static")
 
     @app.get("/{full_path:path}", include_in_schema=False)

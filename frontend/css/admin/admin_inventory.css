@@ -1,0 +1,978 @@
+/* Gestión de inventario físico: matriz de stock por silueta, variante de color y talla textil. */
+
+/* ==========================================================================
+   MÓDULO DE INVENTARIO FÍSICO Y MATRIZ Color x Talla
+   ========================================================================== */
+.inventory-module-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+  margin-bottom: 4rem;
+}
+
+.inventory-top-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  flex-wrap: wrap;
+  gap: 1.5rem;
+  border-bottom: 1px solid var(--border-subtle);
+  padding-bottom: 1.5rem;
+}
+
+.inventory-title {
+  font-size: 1.6rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: -0.02em;
+  color: var(--text-primary);
+  margin: 0.4rem 0 0.2rem;
+}
+
+.inventory-desc {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+}
+
+.inventory-garment-tabs {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.inventory-model-pill {
+  padding: 0.5rem 1.1rem;
+  font-family: var(--font-display);
+  font-size: 0.775rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--text-muted);
+  background: var(--bg-surface-elevated);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-pill);
+  min-height: 40px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 180ms cubic-bezier(0.19, 1, 0.22, 1);
+}
+
+.inventory-model-pill:hover {
+  color: var(--text-primary);
+  border-color: var(--border-strong);
+}
+
+.inventory-model-pill.active {
+  background: var(--text-primary);
+  color: var(--bg-main);
+  border-color: var(--text-primary);
+}
+
+.inventory-kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr));
+  gap: 1.25rem;
+}
+
+.inventory-kpi-card {
+  background: var(--bg-surface-elevated);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-none);
+  padding: 1.35rem 1.5rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.inventory-kpi-card.warning {
+  border-left: 3px solid var(--accent-warning);
+}
+
+.inventory-kpi-card.danger {
+  border-left: 3px solid var(--accent-signal-red);
+}
+
+.inventory-kpi-card .kpi-val {
+  font-size: 1.85rem;
+  font-weight: 800;
+  font-family: var(--font-display);
+  color: var(--text-primary);
+  line-height: 1.1;
+  margin: 0.35rem 0;
+}
+
+.inventory-kpi-card .kpi-val small {
+  font-size: 0.75rem;
+  font-family: var(--font-mono);
+  color: var(--text-muted);
+  font-weight: 500;
+}
+
+.inventory-kpi-card .kpi-note {
+  font-size: 0.725rem;
+  font-family: var(--font-mono);
+  color: var(--text-secondary);
+}
+
+/* Grilla principal: Matriz (izq) y Ajustes Base (der) */
+.inventory-main-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 2fr) minmax(0, 1fr);
+  gap: 1.75rem;
+  align-items: start;
+  width: 100%;
+  max-width: 100%;
+}
+
+@media (max-width: 1024px) {
+  .inventory-main-layout {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+.inventory-matrix-card,
+.inventory-garment-settings-card {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-none);
+  padding: 1.75rem;
+  min-width: 0;
+  max-width: 100%;
+  overflow: hidden;
+}
+
+.inventory-matrix-card .table-responsive {
+  width: 100%;
+  max-width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.matrix-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+  border-bottom: 1px solid var(--border-subtle);
+  padding-bottom: 1rem;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+.matrix-card-header h4 {
+  font-size: 1.15rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: var(--text-primary);
+  margin: 0;
+}
+
+.inventory-matrix-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+}
+
+.inventory-matrix-table th {
+  background: rgba(14, 18, 24, 0.85);
+  padding: 0.85rem;
+  border: 1px solid var(--border-subtle);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text-muted);
+}
+
+.inventory-matrix-table td {
+  padding: 0.75rem;
+  border: 1px solid var(--border-subtle);
+  vertical-align: middle;
+}
+
+/* Columna de Color Sticky para scroll horizontal en Mobile / Tablet */
+.inventory-matrix-table th:first-child,
+.inventory-matrix-table td:first-child {
+  position: sticky;
+  left: 0;
+  z-index: 2;
+  background: var(--bg-surface-elevated);
+  box-shadow: 2px 0 6px rgba(0, 0, 0, 0.4);
+}
+
+.inventory-matrix-table th:first-child {
+  z-index: 3;
+}
+
+@media (max-width: 600px) {
+  .inventory-matrix-table th,
+  .inventory-matrix-table td {
+    padding: 0.5rem 0.45rem;
+  }
+  .inventory-matrix-table th:first-child,
+  .inventory-matrix-table td:first-child {
+    max-width: 130px;
+  }
+  .color-header-cell {
+    gap: 0.45rem;
+  }
+  .color-info-wrap strong {
+    font-size: 0.74rem;
+  }
+  .stock-input {
+    width: 54px;
+    padding: 4px 6px;
+    font-size: 0.82rem;
+  }
+}
+
+.color-header-cell {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.color-dot {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  flex-shrink: 0;
+}
+
+.color-info-wrap {
+  display: flex;
+  flex-direction: column;
+}
+
+.color-info-wrap strong {
+  color: var(--text-primary);
+  font-size: 0.825rem;
+}
+
+.color-info-wrap small {
+  color: var(--text-muted);
+  font-size: 0.7rem;
+}
+
+.stock-control-wrap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+
+.stock-input {
+  width: 68px;
+  min-height: 40px;
+  padding: 6px 8px;
+  background: var(--bg-main);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-none);
+  color: var(--text-primary);
+  font-family: var(--font-mono);
+  font-weight: 700;
+  text-align: center;
+  font-size: 0.9rem;
+}
+
+.stock-input:focus {
+  border-color: var(--accent-admin);
+  outline: none;
+}
+
+.cell-stock.stock-empty {
+  background: rgba(239, 68, 68, 0.1);
+}
+
+.cell-stock.stock-low {
+  background: rgba(245, 158, 11, 0.1);
+}
+
+.btn-save-stock {
+  background: var(--bg-surface-elevated);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-none);
+  cursor: pointer;
+  min-width: 40px;
+  min-height: 40px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 6px 10px;
+  font-size: 0.85rem;
+  transition: all 150ms ease;
+}
+
+.btn-save-stock:hover {
+  background: var(--text-primary);
+  color: var(--bg-main);
+}
+
+.inventory-photos-preview {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+  background: var(--bg-surface-elevated);
+  padding: 1rem;
+  border: 1px solid var(--border-subtle);
+  margin-bottom: 1.25rem;
+}
+
+.photo-preview-box {
+  flex: 1;
+  text-align: center;
+}
+
+.photo-preview-label {
+  display: block;
+  font-size: 0.7rem;
+  font-family: var(--font-mono);
+  color: var(--text-muted);
+  margin-bottom: 0.35rem;
+  text-transform: uppercase;
+}
+
+.photo-preview-box img {
+  width: 80px;
+  height: 80px;
+  object-fit: contain;
+  background: var(--bg-garment-stage, #d8d8e0);
+  border: 1px solid var(--border-subtle);
+  padding: 4px;
+}
+
+.inventory-loading-box {
+  text-align: center;
+  padding: 3rem 1rem;
+  color: var(--text-muted);
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
+}
+
+.inventory-model-pill {
+  gap: 0.55rem;
+}
+
+.pill-price-tag {
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: var(--radius-pill);
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--text-secondary);
+}
+
+.inventory-model-pill.active .pill-price-tag {
+  background: rgba(0, 0, 0, 0.2);
+  color: var(--bg-main);
+}
+
+.inventory-feedback-banner {
+  display: none;
+  padding: 0.9rem 1.25rem;
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  border: 1px solid var(--border-strong);
+  border-radius: 0px;
+}
+
+.inventory-feedback-banner.show {
+  display: block;
+}
+
+.inventory-feedback-banner.success {
+  background: rgba(16, 185, 129, 0.12);
+  border-color: var(--accent-success, #10b981);
+  color: #a7f3d0;
+}
+
+.inventory-feedback-banner.error {
+  background: rgba(239, 68, 68, 0.15);
+  border-color: var(--accent-signal-red, #ef4444);
+  color: #fecaca;
+}
+
+.inventory-price-section-box {
+  padding: 1rem;
+  background: var(--bg-surface-elevated);
+  border: 1px solid var(--border-subtle);
+  border-radius: 0px;
+}
+
+.inventory-price-hint {
+  font-size: 0.74rem;
+  color: var(--text-muted);
+  margin: 0.25rem 0 0.75rem;
+  line-height: 1.4;
+}
+
+.inventory-currency-input-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.inventory-currency-input-wrap .currency-prefix {
+  position: absolute;
+  left: 0.85rem;
+  color: var(--accent-admin);
+  font-weight: 700;
+  font-family: var(--font-mono);
+  pointer-events: none;
+}
+
+.inventory-currency-input-wrap .currency-suffix {
+  position: absolute;
+  right: 0.85rem;
+  color: var(--text-muted);
+  font-size: 0.72rem;
+  font-family: var(--font-mono);
+  pointer-events: none;
+}
+
+.inv-price-input-main {
+  padding-left: 1.85rem !important;
+  padding-right: 3rem !important;
+  font-family: var(--font-mono) !important;
+  font-weight: 700 !important;
+  font-size: 0.95rem !important;
+}
+
+.inventory-currency-input-wrap.compact {
+  width: 135px;
+  flex-shrink: 0;
+}
+
+.inventory-currency-input-wrap.compact .inv-lookbook-price-input {
+  padding-left: 1.65rem !important;
+  padding-right: 0.5rem !important;
+  font-family: var(--font-mono) !important;
+  font-weight: 700 !important;
+  font-size: 0.85rem !important;
+  min-height: 36px;
+}
+
+.inventory-delta-sync-check {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+  margin-top: 0.75rem;
+  font-size: 0.74rem;
+  color: var(--text-secondary);
+  cursor: pointer;
+}
+
+.inventory-delta-sync-check input {
+  margin-top: 2px;
+  accent-color: var(--text-primary);
+}
+
+.btn-match-base-price {
+  background: transparent;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-pill);
+  color: var(--text-primary);
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  padding: 3px 10px;
+  cursor: pointer;
+  transition: all 0.2s var(--ease-editorial);
+}
+
+.btn-match-base-price:hover {
+  background: var(--text-primary);
+  color: var(--bg-main);
+}
+
+.inventory-linked-items-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.inventory-linked-item-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.65rem 0.75rem;
+  background: var(--bg-main);
+  border: 1px solid var(--border-subtle);
+}
+
+.linked-item-info {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.linked-item-info strong {
+  font-size: 0.78rem;
+  color: var(--text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.linked-item-info small {
+  font-family: var(--font-mono);
+  font-size: 0.66rem;
+  color: var(--text-muted);
+}
+
+/* ==========================================================================
+   PRECIOS Y VALORES DIFERENCIADOS POR TALLA (MATRIZ & PANEL)
+   ========================================================================== */
+.matrix-th-price {
+  display: inline-block;
+  margin-top: 0.25rem;
+  padding: 2px 7px;
+  font-size: 0.68rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--border-subtle);
+}
+
+.matrix-th-price.is-custom {
+  color: var(--accent-admin);
+  background: rgba(245, 158, 11, 0.12);
+  border-color: var(--accent-admin);
+}
+
+.matrix-size-price-row td {
+  background: rgba(14, 18, 24, 0.45);
+  border-top: 2px solid var(--border-strong);
+}
+
+.cell-size-price.has-custom-size-price {
+  background: rgba(245, 158, 11, 0.07);
+}
+
+.matrix-price-control-stack {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.matrix-currency-sign {
+  color: var(--accent-admin);
+  font-family: var(--font-mono);
+  font-weight: 700;
+  font-size: 0.8rem;
+}
+
+.matrix-size-price-input {
+  width: 82px;
+  font-size: 0.82rem;
+}
+
+.btn-save-size-price {
+  background: var(--bg-surface-elevated);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-none);
+  cursor: pointer;
+  min-width: 36px;
+  min-height: 40px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 6px 8px;
+  color: var(--text-primary);
+  transition: all 150ms ease;
+}
+
+.btn-save-size-price:hover {
+  background: var(--text-primary);
+  color: var(--bg-main);
+}
+
+.matrix-size-price-tag {
+  font-size: 0.62rem;
+  font-family: var(--font-mono);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--text-muted);
+}
+
+.matrix-size-price-tag.is-custom {
+  color: var(--accent-admin);
+  font-weight: 700;
+}
+
+.inventory-size-pricing-Subbox {
+  margin-top: 1rem;
+  padding-top: 0.9rem;
+  border-top: 1px dashed var(--border-subtle);
+}
+
+.size-pricing-header-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.inventory-size-toggle-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.78rem;
+  color: var(--text-primary);
+  cursor: pointer;
+}
+
+.inventory-size-toggle-label input {
+  accent-color: var(--accent-admin);
+  width: 15px;
+  height: 15px;
+  cursor: pointer;
+}
+
+.inventory-size-toggle-label small {
+  color: var(--text-muted);
+  font-weight: 400;
+}
+
+.inventory-size-prices-panel {
+  margin-top: 0.75rem;
+}
+
+.inventory-size-prices-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(118px, 1fr));
+  gap: 0.55rem;
+}
+
+.inventory-size-price-item {
+  background: var(--bg-main);
+  border: 1px solid var(--border-subtle);
+  padding: 0.55rem 0.6rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  transition: border-color 150ms ease;
+}
+
+.inventory-size-price-item.is-custom {
+  border-color: var(--accent-admin);
+  background: rgba(245, 158, 11, 0.05);
+}
+
+.size-price-item-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.size-price-badge-label {
+  font-family: var(--font-display);
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: var(--text-primary);
+}
+
+.size-price-status-pill {
+  font-family: var(--font-mono);
+  font-size: 0.58rem;
+  text-transform: uppercase;
+  padding: 1px 5px;
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--text-muted);
+}
+
+.size-price-status-pill.is-custom {
+  background: rgba(245, 158, 11, 0.16);
+  color: var(--accent-admin);
+  font-weight: 700;
+}
+
+.inv-size-price-input {
+  padding-left: 1.55rem !important;
+  padding-right: 0.45rem !important;
+  font-family: var(--font-mono) !important;
+  font-weight: 700 !important;
+  font-size: 0.82rem !important;
+  min-height: 34px;
+}
+
+/* ==========================================================================
+   PANEL DE DISPONIBILIDAD DE TIPOS DE PRENDA (ENCENDER / APAGAR)
+   ========================================================================== */
+.inventory-availability-panel {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  padding: 1.35rem 1.5rem;
+}
+
+.availability-panel-header h4 {
+  font-size: 1.05rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: var(--text-primary);
+  margin: 0.35rem 0 0.25rem;
+}
+
+.availability-panel-header p {
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  margin: 0 0 1rem;
+  line-height: 1.45;
+}
+
+.availability-garments-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 0.9rem;
+}
+
+.availability-garment-card {
+  background: var(--bg-surface-elevated);
+  border: 1px solid var(--border-subtle);
+  padding: 0.9rem 1rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 0.85rem;
+  transition: all 180ms ease;
+}
+
+.availability-garment-card.is-selected-model {
+  border-color: var(--accent-admin);
+}
+
+.availability-garment-card.is-disabled {
+  background: rgba(239, 68, 68, 0.05);
+  border-color: rgba(239, 68, 68, 0.35);
+}
+
+.availability-card-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 0.5rem;
+}
+
+.availability-model-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+
+.availability-model-meta strong {
+  font-size: 0.82rem;
+  color: var(--text-primary);
+  text-transform: uppercase;
+}
+
+.availability-model-meta small {
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  color: var(--text-muted);
+}
+
+.availability-status-pill {
+  font-family: var(--font-mono);
+  font-size: 0.62rem;
+  font-weight: 700;
+  padding: 2px 7px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  flex-shrink: 0;
+}
+
+.availability-status-pill.online {
+  background: rgba(16, 185, 129, 0.15);
+  color: #34d399;
+  border: 1px solid rgba(16, 185, 129, 0.4);
+}
+
+.availability-status-pill.offline {
+  background: rgba(239, 68, 68, 0.18);
+  color: #f87171;
+  border: 1px solid rgba(239, 68, 68, 0.45);
+}
+
+.availability-card-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+}
+
+.btn-toggle-garment-power {
+  width: 100%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  padding: 0.45rem 0.65rem;
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  cursor: pointer;
+  border: 1px solid var(--border-subtle);
+  transition: all 150ms ease;
+}
+
+.btn-toggle-garment-power.power-on {
+  background: rgba(16, 185, 129, 0.12);
+  color: #a7f3d0;
+  border-color: rgba(16, 185, 129, 0.4);
+}
+
+.btn-toggle-garment-power.power-on:hover {
+  background: rgba(239, 68, 68, 0.18);
+  color: #fecaca;
+  border-color: rgba(239, 68, 68, 0.5);
+}
+
+.btn-toggle-garment-power.power-off {
+  background: rgba(239, 68, 68, 0.16);
+  color: #fecaca;
+  border-color: rgba(239, 68, 68, 0.45);
+}
+
+.btn-toggle-garment-power.power-off:hover {
+  background: rgba(16, 185, 129, 0.2);
+  color: #a7f3d0;
+  border-color: rgba(16, 185, 129, 0.5);
+}
+
+.btn-select-garment-edit {
+  width: 100%;
+  background: transparent;
+  border: 1px solid var(--border-subtle);
+  color: var(--text-secondary);
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  padding: 0.35rem 0.5rem;
+  cursor: pointer;
+  text-transform: uppercase;
+}
+
+.btn-select-garment-edit.active,
+.btn-select-garment-edit:hover {
+  background: var(--text-primary);
+  color: var(--bg-main);
+  border-color: var(--text-primary);
+  font-weight: 700;
+}
+
+.inventory-model-pill.is-muted-off {
+  opacity: 0.65;
+  border-style: dashed;
+}
+
+/* ==========================================================================
+   SELECTOR INTERACTIVO DE TALLA INDIVIDUAL Y EDITOR DE VALOR PROPIO
+   ========================================================================== */
+.inv-size-selector-pills {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(84px, 1fr));
+  gap: 0.45rem;
+  margin-bottom: 0.85rem;
+}
+
+.inv-size-selector-pill {
+  background: var(--bg-main);
+  border: 1px solid var(--border-subtle);
+  padding: 0.5rem 0.4rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.2rem;
+  cursor: pointer;
+  transition: all 150ms ease;
+}
+
+.inv-size-selector-pill:hover {
+  border-color: var(--border-strong);
+}
+
+.inv-size-selector-pill.active {
+  background: rgba(245, 158, 11, 0.14);
+  border-color: var(--accent-admin);
+  box-shadow: 0 0 0 1px var(--accent-admin);
+}
+
+.inv-size-selector-pill .pill-sz-code {
+  font-family: var(--font-display);
+  font-size: 0.74rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  color: var(--text-primary);
+}
+
+.inv-size-selector-pill .pill-sz-val {
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  color: var(--accent-admin);
+  font-weight: 700;
+}
+
+.inv-selected-size-editor-box {
+  background: var(--bg-main);
+  border: 1px solid var(--accent-admin);
+  padding: 0.85rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+}
+
+.selected-size-editor-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.selected-size-title {
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+}
+
+.selected-size-title strong {
+  color: var(--text-primary);
+  text-transform: uppercase;
+}
+
+.selected-size-input-row {
+  display: flex;
+  gap: 0.5rem;
+  align-items: stretch;
+  flex-wrap: wrap;
+}
+
+.inv-save-single-size-btn {
+  padding: 0 0.95rem !important;
+  font-size: 0.75rem !important;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  white-space: nowrap;
+}
+
+.selected-size-helper-actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.selected-size-helper-actions small {
+  font-family: var(--font-mono);
+  font-size: 0.66rem;
+  color: var(--text-muted);
+}
+

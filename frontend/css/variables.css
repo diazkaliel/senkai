@@ -6,6 +6,11 @@
   --bg-surface-dim:       #050506;
   --bg-overlay:           rgba(0, 0, 0, 0.82);
 
+  /* ── Fondo de Contenedores de Prendas & Lienzo Diseñador (Contraste para Prendas Negras) ── */
+  --bg-garment-stage:       radial-gradient(circle at 50% 42%, #e6e6ec 0%, #c4c4cf 100%);
+  --bg-garment-stage-solid: #d4d4de;
+  --grid-garment-stage:     rgba(15, 15, 22, 0.065);
+
   /* ── Bordes ──────────────────────────────────────────────────────────── */
   --border-subtle:        rgba(255, 255, 255, 0.07);
   --border-default:       rgba(255, 255, 255, 0.12);
@@ -38,6 +43,8 @@
   /* Admin-only: cyan como acento funcional del taller */
   --accent-admin:         #38bdf8;
   --accent-admin-subtle:  rgba(56, 189, 248, 0.1);
+  --accent-signal-red:    #ef4444;
+  --accent-white:         #ffffff;
 
   /* ── Tipografía ──────────────────────────────────────────────────────── */
   --font-display: 'Space Grotesk', -apple-system, BlinkMacSystemFont, sans-serif;
@@ -45,15 +52,15 @@
   --font-mono:    'JetBrains Mono', monospace;
 
   /* ── Escala tipográfica fluid (modular 1.25) ─────────────────────────── */
-  --text-xs:   clamp(0.65rem, 0.6rem + 0.15vw, 0.72rem);
+  --text-xs:   clamp(0.7rem, 0.66rem + 0.12vw, 0.75rem);
   --text-sm:   clamp(0.75rem, 0.7rem + 0.15vw, 0.82rem);
   --text-base: clamp(0.875rem, 0.8rem + 0.2vw, 1rem);
   --text-lg:   clamp(1rem, 0.9rem + 0.3vw, 1.15rem);
-  --text-xl:   clamp(1.25rem, 1rem + 0.5vw, 1.5rem);
-  --text-2xl:  clamp(1.75rem, 1.4rem + 0.8vw, 2.25rem);
-  --text-3xl:  clamp(2rem, 1.5rem + 1.2vw, 3rem);
-  --text-4xl:  clamp(2.5rem, 1.8rem + 1.8vw, 4rem);
-  --text-hero: clamp(2.8rem, 2rem + 2.5vw, 5rem);
+  --text-xl:   clamp(1.2rem, 1rem + 0.5vw, 1.5rem);
+  --text-2xl:  clamp(1.5rem, 1.25rem + 0.9vw, 2.25rem);
+  --text-3xl:  clamp(1.65rem, 1.25rem + 1.5vw, 3rem);
+  --text-4xl:  clamp(1.75rem, 1.2rem + 2.2vw, 4rem);
+  --text-hero: clamp(2.1rem, 1.5rem + 2.8vw, 5rem);
 
   /* ── Espaciado — Múltiplos de 4px ────────────────────────────────────── */
   --space-1:   0.25rem;   /*  4px */
@@ -71,6 +78,7 @@
 
   /* ── Geometría Estricta: 0px Estructural vs 75px Ghost Pill (DESIGN.md) ── */
   --radius-none: 0px;
+  --radius-xs:   0px;
   --radius-sm:   0px;   /* Erradicación de redondeos tímidos: 0px para maquinaria/brutalismo */
   --radius-md:   0px;
   --radius-lg:   0px;

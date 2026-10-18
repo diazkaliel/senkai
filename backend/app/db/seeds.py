@@ -34,10 +34,6 @@ INITIAL_GARMENTS = [
         "photo_back": "/static/assets/garments/tshirt_back.png",
         "colors": [
             ("Negro", "#121212"),
-            ("Gris", "#61646B"),
-            ("Azul", "#142036"),
-            ("Rojo", "#B21B24"),
-            ("Blanco", "#FFFFFF"),
         ],
         "sizes": ["S", "M", "L", "XL", "XXL"]
     },
@@ -55,10 +51,6 @@ INITIAL_GARMENTS = [
         "photo_back": "/static/assets/garments/tshirt_back.png",
         "colors": [
             ("Negro", "#121212"),
-            ("Gris", "#61646B"),
-            ("Azul", "#142036"),
-            ("Rojo", "#B21B24"),
-            ("Blanco", "#FFFFFF"),
         ],
         "sizes": ["S", "M", "L", "XL"]
     },
@@ -76,10 +68,6 @@ INITIAL_GARMENTS = [
         "photo_back": "/static/assets/garments/hoodie_back.png",
         "colors": [
             ("Negro", "#121212"),
-            ("Gris", "#61646B"),
-            ("Azul", "#142036"),
-            ("Rojo", "#B21B24"),
-            ("Blanco", "#FFFFFF"),
         ],
         "sizes": ["S", "M", "L", "XL", "XXL"]
     },
@@ -97,10 +85,6 @@ INITIAL_GARMENTS = [
         "photo_back": "/static/assets/garments/crewneck_back.png",
         "colors": [
             ("Negro", "#121212"),
-            ("Gris", "#61646B"),
-            ("Azul", "#142036"),
-            ("Rojo", "#B21B24"),
-            ("Blanco", "#FFFFFF"),
         ],
         "sizes": ["S", "M", "L", "XL"]
     }
@@ -215,4 +199,39 @@ async def seed_database_if_empty(session: AsyncSession) -> None:
             )
             session.add(section_model)
         await session.commit()
+    else:
+        # Migración suave idempotente: actualizar protocolo antiguo ("Elige Prenda") a Términos y Condiciones
+        # y asegurar que lookbook cuente con categorías y subcategorías por defecto.
+        stmt_cms = select(SiteSectionContentModel)
+        existing_sections = {s.section_key: s for s in (await session.execute(stmt_cms)).scalars().all()}
+        cms_updated = False
+
+        proto_row = existing_sections.get("protocol")
+        if proto_row:
+            p_data = proto_row.payload
+            first_step_title = (p_data.get("steps") or [{}])[0].get("title", "")
+            if p_data.get("section_title") == "Secuencia Operativa DTF" or "Elige Prenda" in first_step_title:
+                proto_row.payload = DEFAULT_SECTIONS_CONTENT["protocol"]
+                cms_updated = True
+
+        lookbook_row = existing_sections.get("lookbook")
+        if lookbook_row:
+            lb_data = lookbook_row.payload
+            default_lb = DEFAULT_SECTIONS_CONTENT["lookbook"]
+            changed_lb = False
+            if not lb_data.get("categories"):
+                lb_data["categories"] = default_lb["categories"]
+                changed_lb = True
+            default_subcats = {it["id"]: it.get("subcategory") for it in default_lb["items"]}
+            for it in lb_data.get("items", []):
+                if not it.get("subcategory"):
+                    it["subcategory"] = default_subcats.get(it.get("id"), "Edición Taller")
+                    changed_lb = True
+            if changed_lb:
+                lookbook_row.payload = lb_data
+                cms_updated = True
+
+        if cms_updated:
+            await session.commit()
+
 

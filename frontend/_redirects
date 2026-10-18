@@ -1,0 +1,12 @@
+# =============================================================================
+# SENKAI DTF STUDIO // CLOUDFLARE PAGES ROUTING & REVERSE PROXY
+# =============================================================================
+
+# 1. Reverse Proxy hacia el Backend de Producción
+# Reemplaza 'https://tu-backend.onrender.com' por la URL real de tu API.
+# El código 200 le indica a Cloudflare que haga Proxy interno (sin redirección de URL en el navegador).
+/api/*  https://tu-backend.onrender.com/api/:splat  200
+
+# 2. Soporte SPA (Single Page Application)
+# Cualquier ruta directa del navegador que no sea un archivo físico cae en index.html
+/*      /index.html                                 200

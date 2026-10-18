@@ -2,7 +2,9 @@
 Endpoints para el configurador interactivo y cotizador DTF.
 """
 
-from fastapi import APIRouter, Query
+import os
+import uuid
+from fastapi import APIRouter, Query, UploadFile, File, HTTPException, status
 from app.schemas.domain import (
     DTFPrintPosition, DTFPrintSize,
     MultiPrintQuoteRequest, MultiPrintQuoteResponse
@@ -10,6 +12,80 @@ from app.schemas.domain import (
 from app.services.pricing_service import pricing_service
 
 router = APIRouter(prefix="/customizer", tags=["Configurador y Cotizador DTF"])
+
+ALLOWED_DTF_EXTENSIONS = {".png", ".jpg", ".jpeg", ".webp", ".svg", ".pdf"}
+MAX_DTF_FILE_SIZE_BYTES = 50 * 1024 * 1024  # 50 MB
+CHUNK_SIZE_BYTES = 64 * 1024
+
+
+@router.post(
+    "/upload",
+    summary="Carga binaria de archivo de diseño DTF en alta resolución",
+    status_code=status.HTTP_201_CREATED
+)
+async def upload_customizer_design(
+    file: UploadFile = File(...)
+):
+    """
+    Recibe un diseño del cliente para transfer DTF (PNG, SVG, JPG, WebP o PDF).
+    Valida el archivo y lo almacena en disco para entregar una URL pública estática,
+    eliminando la sobrecarga de transportar megabytes en Base64 en el payload de las órdenes.
+    """
+    if not file.filename:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Nombre de archivo inválido."
+        )
+
+    _, ext = os.path.splitext(file.filename.lower())
+    if ext not in ALLOWED_DTF_EXTENSIONS:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Formato no permitido '{ext}'. Formatos admitidos: {', '.join(sorted(ALLOWED_DTF_EXTENSIONS))}"
+        )
+
+    safe_name = f"dtf_{uuid.uuid4().hex[:14]}{ext}"
+    uploads_dir = os.path.abspath(
+        os.path.join(os.path.dirname(__file__), "..", "..", "..", "..", "..", "frontend", "assets", "uploads")
+    )
+    os.makedirs(uploads_dir, exist_ok=True)
+    destination_path = os.path.join(uploads_dir, safe_name)
+
+    total_bytes = 0
+    try:
+        with open(destination_path, "wb") as f:
+            while True:
+                chunk = await file.read(CHUNK_SIZE_BYTES)
+                if not chunk:
+                    break
+                total_bytes += len(chunk)
+                if total_bytes > MAX_DTF_FILE_SIZE_BYTES:
+                    f.close()
+                    if os.path.exists(destination_path):
+                        os.remove(destination_path)
+                    raise HTTPException(
+                        status_code=status.HTTP_413_CONTENT_TOO_LARGE,
+                        detail="El archivo excede el límite permitido de 50 MB."
+                    )
+                f.write(chunk)
+    except HTTPException:
+        raise
+    except Exception as exc:
+        if os.path.exists(destination_path):
+            os.remove(destination_path)
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Error durante el almacenamiento del archivo: {exc}"
+        )
+
+    return {
+        "status": "success",
+        "url": f"/static/assets/uploads/{safe_name}",
+        "filename": safe_name,
+        "original_name": file.filename,
+        "size_bytes": total_bytes
+    }
+
 
 
 @router.post("/quote-multi", response_model=MultiPrintQuoteResponse, summary="Cotización autoritativa multi-estampa libre por volumen")

@@ -4,8 +4,9 @@ Ejecuta sobre el kernel ASGI de FastAPI usando TestClient sin requerir
 un servidor externo ni abrir puertos TCP de red.
 """
 
+import os
 import pytest
-from starlette.testclient import TestClient
+from fastapi.testclient import TestClient
 
 import asyncio
 from sqlalchemy import update
@@ -18,14 +19,13 @@ from app.db.models import GarmentVariantModel
 @pytest.fixture(scope="module")
 def client():
     """Cliente de pruebas ASGI con ciclo de vida de aplicación completo e inventario verificado."""
-    async def reset_inventory():
-        async with async_session_factory() as session:
-            await session.execute(update(GarmentVariantModel).values(stock_quantity=50))
-            await session.commit()
-
-    asyncio.run(reset_inventory())
-
     with TestClient(app) as test_client:
+        async def reset_inventory():
+            async with async_session_factory() as session:
+                await session.execute(update(GarmentVariantModel).values(stock_quantity=50))
+                await session.commit()
+
+        asyncio.run(reset_inventory())
         yield test_client
 
 
@@ -131,11 +131,11 @@ def test_price_tampering_prevention(client):
     assert res.status_code == 201
     order = res.json()
 
-    # Prenda base 240g ($12.990) + estampa A4 x2 ($5.900) = $18.890 unitario
-    # Subtotal 2 un. = $37.780
+    # Prenda 240g con estampado incluido ($12.990 unitario)
+    # Subtotal 2 un. = $25.980
     # Despacho shipping = $3.990
-    # Total real = $41.770 CLP
-    expected_unit_price = 12990 + 5900
+    # Total real = $29.970 CLP
+    expected_unit_price = 12990
     expected_subtotal = expected_unit_price * 2
     expected_total = expected_subtotal + 3990
 
@@ -314,11 +314,11 @@ def test_multi_print_order_creation_and_recalculation(client):
     assert res_post.status_code == 201
     created = res_post.json()
 
-    # Base: $12.990 + A4: $5.900 + A3: $8.900 = $27.790 unitario
-    # Subtotal 2 un: $55.580
+    # Prenda con estampado incluido: $12.990 unitario
+    # Subtotal 2 un: $25.980
     # Envío: $3.990
-    # Total autoritativo: $59.570 CLP
-    expected_unit = 12990 + 5900 + 8900
+    # Total autoritativo: $29.970 CLP
+    expected_unit = 12990
     expected_subtotal = expected_unit * 2
     expected_total = expected_subtotal + 3990
 
@@ -742,5 +742,298 @@ def test_admin_analytics_metrics_calculation(client):
     assert data["logistics"]["pickup_percentage"] + data["logistics"]["shipping_percentage"] in (100.0, 0.0)
 
 
+def test_admin_garment_variants_listing_and_stock_update(client):
+    """
+    PRUEBA DE GESTIÓN DE INVENTARIO FÍSICO:
+    Verifica que el panel administrativo pueda listar variantes Talla x Color
+    y actualizar el stock de forma atómica con autenticación de taller.
+    """
+    garment_id = "garment-polera-heavyweight-240"
+    admin_headers = {"X-Workshop-Token": settings.WORKSHOP_SECRET_KEY}
 
+    # 1. Sin auth debe fallar 401
+    res_unauth = client.get(f"{settings.API_V1_PREFIX}/admin/garments/{garment_id}/variants")
+    assert res_unauth.status_code == 401
+
+    # 2. Con auth debe retornar lista de variantes
+    res_variants = client.get(
+        f"{settings.API_V1_PREFIX}/admin/garments/{garment_id}/variants",
+        headers=admin_headers
+    )
+    assert res_variants.status_code == 200
+    variants = res_variants.json()
+    assert len(variants) > 0
+
+    first_variant = variants[0]
+    variant_id = first_variant["id"]
+    assert "color_name" in first_variant
+    assert "size" in first_variant
+    assert "stock_quantity" in first_variant
+
+    # 3. Actualizar stock de la variante
+    update_payload = {"stock_quantity": 88, "is_active": True}
+    res_patch = client.patch(
+        f"{settings.API_V1_PREFIX}/admin/garments/{garment_id}/variants/{variant_id}",
+        json=update_payload,
+        headers=admin_headers
+    )
+    assert res_patch.status_code == 200
+    updated_data = res_patch.json()
+    assert updated_data["stock_quantity"] == 88
+
+    # 4. Validación negativa: stock < 0 debe fallar con 422
+    res_negative = client.patch(
+        f"{settings.API_V1_PREFIX}/admin/garments/{garment_id}/variants/{variant_id}",
+        json={"stock_quantity": -5},
+        headers=admin_headers
+    )
+    assert res_negative.status_code == 422
+
+
+def test_admin_upload_image(client):
+    """Verifica la subida de imágenes de catálogo y vitrina desde el panel."""
+    # 1. Sin autenticación -> 401
+    file_bytes = b"\x89PNG\r\n\x1a\n\x00\x00\x00\rIHDR\x00\x00\x00\x01"
+    res_unauth = client.post(
+        f"{settings.API_V1_PREFIX}/admin/upload-image",
+        files={"file": ("test.png", file_bytes, "image/png")}
+    )
+    assert res_unauth.status_code == 401
+
+    admin_headers = {"X-Workshop-Token": settings.WORKSHOP_SECRET_KEY}
+
+    # 2. Extensión no permitida -> 400
+    res_bad_ext = client.post(
+        f"{settings.API_V1_PREFIX}/admin/upload-image",
+        files={"file": ("script.exe", b"malware", "application/octet-stream")},
+        headers=admin_headers
+    )
+    assert res_bad_ext.status_code == 400
+    assert "Extensión no permitida" in res_bad_ext.json()["detail"]
+
+    # 3. Subida exitosa -> 201
+    res_ok = client.post(
+        f"{settings.API_V1_PREFIX}/admin/upload-image",
+        files={"file": ("cyber_kanji_front.png", file_bytes, "image/png")},
+        headers=admin_headers
+    )
+    assert res_ok.status_code == 201
+    data = res_ok.json()
+    assert data["status"] == "success"
+    assert data["url"].startswith("/static/assets/uploads/")
+    assert data["filename"].endswith(".png")
+
+    test_upload_path = os.path.join(
+        os.path.dirname(os.path.dirname(os.path.dirname(__file__))),
+        "frontend", "assets", "uploads", data["filename"]
+    )
+    if os.path.exists(test_upload_path):
+        os.remove(test_upload_path)
+
+    # 4. Rechazo de archivos SVG por riesgo de XSS (SEC-02) -> 400
+    svg_payload = b"<svg xmlns='http://www.w3.org/2000/svg'><script>alert('xss')</script></svg>"
+    res_svg = client.post(
+        f"{settings.API_V1_PREFIX}/admin/upload-image",
+        files={"file": ("malicious.svg", svg_payload, "image/svg+xml")},
+        headers=admin_headers
+    )
+    assert res_svg.status_code == 400
+    assert "Extensión no permitida" in res_svg.json()["detail"]
+
+    # 5. Rechazo de archivo que excede el límite de 10 MB (SEC-03) -> 413
+    oversized_bytes = b"0" * (10 * 1024 * 1024 + 1024)
+    res_oversized = client.post(
+        f"{settings.API_V1_PREFIX}/admin/upload-image",
+        files={"file": ("huge_photo.png", oversized_bytes, "image/png")},
+        headers=admin_headers
+    )
+    assert res_oversized.status_code == 413
+    assert "excede el límite" in res_oversized.json()["detail"]
+
+
+def test_customizer_upload_endpoint(client):
+    """
+    Verifica la subida binaria multipart de archivos de diseño DTF desde el personalizador.
+    Comprueba validación de formato, generación de URL estática y rechazo de extensiones inseguras.
+    """
+    # 1. Extensión no permitida -> 400
+    res_bad = client.post(
+        f"{settings.API_V1_PREFIX}/customizer/upload",
+        files={"file": ("malicious.bat", b"echo off", "application/x-bat")}
+    )
+    assert res_bad.status_code == 400
+    assert "Formato no permitido" in res_bad.json()["detail"]
+
+    # 2. Subida exitosa de diseño PNG -> 201
+    png_bytes = b"\x89PNG\r\n\x1a\n\x00\x00\x00\rIHDR\x00\x00\x00\x01\x00\x00\x00\x01\x08\x06\x00\x00\x00\x1f\x15c4\x00\x00\x00\nIDATx\x9cc\x00\x01\x00\x00\x05\x00\x01\r\n-\xb4\x00\x00\x00\x00IEND\xaeB`\x82"
+    res_png = client.post(
+        f"{settings.API_V1_PREFIX}/customizer/upload",
+        files={"file": ("my_dtf_artwork.png", png_bytes, "image/png")}
+    )
+    assert res_png.status_code == 201
+    data_png = res_png.json()
+    assert data_png["status"] == "success"
+    assert data_png["url"].startswith("/static/assets/uploads/dtf_")
+    assert data_png["filename"].endswith(".png")
+    assert data_png["size_bytes"] == len(png_bytes)
+
+    # Limpieza de archivo creado
+    upload_file_path = os.path.join(
+        os.path.dirname(os.path.dirname(os.path.dirname(__file__))),
+        "frontend", "assets", "uploads", data_png["filename"]
+    )
+    if os.path.exists(upload_file_path):
+        os.remove(upload_file_path)
+
+    # 3. Subida exitosa de diseño vectorial SVG para taller -> 201
+    svg_bytes = b'<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100"><circle cx="50" cy="50" r="40" fill="red"/></svg>'
+    res_svg = client.post(
+        f"{settings.API_V1_PREFIX}/customizer/upload",
+        files={"file": ("vector_logo.svg", svg_bytes, "image/svg+xml")}
+    )
+    assert res_svg.status_code == 201
+    data_svg = res_svg.json()
+    assert data_svg["url"].endswith(".svg")
+
+    svg_file_path = os.path.join(
+        os.path.dirname(os.path.dirname(os.path.dirname(__file__))),
+        "frontend", "assets", "uploads", data_svg["filename"]
+    )
+    if os.path.exists(svg_file_path):
+        os.remove(svg_file_path)
+
+
+def test_admin_differentiated_size_prices_and_order_calculation(client):
+    """
+    PRUEBA DE PRECIOS INDIVIDUALES POR TALLA:
+    Verifica que el administrador pueda asignar valores específicos e independientes a cada talla
+    (ej. S, XL y XXL) dentro del panel de administración, que se sincronicen con las variantes,
+    y que las órdenes calculen autoritativamente el precio según la talla seleccionada.
+    """
+    garment_id = "garment-polera-heavyweight-240"
+    admin_headers = {"X-Workshop-Token": settings.WORKSHOP_SECRET_KEY}
+
+    # 1. Asignar precio base $12.990 y valores independientes para S ($12.990), XL ($14.490) y XXL ($15.990)
+    res_patch = client.patch(
+        f"{settings.API_V1_PREFIX}/admin/garments/{garment_id}",
+        json={
+            "base_price": 12990,
+            "size_prices": {
+                "S": 12990,
+                "XL": 14490,
+                "XXL": 15990
+            }
+        },
+        headers=admin_headers
+    )
+    assert res_patch.status_code == 200
+    updated_garment = res_patch.json()
+    assert updated_garment["base_price"] == 12990
+    assert updated_garment["size_prices"].get("S") == 12990
+    assert updated_garment["size_prices"].get("XL") == 14490
+    assert updated_garment["size_prices"].get("XXL") == 15990
+
+    # 2. Verificar que las variantes en bodega reflejen custom_price en S, XL y XXL
+    res_variants = client.get(
+        f"{settings.API_V1_PREFIX}/admin/garments/{garment_id}/variants",
+        headers=admin_headers
+    )
+    assert res_variants.status_code == 200
+    variants = res_variants.json()
+    xxl_variant = next(v for v in variants if v["size"] == "XXL")
+    m_variant = next(v for v in variants if v["size"] == "M")
+    assert xxl_variant["custom_price"] == 15990
+    assert m_variant["custom_price"] is None
+
+    # 3. Crear una orden con 1 unidad talla M ($12.990) y 1 unidad talla XXL ($15.990)
+    order_payload = {
+        "customer": {
+            "full_name": "Cliente Tallas Diferenciadas",
+            "email": "tallas@senkai.cl",
+            "phone": "+56912345678",
+            "delivery_method": "pickup"
+        },
+        "items": [
+            {
+                "garment_id": garment_id,
+                "selected_color": {"name": "Negro", "hex_code": "#121212", "in_stock": True},
+                "selected_size": "M",
+                "quantity": 1
+            },
+            {
+                "garment_id": garment_id,
+                "selected_color": {"name": "Negro", "hex_code": "#121212", "in_stock": True},
+                "selected_size": "XXL",
+                "quantity": 1
+            }
+        ]
+    }
+    res_order = client.post(f"{settings.API_V1_PREFIX}/orders/", json=order_payload)
+    assert res_order.status_code == 201
+    order_data = res_order.json()
+    assert order_data["items"][0]["unit_price"] == 12990
+    assert order_data["items"][1]["unit_price"] == 15990
+    assert order_data["total_amount"] == 12990 + 15990
+
+    # 4. Restaurar todas las tallas al precio base enviando size_prices vacío
+    res_reset = client.patch(
+        f"{settings.API_V1_PREFIX}/admin/garments/{garment_id}",
+        json={"base_price": 12990, "size_prices": {}},
+        headers=admin_headers
+    )
+    assert res_reset.status_code == 200
+    assert res_reset.json()["size_prices"] == {}
+
+
+def test_admin_toggle_garment_availability_blocks_orders(client):
+    """
+    PRUEBA DE DISPONIBILIDAD DE TIPOS DE PRENDA (ENCENDER / APAGAR):
+    Verifica que el administrador pueda apagar temporalmente un tipo de prenda (ej. Oversized)
+    sin eliminarla del catálogo, bloqueando pedidos para esa prenda hasta que vuelva a encenderse.
+    """
+    garment_id = "garment-polera-heavyweight-240"
+    admin_headers = {"X-Workshop-Token": settings.WORKSHOP_SECRET_KEY}
+
+    # 1. Apagar temporalmente la prenda Oversized
+    res_off = client.patch(
+        f"{settings.API_V1_PREFIX}/admin/garments/{garment_id}",
+        json={"is_active": False},
+        headers=admin_headers
+    )
+    assert res_off.status_code == 200
+    assert res_off.json()["is_active"] is False
+
+    # 2. Verificar que sigue apareciendo en el listado de prendas (para no perderla en el admin) con is_active=False
+    res_list = client.get(f"{settings.API_V1_PREFIX}/garments/")
+    assert res_list.status_code == 200
+    found = next(g for g in res_list.json() if g["id"] == garment_id)
+    assert found["is_active"] is False
+
+    # 3. Intentar crear un pedido de la prenda apagada debe ser rechazado con 400
+    order_payload = {
+        "customer": {
+            "full_name": "Cliente Intento Oversize",
+            "email": "oversize@senkai.cl",
+            "phone": "+56912345678",
+            "delivery_method": "pickup"
+        },
+        "items": [{
+            "garment_id": garment_id,
+            "selected_color": {"name": "Negro", "hex_code": "#121212", "in_stock": True},
+            "selected_size": "L",
+            "quantity": 1
+        }]
+    }
+    res_blocked = client.post(f"{settings.API_V1_PREFIX}/orders/", json=order_payload)
+    assert res_blocked.status_code == 400
+    assert "no se encuentra disponible" in res_blocked.json()["detail"]
+
+    # 4. Volver a encender la prenda Oversized
+    res_on = client.patch(
+        f"{settings.API_V1_PREFIX}/admin/garments/{garment_id}",
+        json={"is_active": True},
+        headers=admin_headers
+    )
+    assert res_on.status_code == 200
+    assert res_on.json()["is_active"] is True
 

@@ -49,11 +49,11 @@ export class AnalyticsDashboardComponent {
     if (!this.host) return;
     this.host.innerHTML = `
       <div class="analytics-error-state">
-        <div style="font-size: 2rem; margin-bottom: 0.5rem;">⚠️</div>
+        <span class="material-symbols-outlined" style="font-size: 2.5rem; color: var(--accent-warning); margin-bottom: 0.5rem;">warning</span>
         <h4>No se pudo cargar la analítica</h4>
         <p>${message}</p>
-        <button class="btn btn-secondary" id="retryAnalyticsBtn" style="margin-top: 1rem;">
-          🔄 Reintentar Carga
+        <button class="btn btn-secondary" id="retryAnalyticsBtn" style="margin-top: 1rem; display: inline-flex; align-items: center; gap: 0.35rem;">
+          <span class="material-symbols-outlined" style="font-size: 16px;">refresh</span> Reintentar Carga
         </button>
       </div>
     `;
@@ -73,7 +73,7 @@ export class AnalyticsDashboardComponent {
         <!-- BARRA SUPERIOR DE FILTROS Y EXPORTACIÓN -->
         <div class="analytics-top-bar">
           <div class="analytics-title-group">
-            <span class="badge badge-cyan">INTELIGENCIA DE TALLER // TIEMPO REAL</span>
+            <span class="badge badge-admin">INTELIGENCIA DE TALLER // TIEMPO REAL</span>
             <h3>Rendimiento Comercial y Operativo</h3>
             <p class="analytics-subtitle">
               Analítica consolidada de los últimos <strong>${this.days} días</strong> con recálculo autoritativo.
@@ -89,8 +89,8 @@ export class AnalyticsDashboardComponent {
             </div>
 
             <!-- Botón de Exportación CSV -->
-            <button class="btn btn-secondary btn-export-csv" id="exportAnalyticsCsvBtn" title="Descargar reporte para contabilidad">
-              📥 Exportar CSV
+            <button class="btn btn-secondary btn-export-csv" id="exportAnalyticsCsvBtn" title="Descargar reporte para contabilidad" style="display: inline-flex; align-items: center; gap: 0.35rem;">
+              <span class="material-symbols-outlined" style="font-size: 16px;">download</span> Exportar CSV
             </button>
           </div>
         </div>
@@ -132,10 +132,10 @@ export class AnalyticsDashboardComponent {
 
             <div class="chart-toggle-group">
               <button class="chart-toggle-btn ${isRev ? 'active' : ''}" data-metric="revenue">
-                💵 Facturación ($)
+                <span class="material-symbols-outlined" style="font-size: 14px; vertical-align: middle;">payments</span> Facturación ($)
               </button>
               <button class="chart-toggle-btn ${!isRev ? 'active' : ''}" data-metric="orders">
-                📦 Pedidos (Cant.)
+                <span class="material-symbols-outlined" style="font-size: 14px; vertical-align: middle;">inventory_2</span> Pedidos (Cant.)
               </button>
             </div>
           </div>
@@ -208,7 +208,7 @@ export class AnalyticsDashboardComponent {
               </div>
 
               <div class="logistics-callout">
-                <span>💡</span>
+                <span class="material-symbols-outlined" style="font-size: 16px; color: var(--accent-admin);">info</span>
                 <span>El retiro en taller agiliza los tiempos de entrega eliminando la espera de courier externo.</span>
               </div>
             </div>

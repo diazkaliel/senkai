@@ -1,0 +1,15 @@
+venv/
+.venv/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.pytest_cache/
+.git/
+.gitignore
+*.db
+*.db-shm
+*.db-wal
+backups/
+node_modules/
+.env

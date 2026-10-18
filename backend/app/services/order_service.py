@@ -60,8 +60,24 @@ class OrderService:
         items_to_deduct: List[Dict[str, Any]] = []
         subtotal_accumulated = 0
 
+        # Consultar precios oficiales de vitrina (Lookbook) por si el ítem proviene directamente del catálogo
+        lookbook_prices_by_name: Dict[str, int] = {}
+        try:
+            from app.services.content_service import content_service
+            consolidated = await content_service.get_consolidated_content(session)
+            if consolidated and consolidated.lookbook and consolidated.lookbook.items:
+                for lb_it in consolidated.lookbook.items:
+                    if lb_it.name and lb_it.price:
+                        lookbook_prices_by_name[lb_it.name.strip()] = int(lb_it.price)
+        except Exception:
+            pass
+
         for item in payload.items:
             garment = await self.catalog.require_garment_async(session, item.garment_id)
+            if not garment.is_active:
+                raise ValueError(
+                    f"El tipo de prenda '{garment.name}' no se encuentra disponible temporalmente para pedidos."
+                )
 
             # Normalizar estampas (soporte para formato multi-print y legado dtf_config)
             prints_to_process = list(item.prints)
@@ -81,23 +97,37 @@ class OrderService:
                     )
                 )
 
-            # Cálculo autoritativo de transfers DTF
-            dtf_unit_cost = 0
+            # Registro técnico de transfers DTF (el valor de la prenda o talla ya incluye el estampado)
             verified_prints: List[DTFPrintItem] = []
             if prints_to_process:
                 quote = self.pricing.calculate_multi_prints_price(prints_to_process, quantity=item.quantity)
-                dtf_unit_cost = quote["unit_dtf_total"]
-                verified_prints = quote["prints"]
+                verified_prints = [
+                    p.model_copy(update={"calculated_dtf_cost": 0})
+                    for p in quote["prints"]
+                ]
 
-            # Valor final del ítem textil
-            unit_price = garment.base_price + dtf_unit_cost
+            # Valor final del ítem textil (considerando precio diferenciado por talla si fue asignado)
+            size_key = item.selected_size.value if hasattr(item.selected_size, "value") else str(item.selected_size)
+            size_prices_map = getattr(garment, "size_prices", None) or {}
+            effective_garment_price = size_prices_map.get(size_key, garment.base_price)
+
+            # Si la prenda fue agregada directamente desde el Catálogo Lookbook, usar su precio oficial
+            raw_item_name = (item.garment_name or "").strip()
+            resolved_garment_name = garment.name
+            if raw_item_name and raw_item_name in lookbook_prices_by_name:
+                lb_base_price = lookbook_prices_by_name[raw_item_name]
+                size_delta = (size_prices_map[size_key] - garment.base_price) if size_key in size_prices_map else 0
+                effective_garment_price = max(1000, lb_base_price + size_delta)
+                resolved_garment_name = raw_item_name
+
+            unit_price = effective_garment_price
             item_subtotal = unit_price * item.quantity
             subtotal_accumulated += item_subtotal
 
             verified_items.append(
                 OrderItemResponse(
                     garment_id=garment.id,
-                    garment_name=garment.name,
+                    garment_name=resolved_garment_name,
                     selected_color=item.selected_color,
                     selected_size=item.selected_size,
                     prints=verified_prints,
@@ -116,7 +146,7 @@ class OrderService:
                 OrderItemModel(
                     id=str(uuid.uuid4()),
                     garment_id=garment.id,
-                    garment_name=garment.name,
+                    garment_name=resolved_garment_name,
                     selected_color_name=item.selected_color.name,
                     selected_color_hex=item.selected_color.hex_code,
                     selected_size=item.selected_size.value,

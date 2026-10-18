@@ -1,0 +1,64 @@
+/* Pie de página con enlaces legales, redes sociales y créditos de taller. */
+
+/* --------------------------------------------------------------------------
+   7. FOOTER
+   -------------------------------------------------------------------------- */
+.site-footer {
+  background: var(--bg-main);
+  border-top: 1px solid var(--border-subtle);
+  padding: var(--space-12) 0 var(--space-8);
+}
+
+.footer-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--space-8);
+  margin-bottom: var(--space-10);
+}
+
+@media (min-width: 769px) {
+  .footer-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+.footer-brand {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  align-items: flex-start;
+}
+
+.footer-contact, .footer-legal {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.footer-social-link, .footer-legal-link {
+  display: inline-flex;
+  align-items: center;
+  min-height: 34px;
+  padding: 0.2rem 0;
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+  color: var(--text-muted);
+  text-decoration: none;
+  transition: color var(--transition-fast);
+  text-transform: uppercase;
+}
+
+.footer-social-link:hover, .footer-social-link:focus-visible,
+.footer-legal-link:hover, .footer-legal-link:focus-visible {
+  color: var(--text-primary);
+}
+
+.footer-social-link:focus-visible, .footer-legal-link:focus-visible {
+  outline: 2px solid var(--border-focus);
+  outline-offset: 2px;
+  border-radius: var(--radius-sm);
+}
+
+.footer-legal-link {
+  font-size: var(--text-xs);
+}

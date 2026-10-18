@@ -41,6 +41,10 @@ COPY --chown=appuser:senkai frontend /app/frontend
 COPY --chown=appuser:senkai alembic /app/alembic
 COPY --chown=appuser:senkai alembic.ini /app/alembic.ini
 
+# Crear directorios para persistencia (uploads, backups, SQLite WAL) con permisos adecuados para appuser
+RUN mkdir -p /app/backups /app/frontend/assets/uploads && \
+    chown -R appuser:senkai /app
+
 USER appuser
 
 EXPOSE 8000
@@ -49,4 +53,4 @@ EXPOSE 8000
 HEALTHCHECK --interval=30s --timeout=5s --start-period=5s --retries=3 \
     CMD python -c "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/health')" || exit 1
 
-CMD ["python", "-m", "uvicorn", "app.main:app", "--app-dir", "backend", "--host", "0.0.0.0", "--port", "8000"]
+CMD ["python", "-m", "uvicorn", "app.main:app", "--app-dir", "backend", "--host", "0.0.0.0", "--port", "8000", "--proxy-headers", "--forwarded-allow-ips=*", "--no-server-header"]

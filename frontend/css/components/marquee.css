@@ -1,0 +1,88 @@
+/* Ticker / Marquee industrial con cinta de desplazamiento continuo en bucle. */
+
+/* --------------------------------------------------------------------------
+   2. MARQUEE / TICKER INDUSTRIAL
+   -------------------------------------------------------------------------- */
+.marquee-container {
+  width: 100%;
+  overflow: hidden;
+  background: var(--bg-surface);
+  border-top: 1px solid var(--border-subtle);
+  border-bottom: 1px solid var(--border-subtle);
+  padding: 0.85rem 0;
+  user-select: none;
+  white-space: nowrap;
+  position: relative;
+}
+
+.marquee-container::before,
+.marquee-container::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 80px;
+  z-index: 2;
+  pointer-events: none;
+}
+
+.marquee-container::before {
+  left: 0;
+  background: linear-gradient(90deg, var(--bg-main), transparent);
+}
+
+.marquee-container::after {
+  right: 0;
+  background: linear-gradient(-90deg, var(--bg-main), transparent);
+}
+
+.marquee-content {
+  display: inline-flex;
+  gap: 3rem;
+  animation: marquee-scroll 22s linear infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .marquee-content {
+    animation: none;
+  }
+}
+
+.marquee-item {
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+  font-weight: 700;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.marquee-item .highlight {
+  color: var(--accent-primary);
+}
+
+@keyframes marquee-scroll {
+  from { transform: translateX(0); }
+  to   { transform: translateX(-50%); }
+}
+
+.marquee-track-reverse {
+  background: var(--bg-main);
+  border-top: none;
+  border-bottom: 1px solid var(--border-subtle);
+  padding: 0.6rem 0;
+}
+
+.marquee-track-reverse .marquee-item {
+  font-size: var(--text-xs);
+  color: var(--text-muted);
+  letter-spacing: 0.12em;
+}
+
+.marquee-track-reverse .marquee-item .highlight {
+  color: var(--text-primary);
+}
+

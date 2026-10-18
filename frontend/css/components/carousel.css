@@ -1,0 +1,775 @@
+/* Carrusel industrial de lanzamientos destacados (Drop Index) con efecto tilt 3D y barras de progreso. */
+
+/* --------------------------------------------------------------------------
+   EDITORIAL DROP INDEX (CARRUSEL INDUSTRIAL SENKAI // LANZAMIENTOS DESTACADOS)
+   -------------------------------------------------------------------------- */
+@keyframes drop-rail-fill {
+  from { transform: scaleX(0); }
+  to   { transform: scaleX(1); }
+}
+
+.drop-index {
+  position: relative;
+  padding: var(--space-8) 0 var(--space-12);
+  width: 100%;
+}
+
+/* Encabezado editorial con título y controles de taller */
+.drop-index__head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  margin-bottom: var(--space-6);
+  gap: var(--space-4);
+  flex-wrap: wrap;
+}
+
+.drop-index__title {
+  font-family: var(--font-display);
+  font-size: clamp(1.85rem, 1.4rem + 1.4vw, 2.85rem);
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  text-transform: uppercase;
+  color: var(--text-primary);
+  margin: 0;
+  line-height: 1;
+  display: flex;
+  align-items: baseline;
+  gap: 0.5rem;
+}
+
+.drop-index__count {
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+  font-weight: 500;
+  color: var(--accent-primary);
+  letter-spacing: 0.08em;
+  top: -0.5em;
+}
+
+.drop-index__controls {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  flex-wrap: wrap;
+}
+
+/* Botones de control con silueta Ghost Pill (75px según DESIGN.md) */
+.drop-ctl {
+  background: transparent;
+  border: 1px solid var(--border-default);
+  color: var(--text-primary);
+  height: 40px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-pill);
+  cursor: pointer;
+  transition: all 0.35s var(--ease-editorial);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.drop-ctl:hover {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: #ffffff;
+}
+
+.drop-ctl:focus-visible {
+  outline: 2px solid var(--border-focus);
+  outline-offset: 3px;
+}
+
+.drop-ctl--play {
+  padding: 0 16px;
+  gap: 8px;
+  font-weight: 600;
+}
+
+.drop-ctl__dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--accent-success);
+  box-shadow: 0 0 6px rgba(34, 197, 94, 0.6);
+  transition: all 0.3s var(--ease-editorial);
+}
+
+.drop-index.is-manual .drop-ctl__dot,
+.drop-ctl[data-state="stopped"] .drop-ctl__dot {
+  background: var(--accent-warning);
+  box-shadow: 0 0 6px rgba(245, 158, 11, 0.5);
+}
+
+.drop-ctl--arrow {
+  width: 40px;
+  padding: 0;
+}
+
+.drop-ctl--arrow:hover {
+  transform: scale(1.04);
+}
+
+.drop-index__counter {
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  font-weight: 600;
+  color: var(--text-muted);
+  letter-spacing: 0.14em;
+  min-width: 4.8rem;
+  text-align: center;
+  margin: 0;
+}
+
+.drop-index__counter-current {
+  color: var(--text-primary);
+  font-size: var(--text-sm);
+  font-weight: 800;
+}
+
+.drop-index__counter-sep {
+  opacity: 0.4;
+  margin: 0 2px;
+}
+
+/* Viewport y riel de desplazamiento nativo */
+.drop-index__viewport {
+  position: relative;
+  width: 100%;
+  transition: opacity 0.22s var(--ease-editorial);
+}
+
+.drop-index__viewport.is-wrapping {
+  opacity: 0;
+}
+
+.drop-index__track {
+  display: flex;
+  gap: var(--space-6);
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  scroll-behavior: smooth;
+  overscroll-behavior-inline: contain;
+  padding: var(--space-2) 0;
+  list-style: none;
+  margin: 0;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  outline: none;
+}
+
+.drop-index__track::-webkit-scrollbar {
+  display: none;
+}
+
+.drop-index__track:focus-visible {
+  outline: 2px solid var(--border-focus);
+  outline-offset: 4px;
+}
+
+/* Slide individual: Tarjeta editorial de alta resolución */
+.drop-slide {
+  flex: 0 0 100%;
+  scroll-snap-align: center;
+  scroll-snap-stop: always;
+  display: grid;
+  grid-template-columns: minmax(0, 1.15fr) minmax(0, 0.85fr);
+  background: var(--bg-surface);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-none); /* 0px brutalista según DESIGN.md */
+  position: relative;
+  overflow: hidden;
+  transition: border-color var(--transition-normal);
+}
+
+.drop-slide:hover {
+  border-color: var(--border-strong);
+}
+
+/* 1. Stage: Visor fotográfico con numeral, guías y tilt interactivo (Fondo contrastante para prendas negras) */
+.drop-slide__stage {
+  position: relative;
+  min-height: 480px;
+  background: var(--bg-garment-stage, radial-gradient(circle at 50% 42%, #e6e6ec 0%, #c4c4cf 100%));
+  background-color: var(--bg-garment-stage-solid, #d4d4de);
+  border-right: 1px solid var(--border-subtle);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+/* Numeral industrial translúcido como marca de agua */
+.drop-slide__numeral {
+  position: absolute;
+  top: 4%;
+  left: 6%;
+  font-family: var(--font-display);
+  font-size: clamp(7rem, 14vw, 13rem);
+  font-weight: 900;
+  color: rgba(15, 15, 22, 0.075);
+  line-height: 0.8;
+  user-select: none;
+  pointer-events: none;
+  letter-spacing: -0.05em;
+}
+
+/* Guías de taller y drafting */
+.drop-slide__guide {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background-image:
+    linear-gradient(to right, var(--grid-garment-stage, rgba(15, 15, 22, 0.065)) 1px, transparent 1px),
+    linear-gradient(to bottom, var(--grid-garment-stage, rgba(15, 15, 22, 0.065)) 1px, transparent 1px);
+  background-size: 32px 32px;
+  opacity: 0.8;
+}
+
+.drop-slide__frame {
+  position: relative;
+  width: 86%;
+  height: 86%;
+  max-width: 520px;
+  max-height: 520px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  perspective: 1400px;
+}
+
+.drop-slide__tilt {
+  width: 100%;
+  height: 100%;
+  transform: perspective(1000px) rotateX(calc(var(--my, 0) * -3.5deg)) rotateY(calc(var(--mx, 0) * 3.5deg));
+  transition: transform 0.15s ease-out;
+  transform-style: preserve-3d;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.drop-slide__flipper {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  transform-style: preserve-3d;
+  transition: transform 0.65s var(--ease-editorial);
+}
+
+.drop-slide__flipper.is-flipped {
+  transform: rotateY(180deg);
+}
+
+.drop-slide__face {
+  position: absolute;
+  inset: 0;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  transform-style: preserve-3d;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.drop-slide__face--front {
+  transform: rotateY(0deg);
+  z-index: 2;
+}
+
+.drop-slide__face--back {
+  transform: rotateY(180deg);
+  z-index: 1;
+}
+
+.drop-slide__face .photorealistic-garment-stage {
+  width: 95%;
+  height: 95%;
+  position: relative;
+}
+
+.drop-slide__art {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.drop-slide__art svg,
+.drop-slide__art img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  filter: drop-shadow(0 4px 14px rgba(0, 0, 0, 0.7));
+}
+
+/* Indicador técnico inferior en el stage */
+.drop-slide__readout {
+  position: absolute;
+  bottom: var(--space-4);
+  left: var(--space-4);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--text-muted);
+  letter-spacing: 0.08em;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(8, 8, 10, 0.85);
+  backdrop-filter: blur(8px);
+  padding: 4px 12px;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-none);
+  margin: 0;
+  z-index: 12;
+}
+
+.drop-slide__reg {
+  width: 6px;
+  height: 6px;
+  border: 1px solid var(--accent-primary);
+  border-radius: 50%;
+  display: inline-block;
+}
+
+/* Conmutador de vista Frente / Espalda con Ghost Pills */
+.drop-slide__views {
+  position: absolute;
+  top: var(--space-4);
+  right: var(--space-4);
+  display: inline-flex;
+  gap: 4px;
+  background: rgba(8, 8, 10, 0.85);
+  backdrop-filter: blur(8px);
+  padding: 3px;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-pill);
+  z-index: 15;
+}
+
+.drop-chip {
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  padding: 6px 14px;
+  min-height: 32px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-pill);
+  cursor: pointer;
+  transition: all 0.25s var(--ease-editorial);
+  font-weight: 600;
+}
+
+.drop-chip:hover {
+  color: var(--text-primary);
+}
+
+.drop-chip:focus-visible {
+  outline: 2px solid var(--border-focus);
+  outline-offset: 2px;
+}
+
+.drop-chip[aria-pressed="true"] {
+  background: #ffffff;
+  color: #000000;
+  font-weight: 800;
+}
+
+/* 2. Sheet: Ficha técnica y llamada a la acción en taller */
+.drop-slide__sheet {
+  padding: var(--space-8);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: var(--space-5);
+  background: var(--bg-surface);
+}
+
+.drop-slide__code {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+  flex-wrap: wrap;
+  margin: 0;
+}
+
+.drop-slide__line {
+  color: var(--accent-primary);
+  font-weight: 700;
+}
+
+.drop-slide__name {
+  font-family: var(--font-display);
+  font-size: clamp(1.4rem, 1.1rem + 1.2vw, 2.35rem);
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: -0.02em;
+  color: var(--text-primary);
+  margin: 0;
+  line-height: 1.1;
+}
+
+.drop-slide__desc {
+  font-family: var(--font-body);
+  font-size: var(--text-sm);
+  color: var(--text-secondary);
+  line-height: 1.6;
+  margin: 0;
+  max-width: 520px;
+}
+
+.drop-slide__specs {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--space-3) var(--space-4);
+  padding: var(--space-4) 0;
+  border-top: 1px solid var(--border-subtle);
+  border-bottom: 1px solid var(--border-subtle);
+  margin: 0;
+}
+
+.drop-slide__specs dt {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--text-muted);
+  margin-bottom: 2px;
+}
+
+.drop-slide__specs dd {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin: 0;
+}
+
+.drop-slide__colors {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.drop-slide__label {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  margin: 0;
+}
+
+.drop-slide__label span {
+  color: var(--text-primary);
+  font-weight: 700;
+  margin-left: 4px;
+}
+
+.drop-slide__swatches {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.drop-swatch {
+  width: 32px;
+  height: 32px;
+  border-radius: var(--radius-pill);
+  border: 2px solid transparent;
+  background: var(--swatch);
+  cursor: pointer;
+  transition: all 0.25s var(--ease-editorial);
+  outline-offset: 2px;
+  position: relative;
+}
+
+.drop-swatch:hover {
+  transform: scale(1.12);
+}
+
+.drop-swatch:focus-visible {
+  outline: 2px solid var(--border-focus);
+}
+
+.drop-swatch[aria-pressed="true"] {
+  border-color: #ffffff;
+  box-shadow: 0 0 0 2px var(--bg-surface), 0 0 10px rgba(255, 255, 255, 0.45);
+  transform: scale(1.12);
+}
+
+.drop-slide__buy {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-4);
+  margin-top: var(--space-2);
+  flex-wrap: wrap;
+}
+
+.drop-slide__price {
+  margin: 0;
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+}
+
+.drop-slide__price-value {
+  font-family: var(--font-display);
+  font-size: clamp(1.4rem, 1.15rem + 0.6vw, 2.1rem);
+  font-weight: 900;
+  color: var(--text-primary);
+  letter-spacing: -0.02em;
+}
+
+.drop-slide__price-unit {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--text-muted);
+  letter-spacing: 0.12em;
+}
+
+.drop-slide__cta {
+  border-radius: var(--radius-pill);
+  height: 46px;
+  padding: 0 24px;
+  font-size: 12px;
+  letter-spacing: 0.1em;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  font-weight: 700;
+}
+
+/* 3. Rail de Navegación Segmentado (Story Progress Bars) */
+.drop-rail {
+  margin-top: var(--space-6);
+  width: 100%;
+}
+
+.drop-rail__list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: var(--space-3);
+}
+
+.drop-rail__btn {
+  width: 100%;
+  min-height: 36px;
+  background: transparent;
+  border: none;
+  padding: var(--space-2) 0;
+  cursor: pointer;
+  text-align: left;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  transition: opacity 0.2s var(--ease-editorial);
+}
+
+.drop-rail__bar {
+  position: relative;
+  width: 100%;
+  height: 2px;
+  background: var(--border-default);
+  overflow: hidden;
+}
+
+.drop-rail__fill {
+  position: absolute;
+  inset: 0;
+  background: #ffffff;
+  transform-origin: left;
+  transform: scaleX(0);
+}
+
+.drop-rail__btn.is-active .drop-rail__fill {
+  animation: drop-rail-fill var(--drop-interval, 6500ms) linear forwards;
+}
+
+.drop-rail__btn.is-done .drop-rail__fill {
+  transform: scaleX(1);
+}
+
+.drop-index.is-manual .drop-rail__fill,
+.drop-index.is-held .drop-rail__fill {
+  animation-play-state: paused;
+}
+
+.drop-rail__meta {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--text-muted);
+  transition: color 0.2s var(--ease-editorial);
+}
+
+.drop-rail__btn:hover .drop-rail__meta,
+.drop-rail__btn.is-active .drop-rail__meta {
+  color: var(--text-primary);
+}
+
+.drop-rail__num {
+  font-weight: 700;
+}
+
+.drop-rail__name {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  flex: 1;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.drop-rail__chip {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--swatch);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  flex-shrink: 0;
+}
+
+/* Estado de carrusel vacío */
+.drop-index--empty {
+  padding: var(--space-12) 0;
+  text-align: center;
+}
+
+.drop-index__empty {
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+  color: var(--text-muted);
+}
+
+/* Adaptación Responsiva */
+@media (max-width: 900px) {
+  .drop-slide {
+    grid-template-columns: 1fr;
+  }
+
+  .drop-slide__stage {
+    border-right: none;
+    border-bottom: 1px solid var(--border-subtle);
+    aspect-ratio: 4 / 3;
+    min-height: 300px;
+  }
+
+  .drop-slide__sheet {
+    padding: var(--space-5);
+  }
+
+  .drop-rail__list {
+    display: flex;
+    overflow-x: auto;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+    gap: var(--space-2);
+  }
+
+  .drop-rail__list::-webkit-scrollbar {
+    display: none;
+  }
+
+  .drop-rail__item {
+    flex: 0 0 140px;
+  }
+}
+
+@media (max-width: 600px) {
+  .drop-index {
+    padding: var(--space-6) 0 var(--space-8);
+  }
+
+  .drop-index__head {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--space-3);
+  }
+
+  .drop-index__controls {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .drop-slide__stage {
+    min-height: 260px;
+    aspect-ratio: 1 / 1;
+  }
+
+  .drop-slide__readout {
+    bottom: var(--space-2);
+    left: var(--space-2);
+    right: var(--space-2);
+    padding: 4px 8px;
+    font-size: 11px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .drop-slide__views {
+    top: var(--space-2);
+    right: var(--space-2);
+  }
+
+  .drop-slide__sheet {
+    padding: var(--space-4);
+    gap: var(--space-4);
+  }
+
+  .drop-slide__buy {
+    flex-direction: column;
+    align-items: stretch;
+    gap: var(--space-3);
+  }
+
+  .drop-slide__cta {
+    width: 100%;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .drop-index__track {
+    scroll-behavior: auto;
+  }
+  .drop-slide__tilt {
+    transform: none !important;
+  }
+  .drop-slide__flipper {
+    transition-duration: 0.01ms !important;
+  }
+  .drop-rail__fill {
+    animation: none !important;
+  }
+  .drop-rail__btn.is-active .drop-rail__fill {
+    transform: scaleX(1) !important;
+  }
+}

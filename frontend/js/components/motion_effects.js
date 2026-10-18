@@ -225,8 +225,17 @@ function initCard3DTilt() {
     rafId = null;
     if (!latestEvent) return;
 
+    // Si el usuario está calibrando o arrastrando una estampa DTF, suspendemos el tilt para no falsear coordenadas
+    if (document.querySelector('.is-canvas-dragging, .dtf-print-draggable.is-dragging')) {
+      if (activeCard) {
+        activeCard.style.transform = '';
+        activeCard = null;
+      }
+      return;
+    }
+
     const e = latestEvent;
-    const card = e.target.closest('.collection-card-pro, .hero-side-card, .protocol-card');
+    const card = e.target.closest('.collection-card-pro, .hero-side-card, .protocol-card, .visualizer-card');
     if (!card) {
       if (activeCard) {
         activeCard.style.transform = '';
@@ -244,11 +253,11 @@ function initCard3DTilt() {
     const normX = (e.clientX - rect.left) / rect.width - 0.5;
     const normY = (e.clientY - rect.top) / rect.height - 0.5;
 
-    // Ángulo controlado y acotado (tope estricto de 3.5deg en rotateX y rotateY)
+    // Ángulo controlado y acotado (tope estricto de 3.5deg en rotateX y rotateY según DESIGN.md)
     const rotY = Math.max(-3.5, Math.min(3.5, Math.round(normX * 3.5 * 10) / 10));
     const rotX = Math.max(-3.5, Math.min(3.5, Math.round(-normY * 3.5 * 10) / 10));
 
-    card.style.transform = `perspective(1000px) rotateX(${rotX}deg) rotateY(${rotY}deg) translateY(-3px)`;
+    card.style.transform = `perspective(1200px) rotateX(${rotX}deg) rotateY(${rotY}deg) translateY(-2px)`;
   };
 
   document.addEventListener('mousemove', (e) => {
@@ -365,20 +374,9 @@ function initMobileNav() {
 }
 
 // ============================================================================
-// 12. TEXTURA SCANLINES (Atelier CRT analógico muy sutil)
-// ============================================================================
-function initScanlines() {
-  const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-  if (!prefersReducedMotion && document.body) {
-    document.body.classList.add('scanlines');
-  }
-}
-
-// ============================================================================
 // INICIALIZACIÓN Y REACTIVIDAD ANTE CAMBIOS DINÁMICOS DEL DOM
 // ============================================================================
 document.addEventListener('DOMContentLoaded', () => {
-  initScanlines();
   initNavbarScrollBehavior();
   initScrollReveal();
   initStaggeredReveal();

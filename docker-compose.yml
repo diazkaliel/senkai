@@ -7,14 +7,22 @@ services:
     restart: unless-stopped
     ports:
       - "8000:8000"
+    env_file:
+      - .env
     environment:
-      - DATABASE_URL=sqlite+aiosqlite:///./senkai_studio.db
-      - WORKSHOP_SECRET_KEY=senkai-taller-secret-key-2026
+      # Valores de fallback en caso de que no existan en .env
+      - DATABASE_URL=${DATABASE_URL:-sqlite+aiosqlite:///./senkai_studio.db}
+      - ENVIRONMENT=${ENVIRONMENT:-production}
     volumes:
       # Persistencia de base de datos local SQLite
       - ./senkai_studio.db:/app/senkai_studio.db
+      # Persistencia de artes y fotos subidas por clientes y administradores
+      - ./frontend/assets/uploads:/app/frontend/assets/uploads
+      # Persistencia de respaldos automatizados (.db.gz)
+      - ./backups:/app/backups
     healthcheck:
       test: ["CMD-SHELL", "python -c \"import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/health')\""]
       interval: 30s
       timeout: 5s
       retries: 3
+
