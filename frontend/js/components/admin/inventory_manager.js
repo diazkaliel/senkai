@@ -1,11 +1,11 @@
-/**
+﻿/**
  * SENKAI // GESTOR DE INVENTARIO FÍSICO, MATRIZ DE STOCK Y PRECIOS OFICIALES
  * Módulo para control de existencias por Talla x Color, alerta de stock crítico,
  * edición de precios base de tela y sincronización directa con los precios de la página web principal.
  */
 
-import { apiService } from '../../services/api.js';
-import { DEFAULT_LOOKBOOK_ITEMS, DEFAULT_LOOKBOOK_CATEGORIES } from './cms/cms_lookbook.js';
+import { apiService } from '../../services/api.js?v=20261018_v3';
+import { DEFAULT_LOOKBOOK_ITEMS, DEFAULT_LOOKBOOK_CATEGORIES } from './cms/cms_lookbook.js?v=20261018_v3';
 
 export class InventoryManagerComponent {
   constructor(containerElement, garments = []) {

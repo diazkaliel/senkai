@@ -1,5 +1,5 @@
-import { SVG_GARMENTS } from './svg_templates.js';
-import { COLLECTION_ITEMS, DEFAULT_CATALOG_CATEGORIES } from '../data/collection_items.js';
+﻿import { SVG_GARMENTS } from './svg_templates.js?v=20261018_v3';
+import { COLLECTION_ITEMS, DEFAULT_CATALOG_CATEGORIES } from '../data/collection_items.js?v=20261018_v3';
 
 export { COLLECTION_ITEMS, DEFAULT_CATALOG_CATEGORIES };
 

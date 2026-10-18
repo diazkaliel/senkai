@@ -1,4 +1,4 @@
-/**
+﻿/**
  * SENKAI // Carrusel de lanzamientos destacados
  *
  * Cómo está armado:
@@ -11,8 +11,8 @@
  *   vuelva a llamar a init() cuando se refresca el catálogo.
  */
 
-import { COLLECTION_ITEMS, resolveItemPrice, buildCatalogCartItem } from './catalog.js';
-import { SVG_GARMENTS } from './svg_templates.js';
+import { COLLECTION_ITEMS, resolveItemPrice, buildCatalogCartItem } from './catalog.js?v=20261018_v3';
+import { SVG_GARMENTS } from './svg_templates.js?v=20261018_v3';
 
 const FILL_ANIMATION = 'drop-rail-fill';
 const SLIDE_VISIBLE_RATIO = 0.6;

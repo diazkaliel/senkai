@@ -1,8 +1,8 @@
-// Submódulo del Personalizador: Enlace de eventos del DOM y controles de usuario.
+﻿// Submódulo del Personalizador: Enlace de eventos del DOM y controles de usuario.
 // Acá centralizo la escucha de clics, inputs de calibración, subida de archivos
 // y conecto el drag & drop del lienzo interactivo con el estado del estudio.
 
-import { attachDragController } from './drag_controller.js';
+import { attachDragController } from './drag_controller.js?v=20261018_v3';
 
 export function attachCustomizerEvents(container, studio) {
   if (!container || !studio) return;

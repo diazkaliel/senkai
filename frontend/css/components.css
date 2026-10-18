@@ -1,16 +1,16 @@
-/* ==========================================================================
+﻿/* ==========================================================================
    SENKAI // COMPONENTES MODULARES (Dark Industrial Editorial)
    Punto de entrada unificado para los estilos del storefront.
    Acá importo cada bloque de la interfaz desacoplado según su responsabilidad,
    manteniendo el orden estricto de la cascada CSS.
    ========================================================================== */
 
-@import url("./components/navbar.css?v=20261018_studio");
-@import url("./components/stats_band.css?v=20261018_studio");
-@import url("./components/marquee.css?v=20261018_studio");
-@import url("./components/hero.css?v=20261018_studio");
-@import url("./components/collection.css?v=20261018_studio");
-@import url("./components/carousel.css?v=20261018_studio");
-@import url("./components/protocol.css?v=20261018_studio");
-@import url("./components/cart_modals.css?v=20261018_studio");
-@import url("./components/footer.css?v=20261018_studio");
+@import url("./components/navbar.css?v=20261018_v3");
+@import url("./components/stats_band.css?v=20261018_v3");
+@import url("./components/marquee.css?v=20261018_v3");
+@import url("./components/hero.css?v=20261018_v3");
+@import url("./components/collection.css?v=20261018_v3");
+@import url("./components/carousel.css?v=20261018_v3");
+@import url("./components/protocol.css?v=20261018_v3");
+@import url("./components/cart_modals.css?v=20261018_v3");
+@import url("./components/footer.css?v=20261018_v3");

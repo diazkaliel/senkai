@@ -1,7 +1,7 @@
-// Módulo público de rastreo de pedidos en tiempo real por número de orden (ej. SNK-2026-0001).
+﻿// Módulo público de rastreo de pedidos en tiempo real por número de orden (ej. SNK-2026-0001).
 // Permite al cliente consultar en qué etapa técnica del taller se encuentra su pedido.
 
-import { apiService } from '../services/api.js';
+import { apiService } from '../services/api.js?v=20261018_v3';
 
 const LAST_ORDER_STORAGE_KEY = 'senkai_last_order_number';
 

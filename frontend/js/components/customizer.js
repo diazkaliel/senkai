@@ -1,22 +1,22 @@
-// Coordinador principal de la mesa de personalización textil DTF (Senkai Studio).
+﻿// Coordinador principal de la mesa de personalización textil DTF (Senkai Studio).
 // Acá orquesto el estado reactivo de la prenda (color, talla, cara activa),
 // conecto el visor 3D con la consola de taller e integro la cotización en tiempo real.
 
-import { PRESET_ARTWORKS } from './svg_templates.js';
-import { apiService } from '../services/api.js';
-import { notificationService } from '../services/notification_service.js';
-import { attachCustomizerEvents } from './customizer/customizer_events.js';
+import { PRESET_ARTWORKS } from './svg_templates.js?v=20261018_v3';
+import { apiService } from '../services/api.js?v=20261018_v3';
+import { notificationService } from '../services/notification_service.js?v=20261018_v3';
+import { attachCustomizerEvents } from './customizer/customizer_events.js?v=20261018_v3';
 import {
   renderVisualizerStage,
   renderDraggablePrintMarkup,
   getGarmentSvgMarkup,
   getPrintArtworkMarkup,
   getPrintBaseDimensions
-} from './customizer/customizer_stage.js';
+} from './customizer/customizer_stage.js?v=20261018_v3';
 import {
   renderAtelierConsole,
   getGarmentThumbType
-} from './customizer/customizer_steps.js';
+} from './customizer/customizer_steps.js?v=20261018_v3';
 
 const CUSTOMIZER_DRAFT_KEY = 'senkai_customizer_draft_v1';
 

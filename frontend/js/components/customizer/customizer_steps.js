@@ -1,10 +1,10 @@
-// Submódulo del Personalizador: Pasos guiados de configuración textil (Atelier Console).
+﻿// Submódulo del Personalizador: Pasos guiados de configuración textil (Atelier Console).
 // Divido la consola en 3 pasos ordenados:
 // 1. Silueta textil, gama de colores y tabla de tallas.
 // 2. Personalización gráfica (carga de arte, controles milimétricos y centrado).
 // 3. Cantidad de lote con escala de descuentos y desglose de cotización.
 
-import { SVG_GARMENT_THUMBS } from '../svg_templates.js';
+import { SVG_GARMENT_THUMBS } from '../svg_templates.js?v=20261018_v3';
 
 // Mapeo la categoría del producto al tipo de miniatura vectorial que le corresponde
 export function getGarmentThumbType(category) {

@@ -1,10 +1,10 @@
-// Centro de Gestión de Pedidos y Operaciones de Taller (Senkai Studio).
+﻿// Centro de Gestión de Pedidos y Operaciones de Taller (Senkai Studio).
 // Provee una vista de tabla operativa maestra con búsqueda en tiempo real, filtros por estado,
 // transiciones de máquina de estados seguras, descarga de órdenes en PDF y acceso a fichas técnicas.
 
-import { apiService, normalizeItemPrints } from '../../services/api.js';
-import { downloadOrderDossier } from '../../services/order_document_service.js';
-import { notificationService } from '../../services/notification_service.js';
+import { apiService, normalizeItemPrints } from '../../services/api.js?v=20261018_v3';
+import { downloadOrderDossier } from '../../services/order_document_service.js?v=20261018_v3';
+import { notificationService } from '../../services/notification_service.js?v=20261018_v3';
 
 // Mapeo exhaustivo de transiciones legales autorizadas por la máquina de estados del backend
 const STATE_TRANSITIONS = {

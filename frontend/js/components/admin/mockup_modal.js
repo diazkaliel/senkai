@@ -1,11 +1,11 @@
-// Ficha Técnica de Confección y Emplazamiento Textil de Senkai Atelier.
+﻿// Ficha Técnica de Confección y Emplazamiento Textil de Senkai Atelier.
 // Muestra el mockup de la prenda en Negro Industrial, el registro anatómico de estampas,
 // los parámetros de termofijado de taller y permite descargar la orden oficial en PDF.
 
-import { apiService, normalizeItemPrints } from '../../services/api.js';
-import { SVG_GARMENTS, PRESET_ARTWORKS } from '../svg_templates.js';
-import { downloadOrderDossier } from '../../services/order_document_service.js';
-import { notificationService } from '../../services/notification_service.js';
+import { apiService, normalizeItemPrints } from '../../services/api.js?v=20261018_v3';
+import { SVG_GARMENTS, PRESET_ARTWORKS } from '../svg_templates.js?v=20261018_v3';
+import { downloadOrderDossier } from '../../services/order_document_service.js?v=20261018_v3';
+import { notificationService } from '../../services/notification_service.js?v=20261018_v3';
 
 const PRINT_DIMENSIONS = {
   A6: { width: 90, height: 90, cm: "10 × 10 cm", desc: "Bolsillo" },

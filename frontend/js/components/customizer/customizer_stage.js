@@ -1,8 +1,8 @@
-// Submódulo del Personalizador: Escenario y Canvas Textil con Volteo 3D.
+﻿// Submódulo del Personalizador: Escenario y Canvas Textil con Volteo 3D.
 // Acá renderizo la silueta SVG de la prenda seleccionada, el área segura de prensado
 // y la estampa activa con sus gizmos de escala y centrado.
 
-import { SVG_GARMENTS, PRESET_ARTWORKS } from '../svg_templates.js';
+import { SVG_GARMENTS, PRESET_ARTWORKS } from '../svg_templates.js?v=20261018_v3';
 
 // Medidas base en píxeles del film DTF sobre el mockup
 export function getPrintBaseDimensions(printSize) {

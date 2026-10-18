@@ -103,7 +103,10 @@ class CacheControlMiddleware(BaseHTTPMiddleware):
             response.headers["Pragma"] = "no-cache"
         elif path.startswith("/static/"):
             if settings.ENVIRONMENT == "production":
-                response.headers["Cache-Control"] = "public, max-age=31536000, immutable"
+                if path.endswith(".js") or path.endswith(".css"):
+                    response.headers["Cache-Control"] = "no-cache, must-revalidate"
+                else:
+                    response.headers["Cache-Control"] = "public, max-age=31536000, immutable"
             else:
                 response.headers["Cache-Control"] = "no-cache"
 

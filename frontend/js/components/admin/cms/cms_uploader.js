@@ -1,8 +1,8 @@
-// Submódulo del CMS: Gestor reactivo de subida y previsualización de imágenes.
+﻿// Submódulo del CMS: Gestor reactivo de subida y previsualización de imágenes.
 // Acá centralizo la interacción con los inputs de archivos, la llamada al endpoint
 // de streaming del backend (/api/v1/admin/upload-image) y la actualización de miniaturas.
 
-import { apiService } from '../../../services/api.js';
+import { apiService } from '../../../services/api.js?v=20261018_v3';
 
 export function attachImageManagementEvents(container, showToast) {
   // 1. Previsualización en vivo al escribir o pegar una URL

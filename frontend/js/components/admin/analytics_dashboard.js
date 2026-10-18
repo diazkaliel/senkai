@@ -1,10 +1,10 @@
-/**
+﻿/**
  * SEIKO // MÓDULO DE ANALÍTICA DE DATOS Y BUSINESS INTELLIGENCE DE TALLER
  * Visualizaciones interactivas en SVG nativo sin dependencias pesadas.
  * Curva de ingresos/pedidos con tooltip de seguimiento, ranking de prendas y logística.
  */
 
-import { apiService } from '../../services/api.js';
+import { apiService } from '../../services/api.js?v=20261018_v3';
 
 export class AnalyticsDashboardComponent {
   constructor(hostElement) {

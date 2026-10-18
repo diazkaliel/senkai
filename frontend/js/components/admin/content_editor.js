@@ -1,9 +1,9 @@
-// Editor CMS de la vitrina pública de Senkai DTF Studio.
+﻿// Editor CMS de la vitrina pública de Senkai DTF Studio.
 // Este componente orquesta los submódulos de edición de cada sección (Lookbook, Hero,
 // Editorial, Anuncios, Marquee, Encabezados, Stats, Manifiesto, Protocolo y Contacto)
 // permitiendo guardar cambios de forma atómica en el backend mediante FastAPI y Pydantic v2.
 
-import { apiService } from '../../services/api.js';
+import { apiService } from '../../services/api.js?v=20261018_v3';
 import {
   DEFAULT_LOOKBOOK_ITEMS,
   DEFAULT_LOOKBOOK_CATEGORIES,
@@ -11,9 +11,9 @@ import {
   renderCategoryRowMarkup,
   renderLookbookSection,
   collectLookbookPayload
-} from './cms/cms_lookbook.js';
-import { renderHeroSection, collectHeroPayload } from './cms/cms_hero.js';
-import { renderEditorialSection, collectEditorialPayload } from './cms/cms_editorial.js';
+} from './cms/cms_lookbook.js?v=20261018_v3';
+import { renderHeroSection, collectHeroPayload } from './cms/cms_hero.js?v=20261018_v3';
+import { renderEditorialSection, collectEditorialPayload } from './cms/cms_editorial.js?v=20261018_v3';
 import {
   renderAnnouncementSection, collectAnnouncementPayload,
   renderMarqueeSection, collectMarqueePayload,
@@ -22,8 +22,8 @@ import {
   renderStatementSection, collectStatementPayload,
   renderProtocolSection, collectProtocolPayload,
   renderContactSection, collectContactPayload
-} from './cms/cms_sections.js';
-import { attachImageManagementEvents } from './cms/cms_uploader.js';
+} from './cms/cms_sections.js?v=20261018_v3';
+import { attachImageManagementEvents } from './cms/cms_uploader.js?v=20261018_v3';
 
 export class ContentEditorComponent {
   constructor(container) {

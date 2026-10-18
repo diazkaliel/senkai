@@ -1,8 +1,8 @@
-// Catálogo estático de piezas de colección (Streetwear & Ediciones Especiales).
+﻿// Catálogo estático de piezas de colección (Streetwear & Ediciones Especiales).
 // Acá defino las piezas destacadas con sus siluetas base, artes preestablecidos
 // para frente y espalda, coordenadas de prensado y gama de colores disponibles.
 
-import { PRESET_ARTWORKS } from '../components/svg_templates.js';
+import { PRESET_ARTWORKS } from '../components/svg_templates.js?v=20261018_v3';
 
 export const DEFAULT_CATALOG_CATEGORIES = [
   {

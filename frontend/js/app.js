@@ -1,17 +1,17 @@
-// Orquestador principal de la vitrina y navegación SPA de Senkai DTF Studio.
+﻿// Orquestador principal de la vitrina y navegación SPA de Senkai DTF Studio.
 // Inicializo los componentes del storefront (carrito, mesa de diseño, lookbook y catálogo),
 // coordino las rutas por hash (#inicio vs #admin) y sincronizo los cambios del CMS en vivo.
 
-import { apiService } from './services/api.js';
-import { contentHydrator } from './services/content_hydrator.js';
-import { FALLBACK_GARMENTS } from './data/fallback_garments.js';
-import { CustomizerStudio } from './components/customizer.js';
-import { CatalogComponent } from './components/catalog.js';
-import { ProductCarousel } from './components/carousel.js';
-import { CartController } from './components/cart.js';
-import { OrderTrackerComponent } from './components/order_tracker.js';
-import { AdminWorkshopPortal } from './components/admin.js';
-import './components/motion_effects.js';
+import { apiService } from './services/api.js?v=20261018_v3';
+import { contentHydrator } from './services/content_hydrator.js?v=20261018_v3';
+import { FALLBACK_GARMENTS } from './data/fallback_garments.js?v=20261018_v3';
+import { CustomizerStudio } from './components/customizer.js?v=20261018_v3';
+import { CatalogComponent } from './components/catalog.js?v=20261018_v3';
+import { ProductCarousel } from './components/carousel.js?v=20261018_v3';
+import { CartController } from './components/cart.js?v=20261018_v3';
+import { OrderTrackerComponent } from './components/order_tracker.js?v=20261018_v3';
+import { AdminWorkshopPortal } from './components/admin.js?v=20261018_v3';
+import './components/motion_effects.js?v=20261018_v3';
 
 class SenkaiApp {
   constructor() {

@@ -1,16 +1,16 @@
-// Portal de Administración y Taller de Senkai DTF Studio.
+﻿// Portal de Administración y Taller de Senkai DTF Studio.
 // Este archivo actúa como contenedor y router de las 4 herramientas del taller:
 // 1. Tablero Kanban de producción (kanban_board.js)
 // 2. Analítica y métricas de facturación (analytics_dashboard.js)
 // 3. Editor editorial CMS (content_editor.js)
 // 4. Gestor de catálogo y stock físico (inventory_manager.js)
 
-import { apiService } from '../services/api.js';
-import { KanbanBoardComponent } from './admin/kanban_board.js';
-import { ContentEditorComponent } from './admin/content_editor.js';
-import { AnalyticsDashboardComponent } from './admin/analytics_dashboard.js';
-import { InventoryManagerComponent } from './admin/inventory_manager.js';
-import { MockupModalComponent } from './admin/mockup_modal.js';
+import { apiService } from '../services/api.js?v=20261018_v3';
+import { KanbanBoardComponent } from './admin/kanban_board.js?v=20261018_v3';
+import { ContentEditorComponent } from './admin/content_editor.js?v=20261018_v3';
+import { AnalyticsDashboardComponent } from './admin/analytics_dashboard.js?v=20261018_v3';
+import { InventoryManagerComponent } from './admin/inventory_manager.js?v=20261018_v3';
+import { MockupModalComponent } from './admin/mockup_modal.js?v=20261018_v3';
 
 export class AdminWorkshopPortal {
   constructor(containerId) {
