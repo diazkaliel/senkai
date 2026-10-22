@@ -1,77 +1,7 @@
 /* --------------------------------------------------------------------------
    SENKAI MOTION & ANIMATION SYSTEM
-   Design Language: Dark Industrial Editorial
+   Design Language: Dark Industrial Editorial (cubic-bezier(0.19, 1, 0.22, 1))
    -------------------------------------------------------------------------- */
-
-/* ── Hero Styles ─────────────────────────────────────────────────────── */
-.hero-ref-title {
-  font-family: var(--font-display) !important;
-  font-size: var(--text-hero) !important;
-  font-weight: 800 !important;
-  line-height: 1.02 !important;
-  letter-spacing: -0.03em !important;
-  text-transform: uppercase !important;
-  color: var(--text-primary) !important;
-  margin-bottom: var(--space-5) !important;
-}
-
-.hero-ref-subtitle {
-  font-family: var(--font-body);
-  font-size: var(--text-lg);
-  color: var(--text-secondary);
-  max-width: 480px;
-  line-height: 1.5;
-  margin-bottom: var(--space-8);
-}
-
-.hero-ref-cta-btn {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--space-3);
-  background: var(--text-primary);
-  color: var(--text-inverse);
-  font-family: var(--font-mono);
-  font-size: var(--text-sm);
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.12em;
-  padding: var(--space-4) 2.2rem;
-  border-radius: var(--radius-pill); /* CTA primario Ghost Pill táctil */
-  transition: background-color var(--transition-fast), color var(--transition-fast);
-}
-
-.hero-ref-cta-btn:hover {
-  background: #e4e4e7;
-  color: var(--text-inverse);
-}
-
-.hero-side-tag {
-  position: absolute;
-  bottom: 0.8rem;
-  left: 50%;
-  transform: translateX(-50%);
-  font-family: var(--font-mono);
-  font-size: var(--text-xs);
-  font-weight: 700;
-  letter-spacing: 0.1em;
-  color: var(--text-primary);
-  background: var(--bg-overlay);
-  border: 1px solid var(--border-subtle);
-  padding: 4px 10px;
-  border-radius: var(--radius-pill); /* Tag Ghost Pill */
-  white-space: nowrap;
-}
-
-.hero-side-card {
-  position: relative;
-  border: 1px solid var(--border-subtle);
-  background: var(--bg-surface);
-  transition: border-color var(--transition-fast);
-}
-
-.hero-side-card:hover {
-  border-color: var(--border-strong);
-}
 
 /* ── Hero Entrance Animation ─────────────────────────────────────────── */
 @keyframes hero-enter {
@@ -86,7 +16,7 @@
 }
 
 .hero-enter-anim {
-  animation: hero-enter var(--duration-slower) var(--ease-out) forwards;
+  animation: hero-enter var(--duration-slower) var(--ease-editorial) forwards;
   animation-delay: calc(var(--stagger-delay) * var(--hero-enter-order, 0));
   opacity: 0;
 }
@@ -107,14 +37,14 @@
   inset: 0;
   width: 0%;
   background: var(--text-primary);
-  transition: width var(--duration-slower) var(--ease-out);
+  transition: width var(--duration-slower) var(--ease-editorial);
 }
 
 .timeline-fill.filled {
   width: 100%;
 }
 
-/* ── Scroll-Triggered Reveal System ──────────────────────────────────── */
+/* ── Scroll-Triggered Reveal System (IntersectionObserver threshold 0.12) ── */
 .reveal-up {
   transform: translateY(30px);
   opacity: 0;
@@ -159,6 +89,20 @@
   opacity: 1;
 }
 
+.reveal-card,
+.reveal-cinematic {
+  transform: translateY(22px);
+  opacity: 0;
+  transition: transform var(--transition-slow), opacity var(--transition-slow), border-color var(--transition-fast);
+  transition-delay: var(--reveal-delay, 0ms);
+}
+
+.reveal-card.revealed,
+.reveal-cinematic.revealed {
+  transform: translateY(0);
+  opacity: 1;
+}
+
 /* ── Staggered Children ──────────────────────────────────────────────── */
 .stagger-children > * {
   opacity: 0;
@@ -188,11 +132,6 @@
 
 .section-fade.section-visible {
   opacity: 1;
-}
-
-/* ── Parallax Helper ─────────────────────────────────────────────────── */
-.parallax-slow {
-  will-change: transform;
 }
 
 /* ── Navbar adaptativa con scroll ────────────────────────────────────── */
@@ -226,7 +165,7 @@
   background: var(--accent-success);
   border-radius: var(--radius-full);
   box-shadow: 0 0 8px var(--accent-success-subtle);
-  animation: live-pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  animation: live-pulse 2s cubic-bezier(0.19, 1, 0.22, 1) infinite;
   vertical-align: middle;
   margin-right: 6px;
 }
@@ -243,7 +182,7 @@
   will-change: transform;
 }
 
-/* 3. Escenario Textil con Volteo Tridimensional (Flip 3D) */
+/* 3. Escenario Textil con Volteo Tridimensional (Flip 3D - perspective 1400px) */
 .garment-stage-3d {
   perspective: 1400px;
   width: 100%;
@@ -347,16 +286,11 @@
   opacity: 1;
 }
 
-
-
 /* ── Timer visual tipo Stories (animación CSS pura, no JS) ───────────── */
 @keyframes carousel-story-fill {
   from { transform: scaleX(0); }
   to   { transform: scaleX(1); }
 }
-
-/* La clase .carousel-indicator-bar.active::after la aplica el CSS del componente */
-/* Esta keyframe es la que consume esa animación */
 
 /* ── Marquee dual en dirección opuesta (profundidad editorial) ────────── */
 @keyframes marquee-scroll-reverse {
@@ -371,10 +305,6 @@
 }
 
 /* ── Entrada de tarjetas del catálogo al filtrar / montar ────────────── */
-/*
-  La animación es ligera (280ms) para que no se sienta artificial.
-  El `both` preserva el estado inicial hasta que se dispara.
-*/
 @keyframes card-enter {
   from {
     opacity: 0;
@@ -387,7 +317,7 @@
 }
 
 .card-enter-anim {
-  animation: card-enter 280ms var(--ease-out) both;
+  animation: card-enter 280ms var(--ease-editorial) both;
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -398,6 +328,7 @@
   .reveal-right,
   .reveal-scale,
   .reveal-card,
+  .reveal-cinematic,
   .stagger-children > * {
     opacity: 1 !important;
     transform: none !important;
@@ -405,4 +336,3 @@
     transition: none !important;
   }
 }
-

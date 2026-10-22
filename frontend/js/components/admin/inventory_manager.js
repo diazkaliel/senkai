@@ -87,24 +87,16 @@ export class InventoryManagerComponent {
         });
       }
 
-      const savedItems = (siteContent && siteContent.lookbook && Array.isArray(siteContent.lookbook.items))
-        ? siteContent.lookbook.items
-        : [];
+      const hasSavedItems = siteContent && siteContent.lookbook && Array.isArray(siteContent.lookbook.items);
+      const savedItems = hasSavedItems ? siteContent.lookbook.items : null;
       if (siteContent && siteContent.lookbook && Array.isArray(siteContent.lookbook.categories) && siteContent.lookbook.categories.length > 0) {
         this.lookbookCategories = siteContent.lookbook.categories;
       }
 
-      // Fusiono con las 6 prendas base para asegurar que siempre estén disponibles para editar su precio
-      const merged = DEFAULT_LOOKBOOK_ITEMS.map(defItem => {
-        const found = savedItems.find(s => s.id === defItem.id);
-        return found ? { ...defItem, ...found } : { ...defItem };
-      });
-      savedItems.forEach(s => {
-        if (!merged.some(m => m.id === s.id)) {
-          merged.push(s);
-        }
-      });
-      this.lookbookItems = merged;
+      // Respetar exactamente las prendas de colección guardadas (no resucitar las eliminadas)
+      this.lookbookItems = (savedItems !== null)
+        ? savedItems
+        : DEFAULT_LOOKBOOK_ITEMS.map(defItem => ({ ...defItem }));
     } catch (err) {
       console.error("Fallo al consultar inventario de variantes y precios:", err);
       this.variants = [];
@@ -193,12 +185,20 @@ export class InventoryManagerComponent {
 
         <!-- PANEL DE ENCENDIDO / APAGADO DE TIPOS DE PRENDAS DISPONIBLES -->
         <div class="inventory-availability-panel">
-          <div class="availability-panel-header">
+          <div class="availability-panel-header" style="display: flex; justify-content: space-between; align-items: flex-start; gap: 1rem; flex-wrap: wrap;">
             <div>
               <span class="badge badge-admin">CONTROL DE CATÁLOGO ACTIVO</span>
-              <h4>Disponibilidad de Tipos de Prenda (Encender / Apagar)</h4>
-              <p>Apaga cualquier silueta que no tengas disponible actualmente (por ejemplo, <strong>Oversize</strong>) sin borrarla del sistema. Al estar apagada, el cliente no podrá seleccionarla ni pedirla en el Simulador ni en el Catálogo.</p>
+              <h4>Disponibilidad de Tipos de Prenda & Productos</h4>
+              <p>Gestiona los productos disponibles en taller. Puedes encenderlos o apagarlos para pausar pedidos, crear nuevos productos (poleras, pendones, accesorios) o quitarlos del catálogo.</p>
             </div>
+            <button
+              type="button"
+              class="btn btn-secondary"
+              id="invBtnOpenAddGarmentModal"
+              style="font-size: 0.78rem; padding: 0.55rem 1.1rem; border-color: var(--accent-admin); color: var(--accent-admin); white-space: nowrap;">
+              <span class="material-symbols-outlined" style="font-size: 16px;">add_circle</span>
+              <span>+ Agregar Producto / Prenda</span>
+            </button>
           </div>
           <div class="availability-garments-grid">
             ${this.garments.map(g => {
@@ -209,12 +209,18 @@ export class InventoryManagerComponent {
                   <div class="availability-card-top">
                     <div class="availability-model-meta">
                       <strong>${this.escapeHtml(g.name)}</strong>
-                      <small>${g.weight_gsm || 240} GSM • Estampado Incluido</small>
+                      <small>${this.escapeHtml(g.category || 'textil')} • ${g.weight_gsm || 240} GSM • $${(g.base_price || 0).toLocaleString('es-CL')} CLP</small>
                     </div>
                     <span class="availability-status-pill ${isActive ? 'online' : 'offline'}">
                       ${isActive ? 'ENCENDIDA' : 'APAGADA'}
                     </span>
                   </div>
+                  ${g.observation ? `
+                    <div class="availability-card-obs" title="Observaciones técnicas de la prenda">
+                      <span class="material-symbols-outlined" style="font-size: 13px; color: var(--accent-admin);">description</span>
+                      <span>${this.escapeHtml(g.observation)}</span>
+                    </div>
+                  ` : ''}
                   <div class="availability-card-actions">
                     <button
                       type="button"
@@ -222,13 +228,21 @@ export class InventoryManagerComponent {
                       data-toggle-garment-active="${g.id}"
                       title="${isActive ? 'Apagar prenda para que el cliente no pueda pedirla' : 'Encender prenda para habilitar pedidos'}">
                       <span class="material-symbols-outlined" style="font-size: 16px;">${isActive ? 'toggle_on' : 'toggle_off'}</span>
-                      <span>${isActive ? 'Disponible en Tienda (Apagar)' : 'Pausada en Tienda (Encender)'}</span>
+                      <span>${isActive ? 'Disponible' : 'Pausada'}</span>
                     </button>
                     <button
                       type="button"
                       class="btn-select-garment-edit ${isSelected ? 'active' : ''}"
                       data-garment-id="${g.id}">
-                      ${isSelected ? 'Editando Tallas ✓' : 'Editar Tallas / Stock'}
+                      ${isSelected ? 'Editando ✓' : 'Editar'}
+                    </button>
+                    <button
+                      type="button"
+                      class="btn-delete-garment"
+                      data-delete-garment="${g.id}"
+                      title="Eliminar permanentemente este producto del catálogo">
+                      <span class="material-symbols-outlined" style="font-size: 14px;">delete</span>
+                      <span>Quitar</span>
                     </button>
                   </div>
                 </div>
@@ -623,9 +637,17 @@ export class InventoryManagerComponent {
                 <input type="text" id="inv-photo-front" class="cms-input" style="font-size: 0.78rem; font-family: var(--font-mono);" value="${this.escapeHtml(currentGarment.photo_front || '')}" placeholder="/static/assets/garments/...">
               </div>
 
-              <div class="cms-field-group" style="margin-bottom: 1.25rem;">
+              <div class="cms-field-group" style="margin-bottom: 0.85rem;">
                 <label class="cms-label" for="inv-photo-back">URL Foto Real Espalda (Prenda Base)</label>
                 <input type="text" id="inv-photo-back" class="cms-input" style="font-size: 0.78rem; font-family: var(--font-mono);" value="${this.escapeHtml(currentGarment.photo_back || '')}" placeholder="/static/assets/garments/...">
+              </div>
+
+              <div class="cms-field-group" style="margin-bottom: 1.25rem;">
+                <label class="cms-label" for="inv-observation">
+                  <span>Observación Técnica / Medidas / Especificaciones</span>
+                  <span class="cms-label-hint">Visible en la tarjeta de vitrina</span>
+                </label>
+                <input type="text" id="inv-observation" class="cms-input" value="${this.escapeHtml(currentGarment.observation || '')}" placeholder="Ej: Medidas: 100x200cm con ojetillos metálicos perimetrales...">
               </div>
 
               <button class="btn btn-primary" id="invSaveGarmentDetailsBtn" style="width: 100%; padding: 0.85rem; display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem;">
@@ -636,6 +658,71 @@ export class InventoryManagerComponent {
           ` : ''}
 
         </div>
+
+        <!-- MODAL PARA AGREGAR NUEVA PRENDA O PRODUCTO -->
+        <div id="invAddGarmentModal" class="inv-modal-backdrop" style="display: none;">
+          <div class="inv-modal-card">
+            <div class="inv-modal-header">
+              <h4>+ Agregar Nuevo Tipo de Prenda o Producto</h4>
+              <button type="button" class="inv-modal-close" id="invCloseAddGarmentModal">&times;</button>
+            </div>
+            <form id="invAddGarmentForm">
+              <div class="cms-field-group" style="margin-bottom: 0.75rem;">
+                <label class="cms-label">Nombre del Producto / Silueta *</label>
+                <input type="text" id="newGarmentName" class="cms-input" required placeholder="Ej: Pendón Roller 100x200, Polera Boxy 280g...">
+              </div>
+              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; margin-bottom: 0.75rem;">
+                <div class="cms-field-group">
+                  <label class="cms-label">Categoría *</label>
+                  <input type="text" id="newGarmentCategory" class="cms-input" list="garmentCatDatalist" value="poleras" required>
+                  <datalist id="garmentCatDatalist">
+                    <option value="poleras">Poleras</option>
+                    <option value="polerones">Polerones</option>
+                    <option value="pendones">Pendones & Gráfica</option>
+                    <option value="accesorios">Accesorios</option>
+                  </datalist>
+                </div>
+                <div class="cms-field-group">
+                  <label class="cms-label">Precio Base Oficial (CLP) *</label>
+                  <input type="number" id="newGarmentPrice" class="cms-input" min="1000" step="500" value="19990" required>
+                </div>
+              </div>
+              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; margin-bottom: 0.75rem;">
+                <div class="cms-field-group">
+                  <label class="cms-label">Gramaje / Densidad (g/m²)</label>
+                  <input type="number" id="newGarmentGsm" class="cms-input" min="0" max="2000" value="240">
+                </div>
+                <div class="cms-field-group">
+                  <label class="cms-label">Composición / Material</label>
+                  <input type="text" id="newGarmentComposition" class="cms-input" value="100% Algodón Peinado">
+                </div>
+              </div>
+              <div class="cms-field-group" style="margin-bottom: 0.75rem;">
+                <label class="cms-label">Tallas o Medidas Disponibles (separadas por coma) *</label>
+                <input type="text" id="newGarmentSizes" class="cms-input" value="S, M, L, XL" placeholder="Ej: S, M, L, XL o 100x150, 100x200">
+              </div>
+              <div class="cms-field-group" style="margin-bottom: 0.75rem;">
+                <label class="cms-label">
+                  <span>Observación Técnica / Medidas / Especificaciones</span>
+                  <span class="cms-label-hint">Visible en las tarjetas de la vitrina</span>
+                </label>
+                <input type="text" id="newGarmentObservation" class="cms-input" placeholder="Ej: Medidas: 100x200cm con terminación reforzada y bolso...">
+              </div>
+              <div class="cms-field-group" style="margin-bottom: 0.75rem;">
+                <label class="cms-label">Stock Inicial por Variante (unidades)</label>
+                <input type="number" id="newGarmentInitialStock" class="cms-input" min="0" max="1000" value="10">
+              </div>
+              <div class="inv-modal-footer">
+                <button type="button" class="btn btn-secondary" id="invCancelAddGarmentBtn">Cancelar</button>
+                <button type="submit" class="btn btn-primary" id="invSubmitAddGarmentBtn">
+                  <span class="material-symbols-outlined" style="font-size: 16px;">add_task</span>
+                  <span>Crear y Registrar en Taller</span>
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+
       </div>
     `;
   }
@@ -1099,6 +1186,8 @@ export class InventoryManagerComponent {
 
         const newPhotoFront = frontInput ? frontInput.value.trim() : null;
         const newPhotoBack = backInput ? backInput.value.trim() : null;
+        const obsInput = this.container.querySelector('#inv-observation');
+        const newObservation = obsInput ? obsInput.value.trim() : null;
 
         // Recopilar todos los precios por talla independientes
         const { sizePrices, error: sizeError } = this._collectSizePricesMap();
@@ -1130,13 +1219,15 @@ export class InventoryManagerComponent {
             base_price: newPrice,
             size_prices: sizePrices,
             photo_front: newPhotoFront || null,
-            photo_back: newPhotoBack || null
+            photo_back: newPhotoBack || null,
+            observation: newObservation || null
           });
 
           currentGarment.base_price = updatedGarment.base_price;
           currentGarment.size_prices = { ...sizePrices, ...(updatedGarment.size_prices || {}) };
           currentGarment.photo_front = newPhotoFront;
           currentGarment.photo_back = newPhotoBack;
+          currentGarment.observation = newObservation;
 
           this.variants.forEach(v => {
             if (v.garment_id === currentGarment.id && currentGarment.size_prices[v.size]) {
@@ -1212,6 +1303,108 @@ export class InventoryManagerComponent {
         }
       });
     }
+
+    // 5. Botón y modal para agregar un nuevo tipo de producto o prenda
+    const openAddModalBtn = this.container.querySelector('#invBtnOpenAddGarmentModal');
+    const addModal = this.container.querySelector('#invAddGarmentModal');
+    const closeAddModalBtn = this.container.querySelector('#invCloseAddGarmentModal');
+    const cancelAddModalBtn = this.container.querySelector('#invCancelAddGarmentBtn');
+    const addGarmentForm = this.container.querySelector('#invAddGarmentForm');
+
+    if (openAddModalBtn && addModal) {
+      openAddModalBtn.addEventListener('click', () => {
+        addModal.style.display = 'flex';
+      });
+    }
+
+    const closeAddModal = () => {
+      if (addModal) addModal.style.display = 'none';
+    };
+
+    if (closeAddModalBtn) closeAddModalBtn.addEventListener('click', closeAddModal);
+    if (cancelAddModalBtn) cancelAddModalBtn.addEventListener('click', closeAddModal);
+
+    if (addGarmentForm) {
+      addGarmentForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const submitBtn = this.container.querySelector('#invSubmitAddGarmentBtn');
+        if (submitBtn) {
+          submitBtn.disabled = true;
+          submitBtn.innerHTML = `<span class="material-symbols-outlined cms-spin" style="font-size: 16px;">progress_activity</span> <span>Creando...</span>`;
+        }
+
+        try {
+          const name = this.container.querySelector('#newGarmentName')?.value.trim();
+          const category = this.container.querySelector('#newGarmentCategory')?.value.trim() || 'poleras';
+          const price = parseInt(this.container.querySelector('#newGarmentPrice')?.value || '19990', 10);
+          const gsm = parseInt(this.container.querySelector('#newGarmentGsm')?.value || '240', 10);
+          const composition = this.container.querySelector('#newGarmentComposition')?.value.trim() || '100% Algodón Peinado';
+          const rawSizes = this.container.querySelector('#newGarmentSizes')?.value || 'S, M, L, XL';
+          const observation = this.container.querySelector('#newGarmentObservation')?.value.trim() || null;
+          const initialStock = parseInt(this.container.querySelector('#newGarmentInitialStock')?.value || '10', 10);
+
+          const sizes = rawSizes.split(',').map(s => s.trim().toUpperCase()).filter(Boolean);
+
+          const payload = {
+            name,
+            category,
+            base_price: price,
+            weight_gsm: gsm,
+            composition,
+            sizes: sizes.length > 0 ? sizes : ['S', 'M', 'L', 'XL'],
+            observation,
+            initial_stock_per_variant: initialStock
+          };
+
+          const newGarment = await apiService.createGarment(payload);
+          this.garments.push(newGarment);
+          this.selectedGarmentId = newGarment.id;
+          closeAddModal();
+          await this.loadData();
+          this.showFeedback(`Producto "${newGarment.name}" creado e incorporado a la bodega exitosamente.`, 'success');
+        } catch (err) {
+          console.error("Fallo al crear prenda:", err);
+          this.showFeedback(`Error al crear producto: ${err.message}`, 'error');
+        } finally {
+          if (submitBtn) {
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = `<span class="material-symbols-outlined" style="font-size: 16px;">add_task</span> <span>Crear y Registrar en Taller</span>`;
+          }
+        }
+      });
+    }
+
+    // 6. Eliminar una prenda o producto de inventario
+    this.container.querySelectorAll('[data-delete-garment]').forEach(btn => {
+      btn.addEventListener('click', async (e) => {
+        e.stopPropagation();
+        const garmentId = e.currentTarget.dataset.deleteGarment;
+        const targetGarment = this.garments.find(g => g.id === garmentId);
+        const gName = targetGarment ? targetGarment.name : garmentId;
+
+        if (this.garments.length <= 1) {
+          this.showFeedback("⚠️ No puedes eliminar el único producto existente en el catálogo.", "error");
+          return;
+        }
+
+        if (!confirm(`¿Estás seguro de eliminar "${gName}" de forma permanente del catálogo y de la bodega? Esta acción no se puede deshacer.`)) {
+          return;
+        }
+
+        try {
+          await apiService.deleteGarment(garmentId);
+          this.garments = this.garments.filter(g => g.id !== garmentId);
+          if (this.selectedGarmentId === garmentId) {
+            this.selectedGarmentId = this.garments[0]?.id || null;
+          }
+          await this.loadData();
+          this.showFeedback(`Prenda "${gName}" eliminada correctamente del inventario.`, 'success');
+        } catch (err) {
+          console.error("Fallo al eliminar prenda:", err);
+          this.showFeedback(`Error al eliminar: ${err.message}`, 'error');
+        }
+      });
+    });
   }
 }
 

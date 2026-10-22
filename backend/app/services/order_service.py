@@ -62,13 +62,16 @@ class OrderService:
 
         # Consultar precios oficiales de vitrina (Lookbook) por si el ítem proviene directamente del catálogo
         lookbook_prices_by_name: Dict[str, int] = {}
+        lookbook_prices_by_id: Dict[str, int] = {}
         try:
             from app.services.content_service import content_service
             consolidated = await content_service.get_consolidated_content(session)
             if consolidated and consolidated.lookbook and consolidated.lookbook.items:
                 for lb_it in consolidated.lookbook.items:
                     if lb_it.name and lb_it.price:
-                        lookbook_prices_by_name[lb_it.name.strip()] = int(lb_it.price)
+                        lookbook_prices_by_name[lb_it.name.strip().lower()] = int(lb_it.price)
+                    if lb_it.id and lb_it.price:
+                        lookbook_prices_by_id[lb_it.id.strip().lower()] = int(lb_it.price)
         except Exception:
             pass
 
@@ -114,8 +117,9 @@ class OrderService:
             # Si la prenda fue agregada directamente desde el Catálogo Lookbook, usar su precio oficial
             raw_item_name = (item.garment_name or "").strip()
             resolved_garment_name = garment.name
-            if raw_item_name and raw_item_name in lookbook_prices_by_name:
-                lb_base_price = lookbook_prices_by_name[raw_item_name]
+            lb_price = lookbook_prices_by_name.get(raw_item_name.lower()) or lookbook_prices_by_id.get(item.garment_id.lower())
+            if lb_price is not None:
+                lb_base_price = lb_price
                 size_delta = (size_prices_map[size_key] - garment.base_price) if size_key in size_prices_map else 0
                 effective_garment_price = max(1000, lb_base_price + size_delta)
                 resolved_garment_name = raw_item_name

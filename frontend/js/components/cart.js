@@ -1,4 +1,4 @@
-﻿// Carrito de compras y pasarela de checkout.
+// Carrito de compras y pasarela de checkout.
 // Manejo los productos seleccionados, cálculo de totales (con o sin envío) y envío del pedido a taller.
 
 import { apiService } from '../services/api.js?v=20261018_v3';
@@ -56,7 +56,7 @@ export class CartController {
     this.saveToStorage();
     this.updateUI();
     this.openDrawer();
-    notificationService.success(`✨ Prenda agregada a la orden de trabajo: ${item.garment_name}`);
+    notificationService.success(`Prenda agregada a la orden de trabajo: ${item.garment_name}`);
   }
 
   removeItem(index) {
@@ -301,7 +301,7 @@ export class CartController {
       this.closeCheckoutModal();
       this.clear();
       this.onOrderSuccess(createdOrder);
-      notificationService.success(`🎉 ¡Pedido #${createdOrder.order_number} ingresado con éxito!`);
+      notificationService.success(`Pedido #${createdOrder.order_number} ingresado con éxito a cola de taller.`);
     } catch (err) {
       notificationService.error("Hubo un problema al procesar tu pedido. Por favor intenta nuevamente.");
       console.error(err);

@@ -255,13 +255,45 @@ export const apiService = {
     return await res.json();
   },
 
-  async uploadAdminImage(file) {
+  async createGarment(payload) {
+    const res = await fetch(`${API_BASE}/admin/garments`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        ...this._getAuthHeaders()
+      },
+      body: JSON.stringify(payload)
+    });
+    if (!res.ok) {
+      if (res.status === 401) throw new Error("UNAUTHORIZED");
+      const errBody = await res.json().catch(() => ({}));
+      throw new Error(errBody.detail || "Error al registrar el producto en el catálogo");
+    }
+    return await res.json();
+  },
+
+  async deleteGarment(garmentId) {
+    const res = await fetch(`${API_BASE}/admin/garments/${encodeURIComponent(garmentId)}`, {
+      method: "DELETE",
+      headers: this._getAuthHeaders()
+    });
+    if (!res.ok) {
+      if (res.status === 401) throw new Error("UNAUTHORIZED");
+      const errBody = await res.json().catch(() => ({}));
+      throw new Error(errBody.detail || "Error al eliminar la prenda del catálogo");
+    }
+    return await res.json();
+  },
+
+  async uploadAdminImage(file, options = {}) {
     const formData = new FormData();
     formData.append("file", file);
 
     const headers = this._getAuthHeaders(); // Fetch configura automáticamente multipart boundary al omitir Content-Type
 
-    const res = await fetch(`${API_BASE}/admin/upload-image`, {
+    const useWebp = options.webp !== false;
+    const uploadUrl = `${API_BASE}/admin/upload-image${useWebp ? '?webp=true' : ''}`;
+    const res = await fetch(uploadUrl, {
       method: "POST",
       headers,
       body: formData

@@ -40,6 +40,7 @@ class GarmentModel(Base):
     photo_front: Mapped[Optional[str]] = mapped_column(String(255), nullable=True)
     photo_back: Mapped[Optional[str]] = mapped_column(String(255), nullable=True)
     size_prices_json: Mapped[Optional[str]] = mapped_column(Text, default="{}", nullable=True)
+    observation: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
     is_active: Mapped[bool] = mapped_column(Boolean, default=True, index=True)
 
     # Relación con variantes de color, talla y stock físico

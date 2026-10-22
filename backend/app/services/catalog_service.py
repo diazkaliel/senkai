@@ -8,7 +8,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.schemas.domain import (
     GarmentBase, GarmentCategory, GarmentSize, ColorVariant, GarmentUpdatePayload,
-    GarmentVariantDetail, VariantStockUpdatePayload
+    GarmentVariantDetail, VariantStockUpdatePayload, GarmentCreatePayload
 )
 from app.repositories.catalog_repository import catalog_repository, CatalogRepository
 from app.core.exceptions import EntityNotFoundException
@@ -135,7 +135,7 @@ class CatalogService:
                 garment_id=v.garment_id,
                 color_name=v.color_name,
                 color_hex=v.color_hex,
-                size=GarmentSize(v.size),
+                size=GarmentSize(v.size) if v.size in GarmentSize._value2member_map_ else v.size,
                 stock_quantity=v.stock_quantity,
                 custom_price=v.custom_price,
                 is_active=v.is_active
@@ -168,11 +168,31 @@ class CatalogService:
             garment_id=updated.garment_id,
             color_name=updated.color_name,
             color_hex=updated.color_hex,
-            size=GarmentSize(updated.size),
+            size=GarmentSize(updated.size) if updated.size in GarmentSize._value2member_map_ else updated.size,
             stock_quantity=updated.stock_quantity,
             custom_price=updated.custom_price,
             is_active=updated.is_active
         )
+
+    async def create_garment_async(
+        self,
+        session: AsyncSession,
+        payload: GarmentCreatePayload
+    ) -> GarmentBase:
+        """Crea una nueva prenda o producto en el catálogo e inicializa sus variantes."""
+        created_model = await self.repository.create_garment(session, payload)
+        return self.repository.to_schema(created_model)
+
+    async def delete_garment_async(
+        self,
+        session: AsyncSession,
+        garment_id: str
+    ) -> bool:
+        """Elimina una prenda del catálogo y sus variantes físicas."""
+        deleted = await self.repository.delete_garment(session, garment_id)
+        if not deleted:
+            raise EntityNotFoundException(f"Prenda con ID '{garment_id}' no encontrada para eliminar.")
+        return True
 
     # Métodos sincrónicos compatibles
     def get_all_garments(self) -> List[GarmentBase]:

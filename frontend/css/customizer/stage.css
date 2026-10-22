@@ -3,7 +3,7 @@
 /* ==========================================================================
    SENKAI // ATELIER DE PERSONALIZACIÓN TEXTIL DTF
    Studio Split Inmersivo (60% / 40%) con Flip 3D y Micro-Interacciones
-   Estética: Dark Luxury Streetwear Brutalist
+   Estética: Dark Luxury Streetwear Brutalist (disenio.md)
    ========================================================================== */
 
 .customizer-section {
@@ -46,13 +46,13 @@
 .visualizer-card {
   background: var(--bg-surface);
   border: 1px solid var(--border-subtle);
-  border-radius: 0;
+  border-radius: 0px; /* disenio.md: 0px obligatorio en módulos estructurales */
   padding: 1.5rem;
   display: flex;
   flex-direction: column;
   align-items: center;
   width: 100%;
-  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.7);
+  box-shadow: none;
   transition: transform 0.35s var(--ease-editorial, cubic-bezier(0.19, 1, 0.22, 1)), border-color var(--transition-fast);
   will-change: transform;
 }
@@ -72,7 +72,9 @@
   min-width: 0;
   background: #09090b;
   border: 1px solid var(--border-subtle);
-  padding: 2px;
+  border-radius: var(--radius-pill); /* disenio.md: 75px en conmutadores de estado (switches) */
+  padding: 3px;
+  gap: 2px;
 }
 
 .visualizer-actions-right {
@@ -87,9 +89,10 @@
   align-items: center;
   gap: 0.5rem;
   min-height: 36px;
-  padding: 0.5rem 1.15rem;
+  padding: 0.45rem 1.15rem;
   background: transparent;
-  border: none;
+  border: 1px solid transparent;
+  border-radius: var(--radius-pill); /* disenio.md: 75px Ghost Pill */
   font-family: var(--font-mono);
   font-size: 0.75rem;
   font-weight: 700;
@@ -115,9 +118,10 @@
   justify-content: center;
   min-width: 18px;
   height: 18px;
-  padding: 0 4px;
+  padding: 0 5px;
   background: rgba(255, 255, 255, 0.08);
   color: var(--text-secondary);
+  border-radius: var(--radius-pill);
   font-size: 0.6875rem;
   font-weight: 700;
   font-family: var(--font-mono);
@@ -133,9 +137,10 @@
   align-items: center;
   gap: 0.4rem;
   min-height: 36px;
-  padding: 0.45rem 0.85rem;
+  padding: 0.45rem 0.9rem;
   background: #09090b;
   border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-pill);
   color: var(--text-secondary);
   font-family: var(--font-mono);
   font-size: 0.725rem;
@@ -164,6 +169,7 @@
   background: var(--bg-garment-stage, radial-gradient(circle at 50% 42%, #e6e6ec 0%, #c4c4cf 100%));
   background-color: var(--bg-garment-stage-solid, #d4d4de);
   border: 1px solid var(--border-default);
+  border-radius: 0px; /* disenio.md: 0px en visores fotográficos y canvas */
 }
 
 .canvas-viewport::before {
@@ -343,7 +349,7 @@
   -webkit-mask-repeat: no-repeat;
   mask-repeat: no-repeat;
   z-index: 2;
-  transition: background-color 0.2s ease;
+  transition: background-color 0.2s var(--ease-editorial);
   filter: drop-shadow(0 15px 30px rgba(0, 0, 0, 0.45));
 }
 
@@ -382,7 +388,7 @@
   z-index: 10;
   backface-visibility: hidden;
   -webkit-backface-visibility: hidden;
-  transition: transform 0.1s ease-out;
+  transition: transform 0.1s var(--ease-editorial);
 }
 
 .dtf-print-draggable:active,
@@ -507,7 +513,7 @@
   padding: 0.65rem 0.85rem;
   background: var(--bg-surface-elevated);
   border: 1px solid var(--border-subtle);
-  border-radius: var(--radius-sm);
+  border-radius: 0px;
   cursor: pointer;
   transition: all var(--transition-fast);
   text-align: left;
@@ -531,7 +537,7 @@
   justify-content: center;
   background: var(--bg-garment-stage, #d4d4de);
   border: 1px solid var(--border-subtle);
-  border-radius: var(--radius-sm);
+  border-radius: 0px;
   flex-shrink: 0;
   position: relative;
 }
@@ -584,7 +590,7 @@
   padding: 1.5rem 1rem;
   background: var(--bg-surface-elevated);
   border: 1px dashed var(--border-subtle);
-  border-radius: var(--radius-sm);
+  border-radius: 0px;
   margin-bottom: 0.75rem;
 }
 
@@ -617,7 +623,7 @@
   background: var(--text-primary);
   color: var(--bg-main);
   border: none;
-  border-radius: var(--radius-sm);
+  border-radius: var(--radius-pill); /* disenio.md: 75px en CTA de activación */
   font-family: var(--font-mono);
   font-size: 0.75rem;
   font-weight: 800;
@@ -638,7 +644,7 @@
   background: transparent;
   color: #f87171;
   border: 1px solid rgba(239, 68, 68, 0.35);
-  border-radius: var(--radius-sm);
+  border-radius: var(--radius-pill);
   font-family: var(--font-mono);
   font-size: 0.725rem;
   font-weight: 700;
@@ -660,7 +666,7 @@
   color: var(--text-secondary);
   background: rgba(255, 255, 255, 0.03);
   border: 1px solid var(--border-subtle);
-  border-radius: var(--radius-sm);
+  border-radius: 0px;
   padding: 0.85rem 1rem;
   margin-top: 1.25rem;
   display: flex;
@@ -683,4 +689,3 @@
   flex-shrink: 0;
   margin-top: 1px;
 }
-

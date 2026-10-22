@@ -343,3 +343,61 @@ def test_update_terms_and_conditions_section(client):
     assert saved["legal_footer"].startswith("Regido por la Ley")
     assert len(saved["steps"]) == 4
 
+
+def test_update_lookbook_with_multi_images_observations_and_large_catalog(client):
+    """Verifica que el Lookbook soporte galería múltiple de imágenes, observaciones y más de 48 piezas."""
+    headers = {"X-Workshop-Token": settings.WORKSHOP_SECRET_KEY}
+
+    categories = [
+        {"id": "urbanas", "label": "Urbanas", "subcategories": ["Oversize", "Boxy"]},
+        {"id": "hoodies", "label": "Hoodies", "subcategories": ["Canguro", "Zip"]},
+        {"id": "pendones", "label": "Pendones & Gráfica", "subcategories": ["Roll-up", "Lona PVC"]},
+        {"id": "accesorios", "label": "Accesorios", "subcategories": ["Tote Bag", "Jockeys"]}
+    ]
+
+    # Generar 52 piezas distribuidas en las 4 categorías
+    items = []
+    cat_keys = ["urbanas", "hoodies", "pendones", "accesorios"]
+    for i in range(1, 53):
+        cat = cat_keys[i % len(cat_keys)]
+        items.append({
+            "id": f"col-item-pieza-{i:03d}",
+            "name": f"Pieza de Colección #{i:03d}",
+            "badge": "Edición Limitada 2026",
+            "category": cat,
+            "subcategory": "Especial Taller",
+            "price": 19990 + (i * 500),
+            "garment_id": "garment-polera-heavyweight-240",
+            "photo_front": f"/static/assets/uploads/piece_{i:03d}_front.webp",
+            "photo_back": f"/static/assets/uploads/piece_{i:03d}_back.webp",
+            "gallery_images": [
+                f"/static/assets/uploads/piece_{i:03d}_angle1.webp",
+                f"/static/assets/uploads/piece_{i:03d}_detail.webp"
+            ],
+            "observation": f"Especificación técnica #{i}: Medidas de confección calibradas en taller."
+        })
+
+    payload = {
+        "categories": categories,
+        "items": items
+    }
+
+    res = client.put(
+        f"{settings.API_V1_PREFIX}/admin/content/lookbook",
+        json=payload,
+        headers=headers
+    )
+    assert res.status_code == 200
+    saved = res.json()["data"]
+    assert len(saved["items"]) == 52
+    assert len(saved["items"][0]["gallery_images"]) == 2
+    assert "Especificación técnica" in saved["items"][0]["observation"]
+
+    # Verificar consumo desde la vitrina pública
+    res_pub = client.get(f"{settings.API_V1_PREFIX}/content")
+    assert res_pub.status_code == 200
+    pub_lb = res_pub.json()["lookbook"]
+    assert len(pub_lb["items"]) == 52
+    assert pub_lb["items"][0]["observation"].startswith("Especificación técnica")
+    assert pub_lb["items"][0]["gallery_images"][0].endswith(".webp")
+

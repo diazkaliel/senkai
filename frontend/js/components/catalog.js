@@ -1,4 +1,4 @@
-﻿import { SVG_GARMENTS } from './svg_templates.js?v=20261018_v3';
+import { SVG_GARMENTS } from './svg_templates.js?v=20261018_v3';
 import { COLLECTION_ITEMS, DEFAULT_CATALOG_CATEGORIES } from '../data/collection_items.js?v=20261018_v3';
 
 export { COLLECTION_ITEMS, DEFAULT_CATALOG_CATEGORIES };
@@ -420,7 +420,7 @@ export class CatalogComponent {
       });
     });
 
-    // 8. Conmutador de vista Frontal / Trasera en la tarjeta vía Flip 3D (DESIGN.md)
+    // 8. Conmutador de vista Frontal / Trasera en la tarjeta vía Flip 3D (disenio.md)
     this.container.querySelectorAll('.card-view-btn[data-flip-view]').forEach(btn => {
       btn.addEventListener('click', (e) => {
         e.stopPropagation();
@@ -469,6 +469,24 @@ export class CatalogComponent {
           e.currentTarget.dataset.view = newView;
           cardEl.querySelector('.card-pro-face-front')?.setAttribute('aria-hidden', isBack ? 'true' : 'false');
           cardEl.querySelector('.card-pro-face-back')?.setAttribute('aria-hidden', !isBack ? 'true' : 'false');
+        }
+      });
+    });
+
+    // 8c. Galería de fotos adicionales de la pieza del catálogo
+    this.container.querySelectorAll('.card-gallery-thumb-btn').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const photoUrl = e.currentTarget.dataset.photoUrl;
+        const cardEl = e.currentTarget.closest('.collection-card-pro');
+        if (!cardEl || !photoUrl) return;
+
+        cardEl.querySelectorAll('.card-gallery-thumb-btn').forEach(b => b.classList.remove('active'));
+        e.currentTarget.classList.add('active');
+
+        const frontImg = cardEl.querySelector('.card-pro-face-front .card-real-photo-img');
+        if (frontImg) {
+          frontImg.src = photoUrl;
         }
       });
     });
@@ -647,6 +665,8 @@ export function renderProductCardMarkup(item, garments = [], categories = DEFAUL
 
   const realPhotoFrontSrc = item.photo_front || item.photoFront || garment?.photo_front || '/static/assets/garments/tshirt_front.png';
   const realPhotoBackSrc = item.photo_back || item.photoBack || garment?.photo_back || '/static/assets/garments/tshirt_back.png';
+  const galleryImages = Array.isArray(item.gallery_images) ? item.gallery_images.filter(Boolean) : [];
+  const observationText = (item.observation || garment?.observation || "").trim();
 
   const isCustomFrontPhoto = !!(item.photo_front || item.photoFront);
   const isCustomBackPhoto = !!(item.photo_back || item.photoBack);
@@ -672,7 +692,8 @@ export function renderProductCardMarkup(item, garments = [], categories = DEFAUL
         <div style="display: flex; gap: 0.35rem; align-items: center;">
           ${hasCustomPhotos ? `
           <button class="card-view-btn mode-toggle-btn ${viewMode === 'photo' ? 'active' : ''}" data-toggle-mode="${item.id}" title="Alternar entre Foto Real y Simulación Técnica" style="font-size: 0.65rem; padding: 0.2rem 0.5rem;">
-            ${viewMode === 'photo' ? '📷 FOTO' : '📐 TÉCNICO'}
+            <span class="material-symbols-outlined" style="font-size: 13px;" aria-hidden="true">${viewMode === 'photo' ? 'photo_camera' : 'architecture'}</span>
+            <span>${viewMode === 'photo' ? 'FOTO' : 'TÉCNICO'}</span>
           </button>
           ` : ''}
           <div class="card-pro-view-toggle">
@@ -724,11 +745,37 @@ export function renderProductCardMarkup(item, garments = [], categories = DEFAUL
         </div>
 
         <div class="card-face-indicator">
-          ${(hasCustomPhotos && viewMode === 'photo') ? '📷 FOTO REAL' : '📐 SIMULACIÓN ATELIER'} • <span class="card-face-text">${isBack ? 'ESPALDA' : 'FRENTE'}</span>
+          <span class="material-symbols-outlined" style="font-size: 13px;" aria-hidden="true">${(hasCustomPhotos && viewMode === 'photo') ? 'photo_camera' : 'architecture'}</span>
+          <span>${(hasCustomPhotos && viewMode === 'photo') ? 'FOTO REAL' : 'SIMULACIÓN ATELIER'}</span> • <span class="card-face-text">${isBack ? 'ESPALDA' : 'FRENTE'}</span>
         </div>
       </div>
 
+      ${galleryImages.length > 0 ? `
+        <div class="card-gallery-thumbnails-strip">
+          ${[
+            { label: 'Frente', url: realPhotoFrontSrc },
+            { label: 'Espalda', url: realPhotoBackSrc },
+            ...galleryImages.map((gUrl, idx) => ({ label: `Foto ${idx + 1}`, url: gUrl }))
+          ].map((photo, pIdx) => `
+            <button type="button"
+                    class="card-gallery-thumb-btn ${pIdx === 0 ? 'active' : ''}"
+                    data-gallery-target-card="${item.id}"
+                    data-photo-url="${photo.url}"
+                    title="Ver ${photo.label}">
+              <img src="${photo.url}" alt="${photo.label}" onerror="this.src='/static/assets/garments/tshirt_front.png'">
+            </button>
+          `).join('')}
+        </div>
+      ` : ''}
+
       <div class="card-pro-footer">
+        ${observationText ? `
+          <div class="card-observation-badge" title="Especificaciones técnicas y medidas">
+            <span class="material-symbols-outlined" style="font-size: 13px; color: var(--accent-admin);">tune</span>
+            <span>SPEC // ${observationText}</span>
+          </div>
+        ` : ''}
+
         <div class="card-pro-title-row">
           <h4 class="card-pro-name">${item.name}</h4>
           <div class="card-pro-price">$${finalPrice.toLocaleString('es-CL')} <small>CLP</small></div>

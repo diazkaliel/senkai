@@ -13,10 +13,10 @@
 .atelier-console-card {
   background: var(--bg-surface);
   border: 1px solid var(--border-subtle);
-  border-radius: 0;
+  border-radius: 0px; /* disenio.md: 0px obligatorio en módulos estructurales */
   display: flex;
   flex-direction: column;
-  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.6);
+  box-shadow: none;
   width: 100%;
   overflow: hidden;
 }
@@ -58,7 +58,8 @@
   box-shadow: inset 0 2px 0 var(--text-primary);
 }
 
-.atelier-tab-num {
+.atelier-tab-num,
+.atelier-tab-btn .tab-index {
   font-family: var(--font-mono);
   font-size: 0.675rem;
   font-weight: 700;
@@ -67,11 +68,13 @@
   transition: color var(--transition-fast);
 }
 
-.atelier-tab-btn.active .atelier-tab-num {
+.atelier-tab-btn.active .atelier-tab-num,
+.atelier-tab-btn.active .tab-index {
   color: var(--accent-primary);
 }
 
-.atelier-tab-label {
+.atelier-tab-label,
+.atelier-tab-btn .tab-text {
   font-family: var(--font-display);
   font-size: 0.725rem;
   font-weight: 700;
@@ -81,8 +84,22 @@
   transition: color var(--transition-fast);
 }
 
-.atelier-tab-btn.active .atelier-tab-label {
+.atelier-tab-btn.active .atelier-tab-label,
+.atelier-tab-btn.active .tab-text {
   color: #ffffff;
+}
+
+.atelier-tab-btn .tab-active-dot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: transparent;
+  margin-top: 2px;
+  transition: background-color var(--transition-fast);
+}
+
+.atelier-tab-btn.active .tab-active-dot {
+  background: var(--accent-primary);
 }
 
 /* Contenedor del Cuerpo de la Pestaña */
@@ -163,7 +180,7 @@
   font-size: 0.775rem;
   letter-spacing: 0.05em;
   padding: 0.65rem 1.25rem;
-  border-radius: 75px;
+  border-radius: var(--radius-pill);
   cursor: pointer;
 }
 
@@ -237,7 +254,7 @@
   font-size: 0.85rem;
   font-weight: 800;
   letter-spacing: 0.06em;
-  border-radius: 75px;
+  border-radius: var(--radius-pill);
   background: #ffffff;
   color: #000000;
   border: 1px solid #ffffff;
@@ -249,7 +266,6 @@
   background: #e4e4e7;
   color: #000000;
   transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(255, 255, 255, 0.15);
 }
 
 .inspector-section {
@@ -259,7 +275,7 @@
   background: var(--bg-surface);
   border: 1px solid var(--border-subtle);
   padding: 1.75rem;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+  box-shadow: none;
 }
 
 .inspector-section-header {
@@ -361,7 +377,7 @@
 .garment-card-btn.active {
   background: #27272a;
   border-color: #ffffff;
-  box-shadow: inset 0 0 0 1px #ffffff, 0 4px 12px rgba(0, 0, 0, 0.4);
+  box-shadow: inset 0 0 0 1px #ffffff;
 }
 
 .garment-card-thumb {
@@ -445,6 +461,7 @@
   color: #f87171;
   background: rgba(239, 68, 68, 0.15);
   border: 1px solid rgba(239, 68, 68, 0.35);
+  border-radius: var(--radius-pill);
   padding: 1px 6px;
   font-size: 0.62rem;
   font-weight: 700;
@@ -489,7 +506,7 @@
   pointer-events: none;
 }
 
-/* Selector de Tallas */
+/* Selector de Tallas (75px Ghost Pill según disenio.md) */
 .size-pills-row {
   display: grid;
   grid-template-columns: repeat(5, 1fr);
@@ -500,6 +517,7 @@
   padding: 0.6rem 0.25rem;
   background: #09090b;
   border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-pill); /* disenio.md: 75px obligatorio en selectores de talla */
   font-family: var(--font-mono);
   font-size: 0.775rem;
   font-weight: 700;
@@ -534,6 +552,7 @@
   padding: 0.45rem 0.5rem;
   background: #09090b;
   border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-pill);
   color: var(--text-secondary);
   font-family: var(--font-mono);
   font-size: 0.725rem;
@@ -754,6 +773,7 @@ input[type="range"].tuning-slider::-moz-range-thumb {
   padding: 0.35rem 0.6rem;
   background: #09090b;
   border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-pill);
   color: var(--text-muted);
 }
 
@@ -850,6 +870,7 @@ input[type="range"].tuning-slider::-moz-range-thumb {
   background: #ffffff;
   color: #000000;
   border: 1px solid #ffffff;
+  border-radius: var(--radius-pill); /* disenio.md: 75px obligatorio en CTA primario */
   padding: 0.95rem 1.75rem;
   font-family: var(--font-mono);
   font-size: 0.85rem;
@@ -868,4 +889,3 @@ input[type="range"].tuning-slider::-moz-range-thumb {
   color: #ffffff;
   transform: translateY(-2px);
 }
-

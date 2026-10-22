@@ -1,5 +1,5 @@
-// Submódulo del CMS: Editor de las 6 prendas destacadas del Lookbook, Categorías, Subcategorías y Carrusel.
-// Acá renderizo el gestor de categorías/subcategorías de filtro y las tarjetas de cada prenda
+// Submódulo del CMS: Editor de las prendas destacadas del Lookbook, Categorías, Subcategorías y Galería Multi-imagen.
+// Renderiza el gestor de categorías/subcategorías de filtro y las tarjetas de cada prenda
 // para sincronizarlas con el backend y con la vitrina pública.
 
 export const DEFAULT_LOOKBOOK_CATEGORIES = [
@@ -35,7 +35,9 @@ export const DEFAULT_LOOKBOOK_ITEMS = [
     price: 22990,
     garment_id: "garment-polera-heavyweight-240",
     photo_front: "/static/assets/catalog/kanji_front_v2.png",
-    photo_back: "/static/assets/catalog/kanji_back_v2.png"
+    photo_back: "/static/assets/catalog/kanji_back_v2.png",
+    gallery_images: [],
+    observation: "Corte drop shoulder relajado con cuello en rib reforzado de 3cm."
   },
   {
     id: "col-hoodie-mecha-unit",
@@ -46,7 +48,9 @@ export const DEFAULT_LOOKBOOK_ITEMS = [
     price: 34990,
     garment_id: "garment-poleron-hoodie-320",
     photo_front: "/static/assets/garments/hoodie_front.png",
-    photo_back: "/static/assets/garments/hoodie_back.png"
+    photo_back: "/static/assets/garments/hoodie_back.png",
+    gallery_images: [],
+    observation: "Interior afelpado antipilling de 320g/m² con bolsillo canguro doble costura."
   },
   {
     id: "col-polera-acid-street",
@@ -57,7 +61,9 @@ export const DEFAULT_LOOKBOOK_ITEMS = [
     price: 21990,
     garment_id: "garment-polera-heavyweight-240",
     photo_front: "/static/assets/garments/tshirt_front.png",
-    photo_back: "/static/assets/garments/tshirt_back.png"
+    photo_back: "/static/assets/garments/tshirt_back.png",
+    gallery_images: [],
+    observation: "Tratamiento de suavizado al tacto y costuras reforzadas de hombro a hombro."
   },
   {
     id: "col-crewneck-tokyo-minimal",
@@ -68,7 +74,9 @@ export const DEFAULT_LOOKBOOK_ITEMS = [
     price: 29990,
     garment_id: "garment-poleron-crewneck-300",
     photo_front: "/static/assets/garments/crewneck_front.png",
-    photo_back: "/static/assets/garments/crewneck_back.png"
+    photo_back: "/static/assets/garments/crewneck_back.png",
+    gallery_images: [],
+    observation: "Pretina y puños en rib 1x1 con elastano para máxima durabilidad de forma."
   },
   {
     id: "col-polera-classic-regular",
@@ -79,7 +87,9 @@ export const DEFAULT_LOOKBOOK_ITEMS = [
     price: 16990,
     garment_id: "garment-polera-classic-180",
     photo_front: "/static/assets/garments/tshirt_front.png",
-    photo_back: "/static/assets/garments/tshirt_back.png"
+    photo_back: "/static/assets/garments/tshirt_back.png",
+    gallery_images: [],
+    observation: "Algodón 100% transpirable de 180g/m² para uso diario intensivo."
   },
   {
     id: "col-hoodie-cyberpunk-stealth",
@@ -90,7 +100,9 @@ export const DEFAULT_LOOKBOOK_ITEMS = [
     price: 35990,
     garment_id: "garment-poleron-hoodie-320",
     photo_front: "/static/assets/garments/hoodie_front.png",
-    photo_back: "/static/assets/garments/hoodie_back.png"
+    photo_back: "/static/assets/garments/hoodie_back.png",
+    gallery_images: [],
+    observation: "Capucha envolvente de triple panel con forro interno en algodón peinado."
   }
 ];
 
@@ -162,6 +174,192 @@ export function renderCategoryRowMarkup(cat, idx, escapeHtml) {
   `;
 }
 
+export function renderGalleryImageItemMarkup(itemId, gIdx, imgUrl, escapeHtml) {
+  const safeImg = escapeHtml(imgUrl || '');
+  const randKey = Math.random().toString(36).substring(2, 7);
+  const inputId = `input-gallery-${itemId}-${gIdx}-${randKey}`;
+  const thumbId = `thumb-gallery-${itemId}-${gIdx}-${randKey}`;
+
+  return `
+    <div class="cms-gallery-item-row" style="display: flex; gap: 0.5rem; align-items: center; margin-bottom: 0.45rem;">
+      <div class="cms-media-thumb-wrap" style="width: 44px; height: 44px; min-width: 44px;">
+        <img id="${thumbId}" class="cms-media-thumb" src="${safeImg || '/static/assets/garments/tshirt_front.png'}" alt="Foto galería">
+      </div>
+      <input type="text" id="${inputId}" class="cms-input cms-img-input" data-gallery-image="true" data-preview-target="${thumbId}" value="${safeImg}" placeholder="URL o subir foto adicional..." style="font-size: 0.78rem;">
+      <button type="button" class="btn-cms-upload" data-target-input="${inputId}" title="Subir imagen optimizada WebP" style="padding: 0 0.65rem; min-height: 36px;">
+        <span class="material-symbols-outlined" style="font-size: 14px;">upload</span>
+      </button>
+      <button type="button" class="btn btn-secondary btn-cms-remove-gallery-img" title="Quitar esta foto" style="padding: 0 0.55rem; min-height: 36px; color: var(--accent-signal-red); border-color: rgba(239,68,68,0.35);">
+        <span class="material-symbols-outlined" style="font-size: 14px;">close</span>
+      </button>
+    </div>
+  `;
+}
+
+export function renderLookbookItemCardMarkup(item, idx, garments, activeCategories, escapeHtml) {
+  const itemCategoryExists = activeCategories.some(c => c.id === item.category);
+  const categoryOptions = itemCategoryExists
+    ? activeCategories
+    : [...activeCategories, { id: item.category || 'urbanas', label: item.category || 'Urbanas', subcategories: item.subcategory ? [item.subcategory] : [] }];
+
+  const selectedCatObj = categoryOptions.find(c => c.id === item.category) || categoryOptions[0];
+  const catSubcategories = Array.isArray(selectedCatObj?.subcategories) ? [...selectedCatObj.subcategories] : [];
+  if (item.subcategory && !catSubcategories.includes(item.subcategory)) {
+    catSubcategories.push(item.subcategory);
+  }
+
+  const galleryImages = Array.isArray(item.gallery_images) ? item.gallery_images : [];
+
+  return `
+    <div class="cms-lookbook-item-card" data-item-id="${item.id}" data-category="${item.category || 'urbanas'}" data-garment-id="${item.garment_id || item.garmentId || 'garment-polera-heavyweight-240'}">
+      <div class="cms-lookbook-item-header" style="display: flex; justify-content: space-between; align-items: center; gap: 0.5rem; flex-wrap: wrap;">
+        <div style="display: flex; align-items: center; gap: 0.5rem;">
+          <span class="cms-lookbook-item-id"><strong>PIEZA 0${idx + 1} // ${escapeHtml(item.name || item.id)}</strong></span>
+          <span class="badge badge-cyan cms-item-taxonomy-badge" style="font-size: 0.65rem;">${escapeHtml(selectedCatObj?.label || item.category || 'urbanas').toUpperCase()}${item.subcategory ? ` • ${escapeHtml(item.subcategory)}` : ''}</span>
+        </div>
+        <button type="button" class="btn btn-secondary btn-cms-remove-item" title="Quitar esta prenda de la colección" style="color: var(--accent-signal-red); border-color: rgba(239,68,68,0.35); font-size: 0.72rem; padding: 0.3rem 0.65rem;">
+          <span class="material-symbols-outlined" style="font-size: 15px;">delete</span>
+          <span>Quitar de Colección</span>
+        </button>
+      </div>
+
+      <div class="cms-lookbook-item-grid">
+        <div class="cms-field-group">
+          <label class="cms-label">Nombre Comercial de la Prenda</label>
+          <input type="text" class="cms-input" data-field="name" value="${escapeHtml(item.name || '')}" placeholder="Ej: Polera Heavyweight...">
+        </div>
+
+        <div class="cms-field-group">
+          <label class="cms-label">Badge Técnico / Etiqueta</label>
+          <input type="text" class="cms-input" data-field="badge" value="${escapeHtml(item.badge || '')}" placeholder="Ej: 240g Peinado • Drop Shoulder">
+        </div>
+
+        <div class="cms-field-group">
+          <label class="cms-label">Categoría Principal</label>
+          <select class="cms-select" data-field="category">
+            ${categoryOptions.map(cat => `
+              <option value="${escapeHtml(cat.id)}" ${item.category === cat.id ? 'selected' : ''}>
+                ${escapeHtml(cat.label)} (${escapeHtml(cat.id)})
+              </option>
+            `).join('')}
+          </select>
+        </div>
+
+        <div class="cms-field-group">
+          <label class="cms-label">
+            <span>Subcategoría de Filtro</span>
+            <span class="cms-label-hint">Según categoría elegida</span>
+          </label>
+          <select class="cms-select" data-field="subcategory">
+            ${catSubcategories.length > 0 ? catSubcategories.map(sub => `
+              <option value="${escapeHtml(sub)}" ${item.subcategory === sub ? 'selected' : ''}>
+                ${escapeHtml(sub)}
+              </option>
+            `).join('') : `
+              <option value="Edición Taller">Edición Taller</option>
+            `}
+          </select>
+        </div>
+
+        <div class="cms-field-group">
+          <label class="cms-label">Precio de Venta en Vitrina (CLP)</label>
+          <input type="number" class="cms-input" data-field="price" value="${item.price || 22990}" min="1000" step="500">
+        </div>
+
+        <div class="cms-field-group">
+          <label class="cms-label">Prenda Base Vinculada en Inventario</label>
+          <select class="cms-select" data-field="garment_id">
+            ${garments.map(g => `
+              <option value="${g.id}" ${(item.garment_id === g.id || item.garmentId === g.id) ? 'selected' : ''}>
+                ${escapeHtml(g.name)} (${g.weight_gsm}g) — Base: $${g.base_price.toLocaleString('es-CL')} CLP
+              </option>
+            `).join('')}
+          </select>
+        </div>
+
+        <!-- Observaciones / Especificaciones técnicas -->
+        <div class="cms-field-group" style="grid-column: 1 / -1;">
+          <label class="cms-label">
+            <span>Observaciones Técnicas / Medidas / Especificaciones de Confección</span>
+            <span class="cms-label-hint">Visible en la tarjeta de vitrina (ej: Medidas 100x150cm, gramaje especial, ojetillos)</span>
+          </label>
+          <input type="text" class="cms-input" data-field="observation" value="${escapeHtml(item.observation || '')}" placeholder="Ej: Medidas: 100x200cm con ojetillos perimetrales y lona mate de 440g...">
+        </div>
+
+        <!-- Foto Frontal -->
+        <div class="cms-field-group cms-lookbook-photo-group">
+          <label class="cms-label">
+            <span>Foto Frontal Real</span>
+            <span class="cms-label-hint">PNG transparente, JPG o WebP optimizado</span>
+          </label>
+          <div class="cms-media-row">
+            <div class="cms-media-thumb-wrap">
+              <img id="thumb-lookbook-${item.id}-front" class="cms-media-thumb" src="${item.photo_front || '/static/assets/garments/tshirt_front.png'}" alt="Foto frontal">
+            </div>
+            <div class="cms-media-body">
+              <input type="text" id="input-lookbook-${item.id}-front" class="cms-input cms-img-input" data-field="photo_front" data-preview-target="thumb-lookbook-${item.id}-front" value="${escapeHtml(item.photo_front || '')}" placeholder="URL o subir archivo...">
+              <div class="cms-media-actions">
+                <button type="button" class="btn-cms-upload" data-target-input="input-lookbook-${item.id}-front" title="Subir foto frontal">
+                  <span class="material-symbols-outlined">upload</span>
+                  <span>Subir</span>
+                </button>
+                <button type="button" class="btn-cms-clear" data-target-input="input-lookbook-${item.id}-front" data-preview-target="thumb-lookbook-${item.id}-front" data-fallback="/static/assets/garments/tshirt_front.png" title="Limpiar y usar vector">
+                  <span class="material-symbols-outlined">delete</span>
+                  <span>Quitar</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Foto Trasera -->
+        <div class="cms-field-group cms-lookbook-photo-group">
+          <label class="cms-label">
+            <span>Foto Trasera Real</span>
+            <span class="cms-label-hint">Espalda de prenda con o sin estampa</span>
+          </label>
+          <div class="cms-media-row">
+            <div class="cms-media-thumb-wrap">
+              <img id="thumb-lookbook-${item.id}-back" class="cms-media-thumb" src="${item.photo_back || '/static/assets/garments/tshirt_back.png'}" alt="Foto trasera">
+            </div>
+            <div class="cms-media-body">
+              <input type="text" id="input-lookbook-${item.id}-back" class="cms-input cms-img-input" data-field="photo_back" data-preview-target="thumb-lookbook-${item.id}-back" value="${escapeHtml(item.photo_back || '')}" placeholder="URL o subir archivo...">
+              <div class="cms-media-actions">
+                <button type="button" class="btn-cms-upload" data-target-input="input-lookbook-${item.id}-back" title="Subir foto trasera">
+                  <span class="material-symbols-outlined">upload</span>
+                  <span>Subir</span>
+                </button>
+                <button type="button" class="btn-cms-clear" data-target-input="input-lookbook-${item.id}-back" data-preview-target="thumb-lookbook-${item.id}-back" data-fallback="/static/assets/garments/tshirt_back.png" title="Limpiar y usar vector">
+                  <span class="material-symbols-outlined">delete</span>
+                  <span>Quitar</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Galería Fotográfica Adicional (Multi-Imagen) -->
+        <div class="cms-field-group cms-lookbook-gallery-group" style="grid-column: 1 / -1; margin-top: 0.5rem; border-top: 1px dashed var(--border-subtle); padding-top: 0.75rem;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+            <label class="cms-label" style="margin: 0;">
+              <span class="material-symbols-outlined" style="font-size: 16px; vertical-align: middle; color: var(--accent-admin);">collections</span>
+              <span>Galería Fotográfica Adicional (Formatos WebP / PNG / JPG)</span>
+            </label>
+            <button type="button" class="btn btn-secondary btn-cms-add-gallery-img" data-item-id="${item.id}" style="font-size: 0.72rem; padding: 0.25rem 0.65rem;">
+              <span class="material-symbols-outlined" style="font-size: 14px;">add_photo_alternate</span>
+              <span>+ Añadir Foto a Galería</span>
+            </button>
+          </div>
+          <div class="cms-gallery-items-container" data-item-id="${item.id}">
+            ${galleryImages.map((imgUrl, gIdx) => renderGalleryImageItemMarkup(item.id, gIdx, imgUrl, escapeHtml)).join('')}
+          </div>
+        </div>
+
+      </div>
+    </div>
+  `;
+}
+
 // Genero el HTML de la tarjeta de administración del Lookbook y Categorías
 export function renderLookbookSection(lookbookItems, garments, escapeHtml, categories = DEFAULT_LOOKBOOK_CATEGORIES) {
   const activeCategories = Array.isArray(categories) && categories.length > 0
@@ -186,7 +384,7 @@ export function renderLookbookSection(lookbookItems, garments, escapeHtml, categ
 
       <div class="cms-lookbook-notice">
         <span class="material-symbols-outlined" style="font-size: 16px; color: var(--accent-admin); vertical-align: middle;">info</span>
-        <span><strong>Gestor Visual de Categorías y Subcategorías:</strong> Crea nuevas categorías con <strong>+ Agregar Categoría</strong>, añade subcategorías escribiendo su nombre y pulsando <strong>+ Subcategoría</strong> (o Enter), edita cualquier subcategoría haciendo clic sobre su etiqueta, o elimínala con <strong>&times;</strong>. Usa el botón <strong>Guardar Categorías y Subcategorías</strong> para aplicar los cambios en la tienda al instante.</span>
+        <span><strong>Gestor Integral de Colecciones:</strong> Puedes agregar tantas piezas como desees con <strong>+ AGREGAR PRENDA AL CATÁLOGO</strong>, subir múltiples fotos por prenda a su galería en formato WebP liviano, agregar especificaciones u observaciones técnicas, y quitar prendas con <strong>Quitar de Colección</strong>. Los cambios se sincronizan en vivo.</span>
       </div>
 
       <!-- GESTOR DE CATEGORÍAS Y SUBCATEGORÍAS DEL CATÁLOGO -->
@@ -221,144 +419,30 @@ export function renderLookbookSection(lookbookItems, garments, escapeHtml, categ
         ${allSubcategories.map(sub => `<option value="${escapeHtml(sub)}"></option>`).join('')}
       </datalist>
 
-      <div style="margin: 0.5rem 0 0.25rem;">
-        <h4 style="font-family: var(--font-display); font-size: 0.98rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-primary); margin: 0;">
-          2. Asignación por Prenda Destacada (Catálogo & Carrusel)
-        </h4>
-        <p style="font-size: 0.78rem; color: var(--text-muted); margin: 0.2rem 0 0;">
-          Selecciona a qué Categoría y Subcategoría pertenece cada prenda publicada en la vitrina.
-        </p>
+      <div style="margin: 0.5rem 0 0.25rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.5rem;">
+        <div>
+          <h4 style="font-family: var(--font-display); font-size: 0.98rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-primary); margin: 0;">
+            2. Asignación por Prenda Destacada (Catálogo & Carrusel)
+          </h4>
+          <p style="font-size: 0.78rem; color: var(--text-muted); margin: 0.2rem 0 0;">
+            Configura todas las piezas de la colección: imágenes principales, galería adicional, observaciones y precios.
+          </p>
+        </div>
+        <button type="button" class="btn btn-secondary" id="cmsAddLookbookItemBtnTop" style="font-size: 0.76rem; padding: 0.5rem 0.95rem;">
+          <span class="material-symbols-outlined" style="font-size: 16px;">add_circle</span>
+          <span>+ Agregar Prenda</span>
+        </button>
       </div>
 
       <div class="cms-lookbook-list">
-        ${lookbookItems.map((item, idx) => {
-          const itemCategoryExists = activeCategories.some(c => c.id === item.category);
-          const categoryOptions = itemCategoryExists
-            ? activeCategories
-            : [...activeCategories, { id: item.category || 'urbanas', label: item.category || 'Urbanas', subcategories: item.subcategory ? [item.subcategory] : [] }];
+        ${lookbookItems.map((item, idx) => renderLookbookItemCardMarkup(item, idx, garments, activeCategories, escapeHtml)).join('')}
+      </div>
 
-          const selectedCatObj = categoryOptions.find(c => c.id === item.category) || categoryOptions[0];
-          const catSubcategories = Array.isArray(selectedCatObj?.subcategories) ? [...selectedCatObj.subcategories] : [];
-          if (item.subcategory && !catSubcategories.includes(item.subcategory)) {
-            catSubcategories.push(item.subcategory);
-          }
-
-          return `
-          <div class="cms-lookbook-item-card" data-item-id="${item.id}" data-category="${item.category || 'urbanas'}" data-garment-id="${item.garment_id || item.garmentId || 'garment-polera-heavyweight-240'}">
-            <div class="cms-lookbook-item-header">
-              <span class="cms-lookbook-item-id"><strong>SLIDE 0${idx + 1} // ${escapeHtml(item.name || item.id)}</strong></span>
-              <span class="badge badge-cyan cms-item-taxonomy-badge" style="font-size: 0.65rem;">${escapeHtml(selectedCatObj?.label || item.category || 'urbanas').toUpperCase()}${item.subcategory ? ` • ${escapeHtml(item.subcategory)}` : ''}</span>
-            </div>
-
-            <div class="cms-lookbook-item-grid">
-              <div class="cms-field-group">
-                <label class="cms-label">Nombre Comercial de la Prenda</label>
-                <input type="text" class="cms-input" data-field="name" value="${escapeHtml(item.name || '')}" placeholder="Ej: Polera Heavyweight...">
-              </div>
-
-              <div class="cms-field-group">
-                <label class="cms-label">Badge Técnico / Etiqueta</label>
-                <input type="text" class="cms-input" data-field="badge" value="${escapeHtml(item.badge || '')}" placeholder="Ej: 240g Peinado • Drop Shoulder">
-              </div>
-
-              <div class="cms-field-group">
-                <label class="cms-label">Categoría Principal</label>
-                <select class="cms-select" data-field="category">
-                  ${categoryOptions.map(cat => `
-                    <option value="${escapeHtml(cat.id)}" ${item.category === cat.id ? 'selected' : ''}>
-                      ${escapeHtml(cat.label)} (${escapeHtml(cat.id)})
-                    </option>
-                  `).join('')}
-                </select>
-              </div>
-
-              <div class="cms-field-group">
-                <label class="cms-label">
-                  <span>Subcategoría de Filtro</span>
-                  <span class="cms-label-hint">Según categoría elegida</span>
-                </label>
-                <select class="cms-select" data-field="subcategory">
-                  ${catSubcategories.length > 0 ? catSubcategories.map(sub => `
-                    <option value="${escapeHtml(sub)}" ${item.subcategory === sub ? 'selected' : ''}>
-                      ${escapeHtml(sub)}
-                    </option>
-                  `).join('') : `
-                    <option value="Edición Taller">Edición Taller</option>
-                  `}
-                </select>
-              </div>
-
-              <div class="cms-field-group">
-                <label class="cms-label">Precio de Venta en Vitrina (CLP)</label>
-                <input type="number" class="cms-input" data-field="price" value="${item.price || 22990}" min="1000" step="500">
-              </div>
-
-              <div class="cms-field-group">
-                <label class="cms-label">Prenda Base Vinculada en Inventario</label>
-                <select class="cms-select" data-field="garment_id">
-                  ${garments.map(g => `
-                    <option value="${g.id}" ${(item.garment_id === g.id || item.garmentId === g.id) ? 'selected' : ''}>
-                      ${escapeHtml(g.name)} (${g.weight_gsm}g) — Base: $${g.base_price.toLocaleString('es-CL')} CLP
-                    </option>
-                  `).join('')}
-                </select>
-              </div>
-
-              <!-- Foto Frontal -->
-              <div class="cms-field-group cms-lookbook-photo-group">
-                <label class="cms-label">
-                  <span>Foto Frontal Real</span>
-                  <span class="cms-label-hint">PNG transparente o fondo neutro</span>
-                </label>
-                <div class="cms-media-row">
-                  <div class="cms-media-thumb-wrap">
-                    <img id="thumb-lookbook-${item.id}-front" class="cms-media-thumb" src="${item.photo_front || '/static/assets/garments/tshirt_front.png'}" alt="Foto frontal">
-                  </div>
-                  <div class="cms-media-body">
-                    <input type="text" id="input-lookbook-${item.id}-front" class="cms-input cms-img-input" data-field="photo_front" data-preview-target="thumb-lookbook-${item.id}-front" value="${escapeHtml(item.photo_front || '')}" placeholder="URL o subir archivo...">
-                    <div class="cms-media-actions">
-                      <button type="button" class="btn-cms-upload" data-target-input="input-lookbook-${item.id}-front" title="Subir foto frontal">
-                        <span class="material-symbols-outlined">upload</span>
-                        <span>Subir</span>
-                      </button>
-                      <button type="button" class="btn-cms-clear" data-target-input="input-lookbook-${item.id}-front" data-preview-target="thumb-lookbook-${item.id}-front" data-fallback="/static/assets/garments/tshirt_front.png" title="Limpiar y usar vector">
-                        <span class="material-symbols-outlined">delete</span>
-                        <span>Quitar</span>
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <!-- Foto Trasera -->
-              <div class="cms-field-group cms-lookbook-photo-group">
-                <label class="cms-label">
-                  <span>Foto Trasera Real</span>
-                  <span class="cms-label-hint">Espalda de prenda con o sin estampa</span>
-                </label>
-                <div class="cms-media-row">
-                  <div class="cms-media-thumb-wrap">
-                    <img id="thumb-lookbook-${item.id}-back" class="cms-media-thumb" src="${item.photo_back || '/static/assets/garments/tshirt_back.png'}" alt="Foto trasera">
-                  </div>
-                  <div class="cms-media-body">
-                    <input type="text" id="input-lookbook-${item.id}-back" class="cms-input cms-img-input" data-field="photo_back" data-preview-target="thumb-lookbook-${item.id}-back" value="${escapeHtml(item.photo_back || '')}" placeholder="URL o subir archivo...">
-                    <div class="cms-media-actions">
-                      <button type="button" class="btn-cms-upload" data-target-input="input-lookbook-${item.id}-back" title="Subir foto trasera">
-                        <span class="material-symbols-outlined">upload</span>
-                        <span>Subir</span>
-                      </button>
-                      <button type="button" class="btn-cms-clear" data-target-input="input-lookbook-${item.id}-back" data-preview-target="thumb-lookbook-${item.id}-back" data-fallback="/static/assets/garments/tshirt_back.png" title="Limpiar y usar vector">
-                        <span class="material-symbols-outlined">delete</span>
-                        <span>Quitar</span>
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-            </div>
-          </div>
-        `}).join('')}
+      <div class="cms-lookbook-actions-bar" style="margin: 1.25rem 0; display: flex; justify-content: center;">
+        <button type="button" class="btn btn-secondary" id="cmsAddLookbookItemBtn" style="font-size: 0.85rem; padding: 0.75rem 1.5rem; border-color: var(--accent-admin); color: var(--accent-admin);">
+          <span class="material-symbols-outlined" style="font-size: 18px;">add_circle</span>
+          <span>+ AGREGAR NUEVA PRENDA AL CATÁLOGO / LOOKBOOK</span>
+        </button>
       </div>
 
       <div class="cms-card-footer" style="display: flex; justify-content: space-between; align-items: center; gap: 1rem; flex-wrap: wrap;">
@@ -376,7 +460,7 @@ export function renderLookbookSection(lookbookItems, garments, escapeHtml, categ
   `;
 }
 
-// Recopilo los datos del formulario de categorías y las 6 prendas para armar el payload del backend
+// Recopilo los datos del formulario de categorías y prendas para armar el payload del backend
 export function collectLookbookPayload(container) {
   const categoryRows = container.querySelectorAll('.cms-category-row');
   const categories = Array.from(categoryRows).map(row => {
@@ -423,6 +507,12 @@ export function collectLookbookPayload(container) {
     const priceInput = card.querySelector('[data-field="price"]');
     const frontInput = card.querySelector('[data-field="photo_front"]');
     const backInput = card.querySelector('[data-field="photo_back"]');
+    const observationInput = card.querySelector('[data-field="observation"]');
+
+    const galleryInputs = card.querySelectorAll('[data-gallery-image]');
+    const gallery_images = Array.from(galleryInputs)
+      .map(inp => inp.value.trim())
+      .filter(Boolean);
 
     // Si la prenda define una subcategoría nueva, me aseguro de registrarla en su categoría
     if (subcategory) {
@@ -441,7 +531,9 @@ export function collectLookbookPayload(container) {
       price: parseInt(priceInput ? priceInput.value : 22990, 10) || 22990,
       garment_id: garmentId,
       photo_front: frontInput && frontInput.value.trim() ? frontInput.value.trim() : null,
-      photo_back: backInput && backInput.value.trim() ? backInput.value.trim() : null
+      photo_back: backInput && backInput.value.trim() ? backInput.value.trim() : null,
+      gallery_images,
+      observation: observationInput && observationInput.value.trim() ? observationInput.value.trim() : null
     };
   });
 
@@ -450,5 +542,3 @@ export function collectLookbookPayload(container) {
     categories: categories.length > 0 ? categories : DEFAULT_LOOKBOOK_CATEGORIES
   };
 }
-
-

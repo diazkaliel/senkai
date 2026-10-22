@@ -4,7 +4,7 @@ Contratos estrictos para prendas base, configuración DTF, pedidos y métricas d
 """
 
 from enum import Enum
-from typing import List, Optional, Dict
+from typing import List, Optional, Dict, Union, Any
 from pydantic import BaseModel, Field
 
 
@@ -58,18 +58,19 @@ class ColorVariant(BaseModel):
 class GarmentBase(BaseModel):
     id: str
     name: str
-    category: GarmentCategory
+    category: Union[GarmentCategory, str]
     description: str
     weight_gsm: int = Field(..., description="Gramaje de la tela en g/m² (ej: 180g, 240g, 320g)")
     composition: str = "100% Algodón Peinado"
     base_price: int = Field(..., description="Precio base de la prenda lisa en CLP")
     size_prices: Dict[str, int] = Field(default_factory=dict, description="Precios específicos por talla en CLP cuando difieren del precio base")
     colors: List[ColorVariant]
-    sizes: List[GarmentSize]
+    sizes: List[Union[GarmentSize, str]]
     image_front_template: str
     image_back_template: str
     photo_front: Optional[str] = None
     photo_back: Optional[str] = None
+    observation: Optional[str] = None
     is_active: bool = True
 
 
@@ -79,7 +80,7 @@ class GarmentVariantDetail(BaseModel):
     garment_id: str
     color_name: str
     color_hex: str
-    size: GarmentSize
+    size: Union[GarmentSize, str]
     stock_quantity: int
     custom_price: Optional[int] = Field(default=None, description="Precio personalizado opcional para esta talla en CLP")
     is_active: bool
@@ -101,7 +102,31 @@ class GarmentUpdatePayload(BaseModel):
     size_prices: Optional[Dict[str, Optional[int]]] = Field(None, description="Precios diferenciados por talla en CLP (ej: {'XL': 14990, 'XXL': 15990})")
     photo_front: Optional[str] = Field(None, max_length=255, description="Ruta o URL de foto frontal de estudio")
     photo_back: Optional[str] = Field(None, max_length=255, description="Ruta o URL de foto trasera de estudio")
+    category: Optional[str] = Field(None, max_length=60)
+    weight_gsm: Optional[int] = Field(None, ge=0, le=2000)
+    composition: Optional[str] = Field(None, max_length=120)
+    observation: Optional[str] = Field(None, max_length=1000, description="Observaciones técnicas, especificaciones de tela o medidas")
     is_active: Optional[bool] = None
+
+
+class GarmentCreatePayload(BaseModel):
+    """Payload administrativo para dar de alta un nuevo producto o tipo de prenda en el taller."""
+    id: Optional[str] = Field(None, max_length=64, description="Slug o identificador único opcional")
+    name: str = Field(..., min_length=2, max_length=120, description="Nombre descriptivo del producto")
+    category: str = Field(default="poleras", max_length=60, description="Categoría textil o técnica")
+    description: str = Field(default="Prenda de confección para estampado de precisión.", max_length=1000)
+    weight_gsm: int = Field(default=240, ge=0, le=2000, description="Gramaje o densidad en g/m²")
+    composition: str = Field(default="100% Algodón Peinado", max_length=120)
+    base_price: int = Field(..., ge=1000, le=1000000, description="Precio base en CLP")
+    size_prices: Optional[Dict[str, Optional[int]]] = Field(default_factory=dict)
+    sizes: List[str] = Field(default_factory=lambda: ["S", "M", "L", "XL"])
+    colors: Optional[List[ColorVariant]] = None
+    observation: Optional[str] = Field(default=None, max_length=1000, description="Observaciones técnicas, medidas o especificaciones")
+    image_front_template: Optional[str] = Field(default="/static/assets/garments/tshirt_front.png", max_length=255)
+    image_back_template: Optional[str] = Field(default="/static/assets/garments/tshirt_back.png", max_length=255)
+    photo_front: Optional[str] = Field(default=None, max_length=255)
+    photo_back: Optional[str] = Field(default=None, max_length=255)
+    initial_stock_per_variant: int = Field(default=10, ge=0, le=10000)
 
 
 class DTFConfiguration(BaseModel):
@@ -402,6 +427,8 @@ class LookbookItemPayload(BaseModel):
     garment_id: str = Field(default="garment-polera-heavyweight-240", max_length=64)
     photo_front: Optional[str] = Field(default=None, max_length=255, description="URL o ruta de foto frontal de la pieza")
     photo_back: Optional[str] = Field(default=None, max_length=255, description="URL o ruta de foto trasera de la pieza")
+    gallery_images: List[str] = Field(default_factory=list, description="Lista de imágenes adicionales para la galería de la pieza")
+    observation: Optional[str] = Field(default=None, max_length=1000, description="Observaciones técnicas, medidas o especificaciones de la pieza")
 
 
 class LookbookSectionPayload(BaseModel):

@@ -1,4 +1,4 @@
-﻿// Editor CMS de la vitrina pública de Senkai DTF Studio.
+// Editor CMS de la vitrina pública de Senkai DTF Studio.
 // Este componente orquesta los submódulos de edición de cada sección (Lookbook, Hero,
 // Editorial, Anuncios, Marquee, Encabezados, Stats, Manifiesto, Protocolo y Contacto)
 // permitiendo guardar cambios de forma atómica en el backend mediante FastAPI y Pydantic v2.
@@ -9,6 +9,8 @@ import {
   DEFAULT_LOOKBOOK_CATEGORIES,
   renderSubcategoryChipMarkup,
   renderCategoryRowMarkup,
+  renderLookbookItemCardMarkup,
+  renderGalleryImageItemMarkup,
   renderLookbookSection,
   collectLookbookPayload
 } from './cms/cms_lookbook.js?v=20261018_v3';
@@ -87,22 +89,16 @@ export class ContentEditorComponent {
     };
 
     // Sincronizo las 6 prendas del Lookbook combinando los valores guardados con los predeterminados
-    const savedLookbook = (this.content.lookbook && Array.isArray(this.content.lookbook.items))
-      ? this.content.lookbook.items
-      : [];
+    const hasSavedItems = this.content.lookbook && Array.isArray(this.content.lookbook.items);
+    const savedLookbook = hasSavedItems ? this.content.lookbook.items : null;
+
     const lookbookCategories = (this.content.lookbook && Array.isArray(this.content.lookbook.categories) && this.content.lookbook.categories.length > 0)
       ? this.content.lookbook.categories
       : DEFAULT_LOOKBOOK_CATEGORIES;
 
-    const lookbookItems = DEFAULT_LOOKBOOK_ITEMS.map(defItem => {
-      const saved = savedLookbook.find(s => s.id === defItem.id);
-      return saved ? { ...defItem, ...saved } : { ...defItem };
-    });
-    savedLookbook.forEach(saved => {
-      if (!lookbookItems.some(i => i.id === saved.id)) {
-        lookbookItems.push(saved);
-      }
-    });
+    const lookbookItems = (savedLookbook !== null)
+      ? savedLookbook
+      : DEFAULT_LOOKBOOK_ITEMS.map(defItem => ({ ...defItem }));
 
     this.container.innerHTML = `
       <div class="cms-panel-wrap">
@@ -530,7 +526,83 @@ export class ContentEditorComponent {
           this.syncCategorySelectOptions();
         }
       });
+
+      // Delegación de eventos para quitar prendas y gestionar galería fotográfica
+      lookbookList.addEventListener('click', (e) => {
+        // Quitar prenda completa de la colección
+        const removeCardBtn = e.target.closest('.btn-cms-remove-item');
+        if (removeCardBtn) {
+          e.preventDefault();
+          const card = removeCardBtn.closest('.cms-lookbook-item-card');
+          const itemName = card.querySelector('[data-field="name"]')?.value || 'esta prenda';
+          if (confirm(`¿Estás seguro de quitar "${itemName}" de la colección? (Recuerda presionar Guardar Catálogo para aplicar el cambio)`)) {
+            card.remove();
+            this.showToast(`Prenda retirada de la lista. Presiona Guardar Catálogo para confirmar.`, 'info');
+          }
+          return;
+        }
+
+        // Añadir foto a galería multi-imagen
+        const addGalleryBtn = e.target.closest('.btn-cms-add-gallery-img');
+        if (addGalleryBtn) {
+          e.preventDefault();
+          const itemId = addGalleryBtn.dataset.itemId;
+          const container = lookbookList.querySelector(`.cms-gallery-items-container[data-item-id="${itemId}"]`);
+          if (container) {
+            const count = container.querySelectorAll('.cms-gallery-item-row').length;
+            const rowHtml = renderGalleryImageItemMarkup(itemId, count, '', this.escapeHtml.bind(this));
+            container.insertAdjacentHTML('beforeend', rowHtml);
+            this.attachEvents();
+          }
+          return;
+        }
+
+        // Quitar foto de galería multi-imagen
+        const removeGalleryBtn = e.target.closest('.btn-cms-remove-gallery-img');
+        if (removeGalleryBtn) {
+          e.preventDefault();
+          const row = removeGalleryBtn.closest('.cms-gallery-item-row');
+          if (row) row.remove();
+          return;
+        }
+      });
     }
+
+    // Botones para agregar una nueva prenda al catálogo/lookbook
+    const addLookbookItemHandler = () => {
+      const listEl = this.container.querySelector('.cms-lookbook-list');
+      if (!listEl) return;
+      const currentCards = listEl.querySelectorAll('.cms-lookbook-item-card');
+      const nextIdx = currentCards.length;
+      const newId = `col-item-${Date.now().toString(36)}`;
+      const activeCats = (this.content.lookbook && Array.isArray(this.content.lookbook.categories) && this.content.lookbook.categories.length > 0)
+        ? this.content.lookbook.categories
+        : DEFAULT_LOOKBOOK_CATEGORIES;
+
+      const newItem = {
+        id: newId,
+        name: `Nueva Prenda de Colección #${nextIdx + 1}`,
+        badge: "Edición Taller 2026",
+        category: activeCats[0]?.id || "urbanas",
+        subcategory: activeCats[0]?.subcategories?.[0] || "Edición Taller",
+        price: 24990,
+        garment_id: this.garments[0]?.id || "garment-polera-heavyweight-240",
+        photo_front: "",
+        photo_back: "",
+        gallery_images: [],
+        observation: ""
+      };
+
+      const cardHtml = renderLookbookItemCardMarkup(newItem, nextIdx, this.garments, activeCats, this.escapeHtml.bind(this));
+      listEl.insertAdjacentHTML('beforeend', cardHtml);
+      this.attachEvents();
+      this.showToast(`Prenda añadida al catálogo. Recuerda presionar 'Guardar Catálogo / Lookbook' para persistir.`, 'info');
+    };
+
+    const addLookbookBtn = this.container.querySelector('#cmsAddLookbookItemBtn');
+    const addLookbookBtnTop = this.container.querySelector('#cmsAddLookbookItemBtnTop');
+    if (addLookbookBtn) addLookbookBtn.addEventListener('click', addLookbookItemHandler);
+    if (addLookbookBtnTop) addLookbookBtnTop.addEventListener('click', addLookbookItemHandler);
 
     // 5. Gestión dinámica de Cláusulas de Términos y Condiciones
     const addClauseBtn = this.container.querySelector('#cmsAddTermsClauseBtn');

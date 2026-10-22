@@ -2,13 +2,15 @@
 Repositorio de persistencia para el catálogo textil e inventario físico (SQLAlchemy 2.0).
 """
 
+import re
+import uuid
 from typing import List, Optional, Dict, Any
 from sqlalchemy import select, or_, func
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.db.models import GarmentModel, GarmentVariantModel
 from app.schemas.domain import (
-    GarmentBase, GarmentCategory, GarmentSize, ColorVariant
+    GarmentBase, GarmentCategory, GarmentSize, ColorVariant, GarmentCreatePayload
 )
 from app.core.exceptions import InsufficientStockException
 
@@ -139,7 +141,15 @@ class CatalogRepository:
         
         # Orden canónico de tallas
         size_order = ["S", "M", "L", "XL", "XXL"]
-        sizes = [GarmentSize(s) for s in size_order if s in sizes_set]
+        canonical_sizes = [s for s in size_order if s in sizes_set]
+        other_sizes = sorted([s for s in sizes_set if s not in size_order])
+        all_size_keys = canonical_sizes + other_sizes
+        sizes = []
+        for s in all_size_keys:
+            try:
+                sizes.append(GarmentSize(s))
+            except ValueError:
+                sizes.append(str(s))
 
         size_prices = {
             str(sz): int(price)
@@ -147,10 +157,15 @@ class CatalogRepository:
             if price is not None and int(price) >= 1000
         }
 
+        try:
+            category_val = GarmentCategory(model.category)
+        except ValueError:
+            category_val = str(model.category)
+
         return GarmentBase(
             id=model.id,
             name=model.name,
-            category=GarmentCategory(model.category),
+            category=category_val,
             description=model.description,
             weight_gsm=model.weight_gsm,
             composition=model.composition,
@@ -162,6 +177,7 @@ class CatalogRepository:
             image_back_template=model.image_back_template,
             photo_front=model.photo_front,
             photo_back=model.photo_back,
+            observation=model.observation,
             is_active=model.is_active
         )
 
@@ -262,6 +278,84 @@ class CatalogRepository:
         await session.commit()
         await session.refresh(variant)
         return variant
+
+
+    async def create_garment(
+        self,
+        session: AsyncSession,
+        payload: GarmentCreatePayload
+    ) -> GarmentModel:
+        """Crea una nueva prenda o producto en el catálogo e inicializa sus variantes de stock."""
+        garment_id = payload.id
+        if not garment_id:
+            slug = re.sub(r'[^a-zA-Z0-9]+', '-', payload.name.lower()).strip('-')
+            garment_id = f"garment-{slug}" if slug else f"garment-{uuid.uuid4().hex[:8]}"
+
+        existing = await self.get_by_id(session, garment_id)
+        if existing:
+            garment_id = f"{garment_id}-{uuid.uuid4().hex[:4]}"
+
+        cleaned_sp: Dict[str, int] = {}
+        if payload.size_prices:
+            for sz, val in payload.size_prices.items():
+                if val is not None and int(val) >= 1000:
+                    cleaned_sp[str(sz).strip().upper()] = int(val)
+
+        garment = GarmentModel(
+            id=garment_id,
+            name=payload.name,
+            category=payload.category,
+            description=payload.description,
+            weight_gsm=payload.weight_gsm,
+            composition=payload.composition,
+            base_price=payload.base_price,
+            image_front_template=payload.image_front_template or "/static/assets/garments/tshirt_front.png",
+            image_back_template=payload.image_back_template or "/static/assets/garments/tshirt_back.png",
+            photo_front=payload.photo_front,
+            photo_back=payload.photo_back,
+            observation=payload.observation,
+            is_active=True
+        )
+        garment.size_prices = cleaned_sp
+
+        colors = payload.colors or [ColorVariant(name="Negro", hex_code="#121212", in_stock=True)]
+        raw_sizes = payload.sizes if payload.sizes else ["S", "M", "L", "XL"]
+
+        for color in colors:
+            for sz in raw_sizes:
+                sz_str = str(sz).strip().upper()
+                slug_sz = re.sub(r'[^a-z0-9]+', '', sz_str.lower()) or "std"
+                v_id = f"{garment_id}-{color.name.lower()[:3]}-{slug_sz}"
+                custom_p = cleaned_sp.get(sz_str)
+                variant = GarmentVariantModel(
+                    id=v_id,
+                    garment_id=garment_id,
+                    color_name=color.name,
+                    color_hex=color.hex_code,
+                    size=sz_str,
+                    stock_quantity=payload.initial_stock_per_variant,
+                    custom_price=custom_p,
+                    is_active=True
+                )
+                garment.variants.append(variant)
+
+        session.add(garment)
+        await session.commit()
+        await session.refresh(garment)
+        return garment
+
+    async def delete_garment(
+        self,
+        session: AsyncSession,
+        garment_id: str
+    ) -> bool:
+        """Elimina una prenda y todas sus variantes físicas en cascada."""
+        garment = await self.get_by_id(session, garment_id)
+        if not garment:
+            return False
+        await session.delete(garment)
+        await session.commit()
+        return True
 
 
 catalog_repository = CatalogRepository()

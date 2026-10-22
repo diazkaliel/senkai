@@ -1,6 +1,6 @@
 /**
  * SENKAI // SISTEMA DE MICRO-INTERACCIONES Y MOVIMIENTO EDITORIAL
- * Scroll reveals, parallax, stagger, cursor gradient, contadores y tilt.
+ * Revelado por IntersectionObserver (threshold: 0.12), stagger, contadores y Tilt 3D por delegación.
  */
 
 // ============================================================================
@@ -14,21 +14,23 @@ function initNavbarScrollBehavior() {
   progressBar.className = 'reading-progress-bar';
   navbar.appendChild(progressBar);
 
-  const docHeight = () => document.documentElement.scrollHeight - window.innerHeight;
+  let cachedMaxScroll = Math.max(1, document.documentElement.scrollHeight - window.innerHeight);
+  window.addEventListener('resize', () => {
+    cachedMaxScroll = Math.max(1, document.documentElement.scrollHeight - window.innerHeight);
+  }, { passive: true });
 
   window.addEventListener('scroll', () => {
     const scrollY = window.scrollY;
     navbar.classList.toggle('scrolled', scrollY > 60);
 
-    const total = docHeight();
-    if (total > 0) {
-      progressBar.style.width = Math.min((scrollY / total) * 100, 100) + '%';
+    if (cachedMaxScroll > 0) {
+      progressBar.style.width = Math.min((scrollY / cachedMaxScroll) * 100, 100) + '%';
     }
   }, { passive: true });
 }
 
 // ============================================================================
-// 2. SCROLL REVEAL — 5 direcciones con stagger automático y clase cinemática
+// 2. SCROLL REVEAL — Uso exclusivo de IntersectionObserver (threshold: 0.12)
 // ============================================================================
 let scrollObserver = null;
 
@@ -52,7 +54,7 @@ export function refreshScrollReveal() {
           scrollObserver.unobserve(entry.target);
         }
       });
-    }, { threshold: 0.12, rootMargin: '0px 0px -30px 0px' });
+    }, { threshold: 0.12, rootMargin: '0px 0px -24px 0px' });
   }
 
   revealElements.forEach(el => scrollObserver.observe(el));
@@ -120,11 +122,11 @@ function initSectionReveal() {
 }
 
 // ============================================================================
-// 5. TIMELINE — Relleno animado al entrar en viewport
+// 5. TIMELINE — Relleno animado al entrar en viewport (threshold: 0.12)
 // ============================================================================
 function initTimelineFill() {
   const fill = document.getElementById('timelineFill');
-  if (!fill) return;
+  if (!fill || !fill.parentElement) return;
 
   const observer = new IntersectionObserver((entries) => {
     entries.forEach(entry => {
@@ -133,13 +135,13 @@ function initTimelineFill() {
         observer.unobserve(entry.target);
       }
     });
-  }, { threshold: 0.4 });
+  }, { threshold: 0.12 });
 
   observer.observe(fill.parentElement);
 }
 
 // ============================================================================
-// 6. CONTADORES ANIMADOS con ease-out cúbico
+// 6. CONTADORES ANIMADOS con desaceleración editorial (threshold: 0.12)
 // ============================================================================
 function animateCounter(el, target, duration, prefix = '', suffix = '') {
   const startTime = performance.now();
@@ -178,7 +180,7 @@ function initStatsCounters() {
         observer.unobserve(item);
       }
     });
-  }, { threshold: 0.5 });
+  }, { threshold: 0.12 });
 
   statItems.forEach(item => observer.observe(item));
 }
@@ -193,7 +195,7 @@ function initMagneticHover() {
   const magneticElements = document.querySelectorAll('.btn-magnetic');
 
   magneticElements.forEach(el => {
-    el.addEventListener('mousemove', (e) => {
+    el.addEventListener('pointermove', (e) => {
       const rect = el.getBoundingClientRect();
       const centerX = rect.left + rect.width / 2;
       const centerY = rect.top + rect.height / 2;
@@ -204,14 +206,14 @@ function initMagneticHover() {
       el.style.transform = `translate(${deltaX}px, ${deltaY}px)`;
     });
 
-    el.addEventListener('mouseleave', () => {
+    el.addEventListener('pointerleave', () => {
       el.style.transform = 'translate(0px, 0px)';
     });
   });
 }
 
 // ============================================================================
-// 8. TILT 3D por delegación con RAF Throttling (DESIGN.md: tope estricto 3.5deg)
+// 8. TILT 3D por delegación con RAF Throttling (disenio.md: tope estricto 3.5deg)
 // ============================================================================
 function initCard3DTilt() {
   if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
@@ -225,7 +227,7 @@ function initCard3DTilt() {
     rafId = null;
     if (!latestEvent) return;
 
-    // Si el usuario está calibrando o arrastrando una estampa DTF, suspendemos el tilt para no falsear coordenadas
+    // Si el usuario está calibrando o arrastrando una estampa DTF, suspendemos el tilt
     if (document.querySelector('.is-canvas-dragging, .dtf-print-draggable.is-dragging')) {
       if (activeCard) {
         activeCard.style.transform = '';
@@ -235,7 +237,11 @@ function initCard3DTilt() {
     }
 
     const e = latestEvent;
-    const card = e.target.closest('.collection-card-pro, .hero-side-card, .protocol-card, .visualizer-card');
+    const targetEl = e.target instanceof Element ? e.target : null;
+    const card = targetEl
+      ? targetEl.closest('.collection-card-pro, .hero-side-card, .protocol-card, .terms-clause-card')
+      : null;
+
     if (!card) {
       if (activeCard) {
         activeCard.style.transform = '';
@@ -253,21 +259,21 @@ function initCard3DTilt() {
     const normX = (e.clientX - rect.left) / rect.width - 0.5;
     const normY = (e.clientY - rect.top) / rect.height - 0.5;
 
-    // Ángulo controlado y acotado (tope estricto de 3.5deg en rotateX y rotateY según DESIGN.md)
+    // Ángulo controlado y acotado (tope estricto de 3.5deg en rotateX y rotateY según disenio.md)
     const rotY = Math.max(-3.5, Math.min(3.5, Math.round(normX * 3.5 * 10) / 10));
     const rotX = Math.max(-3.5, Math.min(3.5, Math.round(-normY * 3.5 * 10) / 10));
 
-    card.style.transform = `perspective(1200px) rotateX(${rotX}deg) rotateY(${rotY}deg) translateY(-2px)`;
+    card.style.transform = `perspective(1400px) rotateX(${rotX}deg) rotateY(${rotY}deg) translateY(-2px)`;
   };
 
-  document.addEventListener('mousemove', (e) => {
+  document.addEventListener('pointermove', (e) => {
     latestEvent = e;
     if (!rafId) {
       rafId = requestAnimationFrame(updateTilt);
     }
   }, { passive: true });
 
-  document.addEventListener('mouseleave', () => {
+  document.addEventListener('pointerleave', () => {
     if (rafId) {
       cancelAnimationFrame(rafId);
       rafId = null;
@@ -281,7 +287,7 @@ function initCard3DTilt() {
 }
 
 // ============================================================================
-// 9. MARQUEE CINÉTICO — Aceleración reactiva al scroll en tracks directos y reversos
+// 9. MARQUEE CINÉTICO — Aceleración reactiva al scroll sin lectura de DOM
 // ============================================================================
 function initKineticMarquee() {
   if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
@@ -313,39 +319,8 @@ function initKineticMarquee() {
   }, { passive: true });
 }
 
-
 // ============================================================================
-// 10. PARALLAX LAYERS — Traducción vertical proporcional al scroll
-// ============================================================================
-function initParallaxLayers() {
-  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-  if ('ontouchstart' in window) return;
-
-  const parallaxElements = document.querySelectorAll('.parallax-slow');
-  if (!parallaxElements.length) return;
-
-  let ticking = false;
-
-  window.addEventListener('scroll', () => {
-    if (!ticking) {
-      requestAnimationFrame(() => {
-        const scrollY = window.scrollY;
-        parallaxElements.forEach(el => {
-          const rect = el.getBoundingClientRect();
-          const centerY = rect.top + rect.height / 2;
-          const viewCenter = window.innerHeight / 2;
-          const offset = (centerY - viewCenter) * 0.08;
-          el.style.transform = `translateY(${offset}px)`;
-        });
-        ticking = false;
-      });
-      ticking = true;
-    }
-  }, { passive: true });
-}
-
-// ============================================================================
-// 11. HAMBURGER MENU — Toggle del drawer de navegación móvil
+// 10. HAMBURGER MENU — Toggle del drawer de navegación móvil
 // ============================================================================
 function initMobileNav() {
   const hamburger = document.getElementById('navHamburger');
@@ -386,7 +361,6 @@ document.addEventListener('DOMContentLoaded', () => {
   initMagneticHover();
   initCard3DTilt();
   initKineticMarquee();
-  initParallaxLayers();
   initMobileNav();
 });
 

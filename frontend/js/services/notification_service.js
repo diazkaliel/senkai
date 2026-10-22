@@ -63,7 +63,7 @@ class NotificationService {
       isRemoved = true;
       toast.style.opacity = '0';
       toast.style.transform = 'translateX(100%)';
-      toast.style.transition = 'all 200ms ease-out';
+      toast.style.transition = 'all 220ms cubic-bezier(0.19, 1, 0.22, 1)';
       setTimeout(() => {
         if (toast.parentNode) toast.remove();
       }, 200);

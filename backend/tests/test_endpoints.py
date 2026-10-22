@@ -1037,3 +1037,110 @@ def test_admin_toggle_garment_availability_blocks_orders(client):
     assert res_on.status_code == 200
     assert res_on.json()["is_active"] is True
 
+
+def test_admin_upload_image_webp_conversion(client):
+    """Verifica la conversión y optimización de imágenes a formato WebP ligero."""
+    from PIL import Image
+    import io
+    img = Image.new("RGBA", (200, 200), (20, 20, 20, 255))
+    buf = io.BytesIO()
+    img.save(buf, format="PNG")
+    png_bytes = buf.getvalue()
+
+    admin_headers = {"X-Workshop-Token": settings.WORKSHOP_SECRET_KEY}
+    res = client.post(
+        f"{settings.API_V1_PREFIX}/admin/upload-image?webp=true",
+        files={"file": ("test_banner.png", png_bytes, "image/png")},
+        headers=admin_headers
+    )
+    assert res.status_code == 201
+    data = res.json()
+    assert data["status"] == "success"
+    assert data["filename"].endswith(".webp")
+    assert data["url"].startswith("/static/assets/uploads/")
+    assert data["url"].endswith(".webp")
+
+    upload_path = os.path.join(
+        os.path.dirname(os.path.dirname(os.path.dirname(__file__))),
+        "frontend", "assets", "uploads", data["filename"]
+    )
+    if os.path.exists(upload_path):
+        os.remove(upload_path)
+
+
+def test_admin_create_and_delete_garment_with_observation_and_custom_options(client):
+    """Verifica creación, consulta, edición de observación y eliminación de prendas/productos."""
+    admin_headers = {"X-Workshop-Token": settings.WORKSHOP_SECRET_KEY}
+
+    payload = {
+        "name": "Pendón Roller Publicitario 100x200",
+        "category": "pendones",
+        "description": "Lona PVC 440g con estructura retráctil de aluminio y estuche de transporte.",
+        "weight_gsm": 440,
+        "composition": "Lona Frontlit PVC Mate 440g",
+        "base_price": 28990,
+        "size_prices": {"100X200": 28990, "120X200": 34990},
+        "sizes": ["100x200", "120x200"],
+        "observation": "Medidas 100x200cm. Ojetillos perimetrales y base reforzada. No apto para mesa DTF.",
+        "initial_stock_per_variant": 15
+    }
+
+    # 1. Crear producto
+    res_create = client.post(
+        f"{settings.API_V1_PREFIX}/admin/garments",
+        json=payload,
+        headers=admin_headers
+    )
+    assert res_create.status_code == 201
+    created = res_create.json()
+    garment_id = created["id"]
+    assert created["name"] == payload["name"]
+    assert created["category"] == "pendones"
+    assert created["observation"] == payload["observation"]
+    assert created["base_price"] == 28990
+    assert "100X200" in created["size_prices"]
+
+    # 2. Verificar que aparece en el catálogo público
+    res_cat = client.get(f"{settings.API_V1_PREFIX}/garments/")
+    assert res_cat.status_code == 200
+    cat_items = res_cat.json()
+    found = next((g for g in cat_items if g["id"] == garment_id), None)
+    assert found is not None
+    assert found["observation"] == payload["observation"]
+
+    # 3. Consultar variantes de inventario
+    res_variants = client.get(
+        f"{settings.API_V1_PREFIX}/admin/garments/{garment_id}/variants",
+        headers=admin_headers
+    )
+    assert res_variants.status_code == 200
+    variants = res_variants.json()
+    assert len(variants) == 2
+    assert all(v["stock_quantity"] == 15 for v in variants)
+
+    # 4. Actualizar observación y precio base
+    res_patch = client.patch(
+        f"{settings.API_V1_PREFIX}/admin/garments/{garment_id}",
+        json={
+            "observation": "Medidas actualizadas: 100x200cm con tintas UV resistentes a la intemperie.",
+            "base_price": 29990
+        },
+        headers=admin_headers
+    )
+    assert res_patch.status_code == 200
+    patched = res_patch.json()
+    assert patched["observation"] == "Medidas actualizadas: 100x200cm con tintas UV resistentes a la intemperie."
+    assert patched["base_price"] == 29990
+
+    # 5. Eliminar producto
+    res_del = client.delete(
+        f"{settings.API_V1_PREFIX}/admin/garments/{garment_id}",
+        headers=admin_headers
+    )
+    assert res_del.status_code == 200
+    assert res_del.json()["status"] == "success"
+
+    # 6. Comprobar que ya no está en el catálogo
+    res_after = client.get(f"{settings.API_V1_PREFIX}/garments/{garment_id}")
+    assert res_after.status_code == 404
+

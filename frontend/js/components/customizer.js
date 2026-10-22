@@ -1,4 +1,4 @@
-﻿// Coordinador principal de la mesa de personalización textil DTF (Senkai Studio).
+// Coordinador principal de la mesa de personalización textil DTF (Senkai Studio).
 // Acá orquesto el estado reactivo de la prenda (color, talla, cara activa),
 // conecto el visor 3D con la consola de taller e integro la cotización en tiempo real.
 
@@ -405,7 +405,7 @@ export class CustomizerStudio {
         if (uploadRes && uploadRes.url) {
           activePrint.designImageUrl = uploadRes.url;
           this.saveDraft();
-          notificationService.success("⚡ Arte en alta resolución vinculado a la orden.");
+          notificationService.success("Arte en alta resolución vinculado a la orden.");
         }
       } catch (uploadErr) {
         console.warn("Subida binaria no completada; se mantendrá previsualización local:", uploadErr);
@@ -463,7 +463,7 @@ export class CustomizerStudio {
         if (uploadRes && uploadRes.url && targetPrint) {
           targetPrint.designImageUrl = uploadRes.url;
           this.saveDraft();
-          notificationService.success("⚡ Arte en alta resolución vinculado a la orden.");
+          notificationService.success("Arte en alta resolución vinculado a la orden.");
         }
       } catch (uploadErr) {
         console.warn("Subida binaria no completada; se mantendrá previsualización local:", uploadErr);

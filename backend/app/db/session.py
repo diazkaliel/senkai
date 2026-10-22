@@ -56,6 +56,8 @@ def _ensure_schema_columns(sync_conn) -> None:
                 sync_conn.exec_driver_sql("ALTER TABLE garments ADD COLUMN size_prices_json TEXT DEFAULT '{}'")
             if "is_active" not in garment_cols:
                 sync_conn.exec_driver_sql("ALTER TABLE garments ADD COLUMN is_active BOOLEAN DEFAULT 1")
+            if "observation" not in garment_cols:
+                sync_conn.exec_driver_sql("ALTER TABLE garments ADD COLUMN observation TEXT")
 
         variant_cols = [
             row[1] for row in sync_conn.exec_driver_sql("PRAGMA table_info(garment_variants)").fetchall()

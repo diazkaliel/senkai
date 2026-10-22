@@ -1,7 +1,7 @@
-/* Portada principal: banner editorial, titulares de impacto, countdown y tarjetas laterales. */
+/* Portada principal: banner editorial asimétrico, titulares de impacto y tarjetas técnicas. */
 
 /* --------------------------------------------------------------------------
-   3. HERO SECTION
+   3. HERO SECTION (disenio.md: asimétrico, 0px en módulos, 75px en Ghost Pills)
    -------------------------------------------------------------------------- */
 .hero {
   min-height: 84vh;
@@ -23,13 +23,13 @@
 .hero-main-card {
   background: var(--bg-surface);
   border: 1px solid var(--border-subtle);
-  border-radius: var(--radius-sm);
+  border-radius: 0px; /* disenio.md: 0px obligatorio en contenedores estructurales */
   padding: 2rem 1.5rem;
   display: flex;
   flex-direction: column;
   position: relative;
   overflow: hidden;
-  box-shadow: var(--shadow-card);
+  box-shadow: none; /* disenio.md: separación mediante bordes hairline 1px solid, sin sombras artificiales */
 }
 
 .hero-workbench-layout {
@@ -43,8 +43,8 @@
 .hero-content-side {
   display: flex;
   flex-direction: column;
-  align-items: center;
-  text-align: center;
+  align-items: flex-start;
+  text-align: left;
 }
 
 .hero-atelier-eyebrow {
@@ -83,7 +83,7 @@
 .hero-cta-group {
   display: flex;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-start;
   gap: 1.25rem;
   flex-wrap: wrap;
   width: 100%;
@@ -102,7 +102,7 @@
   font-size: var(--text-sm);
   letter-spacing: 0.1em;
   text-transform: uppercase;
-  border-radius: var(--radius-pill);
+  border-radius: var(--radius-pill); /* disenio.md: 75px exclusivo para CTA primario */
   border: 1px solid var(--text-primary);
   transition: background-color var(--transition-fast), color var(--transition-fast), transform var(--transition-fast);
 }
@@ -138,7 +138,7 @@
 .hero-specs-row {
   display: flex;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-start;
   gap: 1.25rem;
   flex-wrap: wrap;
   margin-top: 1.85rem;
@@ -188,6 +188,7 @@
     var(--bg-garment-stage, radial-gradient(circle at 50% 42%, #e6e6ec 0%, #c4c4cf 100%));
   background-size: 24px 24px, 24px 24px, 100% 100%;
   border: 1px solid var(--border-default);
+  border-radius: 0px;
   pointer-events: none;
   z-index: 0;
 }
@@ -235,13 +236,13 @@
 .hero-side-card {
   background: var(--bg-surface);
   border: 1px solid var(--border-subtle);
-  border-radius: var(--radius-sm);
+  border-radius: 0px; /* disenio.md: 0px en módulos estructurales */
   padding: 1.35rem 1.25rem;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  box-shadow: var(--shadow-card);
-  transition: border-color var(--transition-fast), transform var(--transition-fast), box-shadow var(--transition-fast);
+  box-shadow: none;
+  transition: border-color var(--transition-fast), transform var(--transition-fast);
   text-decoration: none;
   position: relative;
   overflow: hidden;
@@ -270,7 +271,7 @@
   color: var(--text-secondary);
   background: var(--bg-surface-elevated);
   border: 1px solid var(--border-subtle);
-  padding: 2px 7px;
+  padding: 2px 9px;
   border-radius: var(--radius-pill);
   letter-spacing: 0.06em;
 }
@@ -282,6 +283,7 @@
   padding: 0.75rem;
   background: var(--bg-garment-stage, radial-gradient(circle at 50% 42%, #e6e6ec 0%, #c4c4cf 100%));
   border: 1px solid var(--border-subtle);
+  border-radius: 0px;
   position: relative;
   display: flex;
   align-items: center;
@@ -304,6 +306,7 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
+  gap: 0.5rem;
   margin-top: 0.75rem;
   padding-top: 0.65rem;
   border-top: 1px solid var(--border-subtle);
@@ -332,8 +335,8 @@
 
 .hero-side-card:hover, .hero-side-card:focus-visible {
   border-color: var(--border-strong);
-  transform: translateY(-3px);
-  box-shadow: var(--shadow-lg);
+  transform: translateY(-2px);
+  box-shadow: none;
 }
 
 .hero-side-card:focus-visible {
@@ -372,16 +375,6 @@
   .hero-workbench-layout {
     grid-template-columns: 1.15fr 0.85fr;
     text-align: left;
-  }
-  .hero-content-side {
-    align-items: flex-start;
-    text-align: left;
-  }
-  .hero-cta-group {
-    justify-content: flex-start;
-  }
-  .hero-specs-row {
-    justify-content: flex-start;
   }
 }
 
