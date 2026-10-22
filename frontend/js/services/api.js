@@ -191,7 +191,13 @@ export const apiService = {
     if (!res.ok) {
       if (res.status === 401) throw new Error("UNAUTHORIZED");
       const errBody = await res.json().catch(() => ({}));
-      throw new Error(errBody.detail || "Error al actualizar la sección editorial");
+      let msg = errBody.detail || "Error al actualizar la sección editorial";
+      if (Array.isArray(msg)) {
+        msg = msg.map(e => `${e.loc ? e.loc.slice(-1)[0] : 'campo'}: ${e.msg}`).join(', ');
+      } else if (typeof msg === 'object' && msg !== null) {
+        msg = JSON.stringify(msg);
+      }
+      throw new Error(msg);
     }
     return await res.json();
   },

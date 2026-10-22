@@ -2,7 +2,7 @@
 // Genera fichas de trabajo, comprobantes de producción y órdenes oficiales en formato
 // A4 descargables directamente como archivo HTML autosuficiente e imprimibles como PDF.
 
-import { normalizeItemPrints } from './api.js?v=20261018_v3';
+import { normalizeItemPrints } from './api.js?v=20261022_v1';
 
 export function generateOrderHtmlDocument(order) {
   if (!order) return "";

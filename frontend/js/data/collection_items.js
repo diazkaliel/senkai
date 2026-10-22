@@ -2,7 +2,7 @@
 // Acá defino las piezas destacadas con sus siluetas base, artes preestablecidos
 // para frente y espalda, coordenadas de prensado y gama de colores disponibles.
 
-import { PRESET_ARTWORKS } from '../components/svg_templates.js?v=20261018_v3';
+import { PRESET_ARTWORKS } from '../components/svg_templates.js?v=20261022_v1';
 
 export const DEFAULT_CATALOG_CATEGORIES = [
   {

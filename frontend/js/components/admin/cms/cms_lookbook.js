@@ -451,7 +451,7 @@ export function renderLookbookSection(lookbookItems, garments, escapeHtml, categ
           <span>Restaurar Prendas y Categorías por Defecto</span>
         </button>
 
-        <button class="btn-cms-save" data-action="save-section" data-target="lookbook">
+        <button type="button" class="btn-cms-save" data-action="save-section" data-target="lookbook">
           <span class="material-symbols-outlined" style="font-size: 16px;">save</span>
           <span>Guardar Catálogo / Lookbook</span>
         </button>
@@ -523,13 +523,13 @@ export function collectLookbookPayload(container) {
     }
 
     return {
-      id,
-      name: nameInput ? nameInput.value.trim() : "Prenda",
-      badge: badgeInput ? badgeInput.value.trim() : "Edición Taller",
-      category,
-      subcategory,
+      id: id || `col-item-${Date.now().toString(36)}`,
+      name: (nameInput && nameInput.value.trim()) || "Prenda de Colección",
+      badge: (badgeInput && badgeInput.value.trim()) || "Edición Taller",
+      category: category || "urbanas",
+      subcategory: subcategory || "Edición Taller",
       price: parseInt(priceInput ? priceInput.value : 22990, 10) || 22990,
-      garment_id: garmentId,
+      garment_id: garmentId || "garment-polera-heavyweight-240",
       photo_front: frontInput && frontInput.value.trim() ? frontInput.value.trim() : null,
       photo_back: backInput && backInput.value.trim() ? backInput.value.trim() : null,
       gallery_images,

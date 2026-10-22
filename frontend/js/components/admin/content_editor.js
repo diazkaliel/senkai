@@ -3,7 +3,7 @@
 // Editorial, Anuncios, Marquee, Encabezados, Stats, Manifiesto, Protocolo y Contacto)
 // permitiendo guardar cambios de forma atómica en el backend mediante FastAPI y Pydantic v2.
 
-import { apiService } from '../../services/api.js?v=20261018_v3';
+import { apiService } from '../../services/api.js?v=20261022_v1';
 import {
   DEFAULT_LOOKBOOK_ITEMS,
   DEFAULT_LOOKBOOK_CATEGORIES,
@@ -13,9 +13,9 @@ import {
   renderGalleryImageItemMarkup,
   renderLookbookSection,
   collectLookbookPayload
-} from './cms/cms_lookbook.js?v=20261018_v3';
-import { renderHeroSection, collectHeroPayload } from './cms/cms_hero.js?v=20261018_v3';
-import { renderEditorialSection, collectEditorialPayload } from './cms/cms_editorial.js?v=20261018_v3';
+} from './cms/cms_lookbook.js?v=20261022_v1';
+import { renderHeroSection, collectHeroPayload } from './cms/cms_hero.js?v=20261022_v1';
+import { renderEditorialSection, collectEditorialPayload } from './cms/cms_editorial.js?v=20261022_v1';
 import {
   renderAnnouncementSection, collectAnnouncementPayload,
   renderMarqueeSection, collectMarqueePayload,
@@ -24,8 +24,8 @@ import {
   renderStatementSection, collectStatementPayload,
   renderProtocolSection, collectProtocolPayload,
   renderContactSection, collectContactPayload
-} from './cms/cms_sections.js?v=20261018_v3';
-import { attachImageManagementEvents } from './cms/cms_uploader.js?v=20261018_v3';
+} from './cms/cms_sections.js?v=20261022_v1';
+import { attachImageManagementEvents } from './cms/cms_uploader.js?v=20261022_v1';
 
 export class ContentEditorComponent {
   constructor(container) {
@@ -388,6 +388,9 @@ export class ContentEditorComponent {
   }
 
   attachEvents() {
+    if (this._eventsAttached) return;
+    this._eventsAttached = true;
+
     // 1. Salto suave al hacer clic en los botones de acceso rápido
     this.container.querySelectorAll('.btn-cms-jump').forEach(btn => {
       btn.addEventListener('click', (e) => {
@@ -406,12 +409,16 @@ export class ContentEditorComponent {
       });
     });
 
-    // 2. Guardar sección individual
-    this.container.querySelectorAll('.btn-cms-save').forEach(btn => {
-      btn.addEventListener('click', async (e) => {
-        const targetSection = e.currentTarget.dataset.target;
-        await this.handleSaveSection(targetSection, e.currentTarget);
-      });
+    // 2. Guardar sección individual (delegado en el contenedor para evitar duplicación y soportar elementos dinámicos)
+    this.container.addEventListener('click', async (e) => {
+      const saveBtn = e.target.closest('.btn-cms-save');
+      if (!saveBtn) return;
+      e.preventDefault();
+      if (saveBtn.disabled || saveBtn.classList.contains('loading')) return;
+      const targetSection = saveBtn.dataset.target;
+      if (targetSection) {
+        await this.handleSaveSection(targetSection, saveBtn);
+      }
     });
 
     // 3. Gestor de previsualización y subida de fotos
@@ -552,7 +559,6 @@ export class ContentEditorComponent {
             const count = container.querySelectorAll('.cms-gallery-item-row').length;
             const rowHtml = renderGalleryImageItemMarkup(itemId, count, '', this.escapeHtml.bind(this));
             container.insertAdjacentHTML('beforeend', rowHtml);
-            this.attachEvents();
           }
           return;
         }
@@ -595,7 +601,7 @@ export class ContentEditorComponent {
 
       const cardHtml = renderLookbookItemCardMarkup(newItem, nextIdx, this.garments, activeCats, this.escapeHtml.bind(this));
       listEl.insertAdjacentHTML('beforeend', cardHtml);
-      this.attachEvents();
+      this.syncCategorySelectOptions();
       this.showToast(`Prenda añadida al catálogo. Recuerda presionar 'Guardar Catálogo / Lookbook' para persistir.`, 'info');
     };
 
@@ -692,9 +698,13 @@ export class ContentEditorComponent {
 
   // Guardo la sección modificada comunicándome con el endpoint PUT /admin/content/{section_key}
   async handleSaveSection(sectionKey, buttonEl) {
+    if (!buttonEl || buttonEl.disabled || buttonEl.classList.contains('loading')) {
+      return;
+    }
+    const originalHtml = buttonEl.getAttribute('data-original-html') || buttonEl.innerHTML;
+    buttonEl.setAttribute('data-original-html', originalHtml);
     buttonEl.disabled = true;
     buttonEl.classList.add('loading');
-    const originalHtml = buttonEl.innerHTML;
     buttonEl.innerHTML = `<span class="material-symbols-outlined cms-spin" style="font-size: 16px;">progress_activity</span> <span>Guardando...</span>`;
 
     try {
@@ -703,7 +713,7 @@ export class ContentEditorComponent {
 
       // Actualizo la copia local en memoria
       this.content[sectionKey] = payload;
-      this.showToast(`Sección '${sectionKey}' actualizada con éxito.`, "success");
+      this.showToast(`Sección '${sectionKey}' guardada con éxito en línea.`, "success");
 
       // Notifico a la vitrina pública para que se refresque reactivamente
       window.dispatchEvent(new CustomEvent('senkai:cms-updated', { detail: { sectionKey, payload } }));
@@ -718,7 +728,8 @@ export class ContentEditorComponent {
     } finally {
       buttonEl.disabled = false;
       buttonEl.classList.remove('loading');
-      buttonEl.innerHTML = originalHtml;
+      buttonEl.innerHTML = buttonEl.getAttribute('data-original-html') || originalHtml;
+      buttonEl.removeAttribute('data-original-html');
     }
   }
 

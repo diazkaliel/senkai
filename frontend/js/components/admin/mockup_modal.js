@@ -2,10 +2,10 @@
 // Muestra el mockup de la prenda en Negro Industrial, el registro anatómico de estampas,
 // los parámetros de termofijado de taller y permite descargar la orden oficial en PDF.
 
-import { apiService, normalizeItemPrints } from '../../services/api.js?v=20261018_v3';
-import { SVG_GARMENTS, PRESET_ARTWORKS } from '../svg_templates.js?v=20261018_v3';
-import { downloadOrderDossier } from '../../services/order_document_service.js?v=20261018_v3';
-import { notificationService } from '../../services/notification_service.js?v=20261018_v3';
+import { apiService, normalizeItemPrints } from '../../services/api.js?v=20261022_v1';
+import { SVG_GARMENTS, PRESET_ARTWORKS } from '../svg_templates.js?v=20261022_v1';
+import { downloadOrderDossier } from '../../services/order_document_service.js?v=20261022_v1';
+import { notificationService } from '../../services/notification_service.js?v=20261022_v1';
 
 const PRINT_DIMENSIONS = {
   A6: { width: 90, height: 90, cm: "10 × 10 cm", desc: "Bolsillo" },

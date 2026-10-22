@@ -2,7 +2,7 @@
 // Acá centralizo la escucha de clics, inputs de calibración, subida de archivos
 // y conecto el drag & drop del lienzo interactivo con el estado del estudio.
 
-import { attachDragController } from './drag_controller.js?v=20261018_v3';
+import { attachDragController } from './drag_controller.js?v=20261022_v1';
 
 export function attachCustomizerEvents(container, studio) {
   if (!container || !studio) return;

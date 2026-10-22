@@ -4,7 +4,7 @@
  * Curva de ingresos/pedidos con tooltip de seguimiento, ranking de prendas y logística.
  */
 
-import { apiService } from '../../services/api.js?v=20261018_v3';
+import { apiService } from '../../services/api.js?v=20261022_v1';
 
 export class AnalyticsDashboardComponent {
   constructor(hostElement) {

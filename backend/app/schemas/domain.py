@@ -425,10 +425,10 @@ class LookbookItemPayload(BaseModel):
     subcategory: Optional[str] = Field(default="Drop Shoulder 240g", max_length=60, description="Subcategoría técnica o de estilo")
     price: int = Field(default=22990, ge=1000, le=1000000)
     garment_id: str = Field(default="garment-polera-heavyweight-240", max_length=64)
-    photo_front: Optional[str] = Field(default=None, max_length=255, description="URL o ruta de foto frontal de la pieza")
-    photo_back: Optional[str] = Field(default=None, max_length=255, description="URL o ruta de foto trasera de la pieza")
+    photo_front: Optional[str] = Field(default=None, max_length=1000, description="URL o ruta de foto frontal de la pieza")
+    photo_back: Optional[str] = Field(default=None, max_length=1000, description="URL o ruta de foto trasera de la pieza")
     gallery_images: List[str] = Field(default_factory=list, description="Lista de imágenes adicionales para la galería de la pieza")
-    observation: Optional[str] = Field(default=None, max_length=1000, description="Observaciones técnicas, medidas o especificaciones de la pieza")
+    observation: Optional[str] = Field(default=None, max_length=2000, description="Observaciones técnicas, medidas o especificaciones de la pieza")
 
 
 class LookbookSectionPayload(BaseModel):

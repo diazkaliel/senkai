@@ -5,12 +5,12 @@
 // 3. Editor editorial CMS (content_editor.js)
 // 4. Gestor de catálogo y stock físico (inventory_manager.js)
 
-import { apiService } from '../services/api.js?v=20261018_v3';
-import { KanbanBoardComponent } from './admin/kanban_board.js?v=20261018_v3';
-import { ContentEditorComponent } from './admin/content_editor.js?v=20261018_v3';
-import { AnalyticsDashboardComponent } from './admin/analytics_dashboard.js?v=20261018_v3';
-import { InventoryManagerComponent } from './admin/inventory_manager.js?v=20261018_v3';
-import { MockupModalComponent } from './admin/mockup_modal.js?v=20261018_v3';
+import { apiService } from '../services/api.js?v=20261022_v1';
+import { KanbanBoardComponent } from './admin/kanban_board.js?v=20261022_v1';
+import { ContentEditorComponent } from './admin/content_editor.js?v=20261022_v1';
+import { AnalyticsDashboardComponent } from './admin/analytics_dashboard.js?v=20261022_v1';
+import { InventoryManagerComponent } from './admin/inventory_manager.js?v=20261022_v1';
+import { MockupModalComponent } from './admin/mockup_modal.js?v=20261022_v1';
 
 export class AdminWorkshopPortal {
   constructor(containerId) {
