@@ -1,7 +1,7 @@
-ï»¿// MÃ³dulo pÃºblico de rastreo de pedidos en tiempo real por nÃºmero de orden (ej. SNK-2026-0001).
-// Permite al cliente consultar en quÃ© etapa tÃ©cnica del taller se encuentra su pedido.
+// Módulo público de rastreo de pedidos en tiempo real por número de orden (ej. SNK-2026-0001).
+// Permite al cliente consultar en qué etapa técnica del taller se encuentra su pedido.
 
-import { apiService } from '../services/api.js?v=20261022_v1';
+import { apiService } from '../services/api.js?v=20261022_v2';
 
 const LAST_ORDER_STORAGE_KEY = 'senkai_last_order_number';
 
@@ -9,15 +9,15 @@ const PRODUCTION_STAGES = [
   {
     key: 'cola_impresion_dtf',
     code: 'FASE 01',
-    label: 'Cola de ImpresiÃ³n DTF',
-    desc: 'RecepciÃ³n de orden, procesado RIP a 300 DPI e inyecciÃ³n sobre film tÃ©cnico.',
+    label: 'Cola de Impresión DTF',
+    desc: 'Recepción de orden, procesado RIP a 300 DPI e inyección sobre film técnico.',
     icon: 'print'
   },
   {
     key: 'en_planchado_curado',
     code: 'FASE 02',
-    label: 'Planchado & Curado 160Â°C',
-    desc: 'Transferencia tÃ©rmica en prensa neumÃ¡tica y control de calidad de costuras.',
+    label: 'Planchado & Curado 160°C',
+    desc: 'Transferencia térmica en prensa neumática y control de calidad de costuras.',
     icon: 'iron'
   },
   {
@@ -38,17 +38,17 @@ const PRODUCTION_STAGES = [
 
 const STATUS_META = {
   pendiente_pago: {
-    label: 'Pendiente de ValidaciÃ³n',
+    label: 'Pendiente de Validación',
     stageIndex: 0,
     badgeClass: 'status-warning'
   },
   cola_impresion_dtf: {
-    label: 'En Cola de ImpresiÃ³n DTF',
+    label: 'En Cola de Impresión DTF',
     stageIndex: 0,
     badgeClass: 'status-active'
   },
   en_planchado_curado: {
-    label: 'En Planchado y Curado TÃ©rmico (160Â°C)',
+    label: 'En Planchado y Curado Térmico (160°C)',
     stageIndex: 1,
     badgeClass: 'status-active'
   },
@@ -123,7 +123,7 @@ export class OrderTrackerComponent {
   async trackOrder(orderNumberInput) {
     const cleanCode = String(orderNumberInput || '').trim().toUpperCase();
     if (!cleanCode) {
-      this.errorMessage = 'Ingresa tu nÃºmero de orden (por ejemplo: SNK-2026-0001).';
+      this.errorMessage = 'Ingresa tu número de orden (por ejemplo: SNK-2026-0001).';
       this.currentOrder = null;
       this.render();
       this.attachEvents();
@@ -142,7 +142,7 @@ export class OrderTrackerComponent {
       this.saveLastOrderNumber(order.order_number);
     } catch (err) {
       this.currentOrder = null;
-      this.errorMessage = `No encontramos ningÃºn pedido con el cÃ³digo "${cleanCode}". Verifica que estÃ© bien escrito (ej: SNK-2026-0001).`;
+      this.errorMessage = `No encontramos ningún pedido con el código "${cleanCode}". Verifica que esté bien escrito (ej: SNK-2026-0001).`;
     } finally {
       this.isLoading = false;
       this.render();
@@ -164,9 +164,9 @@ export class OrderTrackerComponent {
                 type="text"
                 id="orderTrackerInput"
                 class="tracker-code-input"
-                placeholder="Ingresa tu NÂ° de Orden (ej: SNK-2026-0001)"
+                placeholder="Ingresa tu N° de Orden (ej: SNK-2026-0001)"
                 value="${this.escapeHtml(this.queryValue)}"
-                aria-label="NÃºmero de orden para rastrear pedido"
+                aria-label="Número de orden para rastrear pedido"
                 autocomplete="off"
               >
             </div>
@@ -178,9 +178,9 @@ export class OrderTrackerComponent {
 
           ${recentOrderCode ? `
             <div class="tracker-recent-hint">
-              <span>Tu Ãºltimo pedido registrado:</span>
+              <span>Tu último pedido registrado:</span>
               <button type="button" class="tracker-quick-code-btn" data-quick-order="${this.escapeHtml(recentOrderCode)}">
-                ${this.escapeHtml(recentOrderCode)} â†—
+                ${this.escapeHtml(recentOrderCode)} ?
               </button>
             </div>
           ` : ''}
@@ -196,7 +196,7 @@ export class OrderTrackerComponent {
         ${this.currentOrder ? this.renderOrderStatusResult(this.currentOrder) : `
           <div class="tracker-empty-prompt">
             <span class="material-symbols-outlined tracker-empty-icon">local_shipping</span>
-            <p>Ingresa el cÃ³digo <strong>SNK-2026-XXXX</strong> que recibiste al confirmar tu compra para ver en tiempo real si tu prenda estÃ¡ en impresiÃ³n DTF, curado tÃ©rmico o lista para entrega.</p>
+            <p>Ingresa el código <strong>SNK-2026-XXXX</strong> que recibiste al confirmar tu compra para ver en tiempo real si tu prenda está en impresión DTF, curado térmico o lista para entrega.</p>
           </div>
         `}
       </div>
@@ -220,7 +220,7 @@ export class OrderTrackerComponent {
       <div class="tracker-result-panel">
         <div class="tracker-result-header">
           <div class="tracker-order-id-group">
-            <span class="tracker-order-eyebrow">ORDEN DE PRODUCCIÃ“N VERIFICADA</span>
+            <span class="tracker-order-eyebrow">ORDEN DE PRODUCCIÓN VERIFICADA</span>
             <h3 class="tracker-order-number">${this.escapeHtml(order.order_number)}</h3>
           </div>
           <div class="tracker-status-pill ${meta.badgeClass}">
@@ -232,10 +232,10 @@ export class OrderTrackerComponent {
         ${isCancelled ? `
           <div class="tracker-feedback-error" style="margin-bottom: 1.5rem;">
             <span class="material-symbols-outlined">cancel</span>
-            <span>Esta orden se encuentra cancelada. Si tienes dudas, contÃ¡ctanos por WhatsApp indicando tu cÃ³digo ${this.escapeHtml(order.order_number)}.</span>
+            <span>Esta orden se encuentra cancelada. Si tienes dudas, contáctanos por WhatsApp indicando tu código ${this.escapeHtml(order.order_number)}.</span>
           </div>
         ` : `
-          <div class="tracker-pipeline-steps" role="list" aria-label="Etapas de producciÃ³n del pedido">
+          <div class="tracker-pipeline-steps" role="list" aria-label="Etapas de producción del pedido">
             ${PRODUCTION_STAGES.map((stage, idx) => {
               const isCompleted = idx < meta.stageIndex || statusKey === 'entregado';
               const isCurrent = idx === meta.stageIndex && statusKey !== 'entregado';
@@ -251,7 +251,7 @@ export class OrderTrackerComponent {
                   <h4 class="tracker-stage-title">${stage.label}</h4>
                   <p class="tracker-stage-desc">${stage.desc}</p>
                   <span class="tracker-stage-tag">
-                    ${isCompleted ? 'COMPLETADO âœ“' : (isCurrent ? 'EN PROCESO AHORA' : 'PENDIENTE')}
+                    ${isCompleted ? 'COMPLETADO ?' : (isCurrent ? 'EN PROCESO AHORA' : 'PENDIENTE')}
                   </span>
                 </div>
               `;
@@ -261,7 +261,7 @@ export class OrderTrackerComponent {
 
         <div class="tracker-details-grid">
           <div class="tracker-meta-box">
-            <span class="tracker-meta-label">INFORMACIÃ“N DE ENTREGA</span>
+            <span class="tracker-meta-label">INFORMACIÓN DE ENTREGA</span>
             <div class="tracker-meta-rows">
               <div class="tracker-meta-row">
                 <span>Cliente:</span>
@@ -273,11 +273,11 @@ export class OrderTrackerComponent {
               </div>
               <div class="tracker-meta-row">
                 <span>Entrega Estimada:</span>
-                <strong>${this.escapeHtml(order.estimated_delivery || '24 a 48 hrs hÃ¡biles')}</strong>
+                <strong>${this.escapeHtml(order.estimated_delivery || '24 a 48 hrs hábiles')}</strong>
               </div>
               ${order.tracking_code ? `
                 <div class="tracker-meta-row">
-                  <span>CÃ³digo Courier / Seguimiento:</span>
+                  <span>Código Courier / Seguimiento:</span>
                   <strong class="tracker-courier-code">${this.escapeHtml(order.tracking_code)}</strong>
                 </div>
               ` : ''}
@@ -291,7 +291,7 @@ export class OrderTrackerComponent {
                 <div class="tracker-item-row">
                   <div class="tracker-item-info">
                     <strong>${this.escapeHtml(item.garment_name)}</strong>
-                    <small>Talla ${this.escapeHtml(item.selected_size)} â€¢ Cant: ${item.quantity}</small>
+                    <small>Talla ${this.escapeHtml(item.selected_size)} • Cant: ${item.quantity}</small>
                   </div>
                   <span class="tracker-item-subtotal">$${Number(item.subtotal || 0).toLocaleString('es-CL')} CLP</span>
                 </div>

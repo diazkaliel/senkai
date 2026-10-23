@@ -1,10 +1,10 @@
-Ôªø/**
- * SEIKO // M√ìDULO DE ANAL√çTICA DE DATOS Y BUSINESS INTELLIGENCE DE TALLER
+/**
+ * SEIKO // M”DULO DE ANALÕTICA DE DATOS Y BUSINESS INTELLIGENCE DE TALLER
  * Visualizaciones interactivas en SVG nativo sin dependencias pesadas.
- * Curva de ingresos/pedidos con tooltip de seguimiento, ranking de prendas y log√≠stica.
+ * Curva de ingresos/pedidos con tooltip de seguimiento, ranking de prendas y logÌstica.
  */
 
-import { apiService } from '../../services/api.js?v=20261022_v1';
+import { apiService } from '../../services/api.js?v=20261022_v2';
 
 export class AnalyticsDashboardComponent {
   constructor(hostElement) {
@@ -28,8 +28,8 @@ export class AnalyticsDashboardComponent {
       this.render();
       this.attachEvents();
     } catch (err) {
-      console.error("Error al cargar anal√≠tica de taller:", err);
-      this.renderError(err.message || "Error al conectar con el motor anal√≠tico.");
+      console.error("Error al cargar analÌtica de taller:", err);
+      this.renderError(err.message || "Error al conectar con el motor analÌtico.");
     } finally {
       this.isLoading = false;
     }
@@ -40,7 +40,7 @@ export class AnalyticsDashboardComponent {
     this.host.innerHTML = `
       <div class="analytics-loading-state">
         <div class="spinner-inline"></div>
-        <p>Procesando m√©tricas y series temporales de taller...</p>
+        <p>Procesando mÈtricas y series temporales de taller...</p>
       </div>
     `;
   }
@@ -50,7 +50,7 @@ export class AnalyticsDashboardComponent {
     this.host.innerHTML = `
       <div class="analytics-error-state">
         <span class="material-symbols-outlined" style="font-size: 2.5rem; color: var(--accent-warning); margin-bottom: 0.5rem;">warning</span>
-        <h4>No se pudo cargar la anal√≠tica</h4>
+        <h4>No se pudo cargar la analÌtica</h4>
         <p>${message}</p>
         <button class="btn btn-secondary" id="retryAnalyticsBtn" style="margin-top: 1rem; display: inline-flex; align-items: center; gap: 0.35rem;">
           <span class="material-symbols-outlined" style="font-size: 16px;">refresh</span> Reintentar Carga
@@ -70,37 +70,37 @@ export class AnalyticsDashboardComponent {
     this.host.innerHTML = `
       <div class="analytics-dashboard">
         
-        <!-- BARRA SUPERIOR DE FILTROS Y EXPORTACI√ìN -->
+        <!-- BARRA SUPERIOR DE FILTROS Y EXPORTACI”N -->
         <div class="analytics-top-bar">
           <div class="analytics-title-group">
             <span class="badge badge-admin">INTELIGENCIA DE TALLER // TIEMPO REAL</span>
             <h3>Rendimiento Comercial y Operativo</h3>
             <p class="analytics-subtitle">
-              Anal√≠tica consolidada de los √∫ltimos <strong>${this.days} d√≠as</strong> con rec√°lculo autoritativo.
+              AnalÌtica consolidada de los ˙ltimos <strong>${this.days} dÌas</strong> con rec·lculo autoritativo.
             </p>
           </div>
 
           <div class="analytics-controls">
-            <!-- Selector de Rango de D√≠as -->
+            <!-- Selector de Rango de DÌas -->
             <div class="analytics-pills-group" role="group" aria-label="Rango de tiempo">
-              <button class="analytics-pill-btn ${this.days === 7 ? 'active' : ''}" data-days="7">7 D√≠as</button>
-              <button class="analytics-pill-btn ${this.days === 14 ? 'active' : ''}" data-days="14">14 D√≠as</button>
-              <button class="analytics-pill-btn ${this.days === 30 ? 'active' : ''}" data-days="30">30 D√≠as</button>
+              <button class="analytics-pill-btn ${this.days === 7 ? 'active' : ''}" data-days="7">7 DÌas</button>
+              <button class="analytics-pill-btn ${this.days === 14 ? 'active' : ''}" data-days="14">14 DÌas</button>
+              <button class="analytics-pill-btn ${this.days === 30 ? 'active' : ''}" data-days="30">30 DÌas</button>
             </div>
 
-            <!-- Bot√≥n de Exportaci√≥n CSV -->
+            <!-- BotÛn de ExportaciÛn CSV -->
             <button class="btn btn-secondary btn-export-csv" id="exportAnalyticsCsvBtn" title="Descargar reporte para contabilidad" style="display: inline-flex; align-items: center; gap: 0.35rem;">
               <span class="material-symbols-outlined" style="font-size: 16px;">download</span> Exportar CSV
             </button>
           </div>
         </div>
 
-        <!-- TARJETAS KPI RESUMEN DEL PER√çODO -->
+        <!-- TARJETAS KPI RESUMEN DEL PERÕODO -->
         <div class="analytics-kpi-row">
           <div class="analytics-kpi-card">
-            <div class="kpi-micro-label">Facturaci√≥n del Per√≠odo</div>
+            <div class="kpi-micro-label">FacturaciÛn del PerÌodo</div>
             <div class="kpi-main-val">$${d.total_revenue_period.toLocaleString('es-CL')} <span class="currency-tag">CLP</span></div>
-            <div class="kpi-footer-note">Hist√≥rico: $${d.historical_revenue_clp.toLocaleString('es-CL')} CLP</div>
+            <div class="kpi-footer-note">HistÛrico: $${d.historical_revenue_clp.toLocaleString('es-CL')} CLP</div>
           </div>
 
           <div class="analytics-kpi-card">
@@ -110,29 +110,29 @@ export class AnalyticsDashboardComponent {
           </div>
 
           <div class="analytics-kpi-card">
-            <div class="kpi-micro-label">Volumen de Producci√≥n</div>
+            <div class="kpi-micro-label">Volumen de ProducciÛn</div>
             <div class="kpi-main-val">${d.total_units_period} <span class="currency-tag">PRENDAS</span></div>
             <div class="kpi-footer-note">En ${d.total_orders_period} pedidos procesados</div>
           </div>
 
           <div class="analytics-kpi-card">
-            <div class="kpi-micro-label">Preferencia Log√≠stica</div>
+            <div class="kpi-micro-label">Preferencia LogÌstica</div>
             <div class="kpi-main-val">${d.logistics.pickup_percentage}% <span class="currency-tag">RETIRO</span></div>
-            <div class="kpi-footer-note">${d.logistics.shipping_percentage}% Env√≠o a domicilio</div>
+            <div class="kpi-footer-note">${d.logistics.shipping_percentage}% EnvÌo a domicilio</div>
           </div>
         </div>
 
-        <!-- GR√ÅFICO PRINCIPAL: SERIE TEMPORAL INTERACTIVA -->
+        <!-- GR¡FICO PRINCIPAL: SERIE TEMPORAL INTERACTIVA -->
         <div class="analytics-chart-panel">
           <div class="chart-header">
             <div>
-              <h4 class="chart-title">Evoluci√≥n Diaria: Tendencia y Actividad</h4>
-              <span class="chart-sub">Desplaza el cursor o toca la gr√°fica para inspeccionar cada jornada</span>
+              <h4 class="chart-title">EvoluciÛn Diaria: Tendencia y Actividad</h4>
+              <span class="chart-sub">Desplaza el cursor o toca la gr·fica para inspeccionar cada jornada</span>
             </div>
 
             <div class="chart-toggle-group">
               <button class="chart-toggle-btn ${isRev ? 'active' : ''}" data-metric="revenue">
-                <span class="material-symbols-outlined" style="font-size: 14px; vertical-align: middle;">payments</span> Facturaci√≥n ($)
+                <span class="material-symbols-outlined" style="font-size: 14px; vertical-align: middle;">payments</span> FacturaciÛn ($)
               </button>
               <button class="chart-toggle-btn ${!isRev ? 'active' : ''}" data-metric="orders">
                 <span class="material-symbols-outlined" style="font-size: 14px; vertical-align: middle;">inventory_2</span> Pedidos (Cant.)
@@ -146,7 +146,7 @@ export class AnalyticsDashboardComponent {
           </div>
         </div>
 
-        <!-- FILA DE PANELES: RANKING DE PRENDAS Y LOG√çSTICA -->
+        <!-- FILA DE PANELES: RANKING DE PRENDAS Y LOGÕSTICA -->
         <div class="analytics-grid-two-cols">
           
           <!-- PANEL RANKING BESTSELLERS -->
@@ -155,16 +155,16 @@ export class AnalyticsDashboardComponent {
               <h4>Prendas Base Bestsellers</h4>
               <span class="badge badge-cyan">${d.top_garments.length} Modelos</span>
             </div>
-            <p class="sub-panel-desc">Prendas con mayor demanda y rotaci√≥n de stock en el taller.</p>
+            <p class="sub-panel-desc">Prendas con mayor demanda y rotaciÛn de stock en el taller.</p>
 
             <div class="garment-bars-list">
               ${d.top_garments.length === 0 ? `
-                <div class="empty-mini-note">Sin registros en el per√≠odo seleccionado.</div>
+                <div class="empty-mini-note">Sin registros en el perÌodo seleccionado.</div>
               ` : d.top_garments.map(g => `
                 <div class="garment-bar-row">
                   <div class="garment-bar-info">
                     <span class="garment-bar-name">${g.garment_name}</span>
-                    <span class="garment-bar-counts">${g.units_sold} un. ‚Ä¢ $${g.revenue_clp.toLocaleString('es-CL')} CLP</span>
+                    <span class="garment-bar-counts">${g.units_sold} un. ï $${g.revenue_clp.toLocaleString('es-CL')} CLP</span>
                   </div>
                   <div class="garment-bar-track">
                     <div class="garment-bar-fill" style="width: ${Math.max(g.share_percentage, 4)}%;"></div>
@@ -175,18 +175,18 @@ export class AnalyticsDashboardComponent {
             </div>
           </div>
 
-          <!-- PANEL DISTRIBUCI√ìN LOG√çSTICA -->
+          <!-- PANEL DISTRIBUCI”N LOGÕSTICA -->
           <div class="analytics-sub-panel">
             <div class="sub-panel-header">
-              <h4>Distribuci√≥n Log√≠stica & Despacho</h4>
+              <h4>DistribuciÛn LogÌstica & Despacho</h4>
               <span class="badge badge-lime">Cumplimiento</span>
             </div>
-            <p class="sub-panel-desc">Balance entre retiros presenciales en taller y env√≠os express por courier.</p>
+            <p class="sub-panel-desc">Balance entre retiros presenciales en taller y envÌos express por courier.</p>
 
             <div class="logistics-visual-box">
               <div class="logistics-ratio-bar">
                 <div class="ratio-segment pickup" style="width: ${d.logistics.pickup_percentage}%;" title="Retiro en Taller: ${d.logistics.pickup_percentage}%"></div>
-                <div class="ratio-segment shipping" style="width: ${d.logistics.shipping_percentage}%;" title="Env√≠o Express: ${d.logistics.shipping_percentage}%"></div>
+                <div class="ratio-segment shipping" style="width: ${d.logistics.shipping_percentage}%;" title="EnvÌo Express: ${d.logistics.shipping_percentage}%"></div>
               </div>
 
               <div class="logistics-legend-row">
@@ -235,7 +235,7 @@ export class AnalyticsDashboardComponent {
     const plotW = svgW - padL - padR;
     const plotH = svgH - padT - padB;
 
-    // Obtener valores m√°ximos para escala
+    // Obtener valores m·ximos para escala
     const values = points.map(p => isRevenue ? p.revenue_clp : p.orders_count);
     const maxVal = Math.max(...values, isRevenue ? 10000 : 1);
 
@@ -247,17 +247,17 @@ export class AnalyticsDashboardComponent {
       return { x, y, point: p, val: v };
     });
 
-    // Construcci√≥n de l√≠nea SVG
+    // ConstrucciÛn de lÌnea SVG
     const linePathD = coords.reduce((acc, c, i) => {
       return i === 0 ? `M ${c.x.toFixed(1)} ${c.y.toFixed(1)}` : `${acc} L ${c.x.toFixed(1)} ${c.y.toFixed(1)}`;
     }, "");
 
-    // Construcci√≥n de pol√≠gono de √°rea con gradiente
+    // ConstrucciÛn de polÌgono de ·rea con gradiente
     const firstC = coords[0];
     const lastC = coords[coords.length - 1];
     const areaPathD = `${linePathD} L ${lastC.x.toFixed(1)} ${padT + plotH} L ${firstC.x.toFixed(1)} ${padT + plotH} Z`;
 
-    // 4 L√≠neas gu√≠a horizontales en el eje Y
+    // 4 LÌneas guÌa horizontales en el eje Y
     const yTicks = [0, 0.33, 0.66, 1.0].map(ratio => {
       const yPos = padT + plotH - ratio * plotH;
       const tickVal = Math.round(ratio * maxVal);
@@ -278,16 +278,16 @@ export class AnalyticsDashboardComponent {
           </linearGradient>
         </defs>
 
-        <!-- L√çNEAS GU√çA HORIZONTALES -->
+        <!-- LÕNEAS GUÕA HORIZONTALES -->
         ${yTicks.map(t => `
           <line x1="${padL}" y1="${t.yPos}" x2="${svgW - padR}" y2="${t.yPos}" stroke="rgba(255, 255, 255, 0.07)" stroke-dasharray="3 3" />
           <text x="${padL - 10}" y="${t.yPos + 4}" fill="var(--text-muted)" font-size="10" font-family="var(--font-mono)" text-anchor="end">${t.label}</text>
         `).join('')}
 
-        <!-- POL√çGONO DE √ÅREA -->
+        <!-- POLÕGONO DE ¡REA -->
         <path d="${areaPathD}" fill="url(#areaGradient)" />
 
-        <!-- L√çNEA PRINCIPAL DEL GR√ÅFICO -->
+        <!-- LÕNEA PRINCIPAL DEL GR¡FICO -->
         <path d="${linePathD}" fill="none" stroke="var(--accent-admin)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" />
 
         <!-- ETIQUETAS EJE X -->
@@ -312,14 +312,14 @@ export class AnalyticsDashboardComponent {
           />
         `).join('')}
 
-        <!-- L√çNEA VERTICAL GU√çA DE SEGUIMIENTO (OCULTA POR DEFECTO) -->
+        <!-- LÕNEA VERTICAL GUÕA DE SEGUIMIENTO (OCULTA POR DEFECTO) -->
         <line id="chartGuideLine" x1="0" y1="${padT}" x2="0" y2="${padT + plotH}" stroke="var(--accent-white)" stroke-opacity="0.35" stroke-width="1.5" stroke-dasharray="2 2" style="display: none; pointer-events: none;" />
       </svg>
     `;
   }
 
   attachEvents() {
-    // 1. Selector de D√≠as (7, 14, 30)
+    // 1. Selector de DÌas (7, 14, 30)
     this.host.querySelectorAll('.analytics-pill-btn').forEach(btn => {
       btn.addEventListener('click', async (e) => {
         const d = parseInt(e.currentTarget.dataset.days, 10);
@@ -330,7 +330,7 @@ export class AnalyticsDashboardComponent {
       });
     });
 
-    // 2. Selector de M√©trica (Facturaci√≥n vs Pedidos)
+    // 2. Selector de MÈtrica (FacturaciÛn vs Pedidos)
     this.host.querySelectorAll('.chart-toggle-btn').forEach(btn => {
       btn.addEventListener('click', (e) => {
         const metric = e.currentTarget.dataset.metric;
@@ -362,11 +362,11 @@ export class AnalyticsDashboardComponent {
           tooltip.innerHTML = `
             <div class="tooltip-date">${d.date} (${d.label})</div>
             <div class="tooltip-main ${isRev ? 'highlight' : ''}">
-              <span>Facturaci√≥n:</span> <strong>$${revFmt} CLP</strong>
+              <span>FacturaciÛn:</span> <strong>$${revFmt} CLP</strong>
             </div>
             <div class="tooltip-sub">
               <span>Pedidos:</span> <strong>${d.orders} un.</strong>
-              <span style="margin: 0 4px">‚Ä¢</span>
+              <span style="margin: 0 4px">ï</span>
               <span>Prendas:</span> <strong>${d.units} un.</strong>
             </div>
           `;
@@ -416,10 +416,10 @@ export class AnalyticsDashboardComponent {
     let csvContent = "\uFEFF"; // UTF-8 BOM para soporte correcto de caracteres en Excel
 
     // Cabecera Resumen
-    csvContent += `REPORTE ANAL√çTICO SENKAI DTF ATELIER\n`;
-    csvContent += `Rango Analizado,√öltimos ${d.period_days} d√≠as\n`;
-    csvContent += `Facturaci√≥n Per√≠odo,$${d.total_revenue_period} CLP\n`;
-    csvContent += `Pedidos Per√≠odo,${d.total_orders_period}\n`;
+    csvContent += `REPORTE ANALÕTICO SENKAI DTF ATELIER\n`;
+    csvContent += `Rango Analizado,⁄ltimos ${d.period_days} dÌas\n`;
+    csvContent += `FacturaciÛn PerÌodo,$${d.total_revenue_period} CLP\n`;
+    csvContent += `Pedidos PerÌodo,${d.total_orders_period}\n`;
     csvContent += `Ticket Promedio (AOV),$${d.average_order_value_clp} CLP\n`;
     csvContent += `Prendas Producidas,${d.total_units_period}\n`;
     csvContent += `Retiro en Taller,${d.logistics.pickup_count} (${d.logistics.pickup_percentage}%)\n`;
@@ -427,7 +427,7 @@ export class AnalyticsDashboardComponent {
 
     // Tabla Serie Temporal
     csvContent += `SERIE TEMPORAL DIARIA\n`;
-    csvContent += `Fecha,D√≠a,Facturaci√≥n (CLP),Pedidos,Prendas\n`;
+    csvContent += `Fecha,DÌa,FacturaciÛn (CLP),Pedidos,Prendas\n`;
     d.timeseries.forEach(p => {
       csvContent += `${p.date},${p.label},${p.revenue_clp},${p.orders_count},${p.units_count}\n`;
     });
@@ -435,12 +435,12 @@ export class AnalyticsDashboardComponent {
 
     // Tabla Prendas Bestsellers
     csvContent += `RANKING PRENDAS BASE\n`;
-    csvContent += `ID Prenda,Nombre Prenda,Unidades Vendidas,Total Facturado (CLP),Participaci√≥n (%)\n`;
+    csvContent += `ID Prenda,Nombre Prenda,Unidades Vendidas,Total Facturado (CLP),ParticipaciÛn (%)\n`;
     d.top_garments.forEach(g => {
       csvContent += `"${g.garment_id}","${g.garment_name}",${g.units_sold},${g.revenue_clp},${g.share_percentage}%\n`;
     });
 
-    // Descarga v√≠a Blob en navegador
+    // Descarga vÌa Blob en navegador
     const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');

@@ -1,4 +1,4 @@
-﻿/**
+/**
  * SENKAI // Carrusel de lanzamientos destacados
  *
  * Cómo está armado:
@@ -11,8 +11,8 @@
  *   vuelva a llamar a init() cuando se refresca el catálogo.
  */
 
-import { COLLECTION_ITEMS, resolveItemPrice, buildCatalogCartItem } from './catalog.js?v=20261022_v1';
-import { SVG_GARMENTS } from './svg_templates.js?v=20261022_v1';
+import { COLLECTION_ITEMS, resolveItemPrice, buildCatalogCartItem } from './catalog.js?v=20261022_v2';
+import { SVG_GARMENTS } from './svg_templates.js?v=20261022_v2';
 
 const FILL_ANIMATION = 'drop-rail-fill';
 const SLIDE_VISIBLE_RATIO = 0.6;
@@ -304,12 +304,13 @@ export class ProductCarousel {
   }
 
   renderFace(item, side, hidden) {
+    const garment = this.findGarment(item);
     const render = SVG_GARMENTS[`${item.garmentType}_${side}`] || SVG_GARMENTS[`tshirt_${side}`];
     const art = side === 'front' ? item.frontArt : item.backArt;
     const spec = side === 'front' ? item.frontSpecs : item.backSpecs;
     const photoSrc = side === 'front'
-      ? (item.photo_front ?? item.photoFront)
-      : (item.photo_back ?? item.photoBack);
+      ? (item.photo_front || item.photoFront || garment?.photo_front)
+      : (item.photo_back || item.photoBack || garment?.photo_back);
 
     if (photoSrc) {
       return `

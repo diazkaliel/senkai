@@ -1,23 +1,23 @@
-Ôªø// Cat√°logo est√°tico de piezas de colecci√≥n (Streetwear & Ediciones Especiales).
-// Ac√° defino las piezas destacadas con sus siluetas base, artes preestablecidos
+// Cat·logo est·tico de piezas de colecciÛn (Streetwear & Ediciones Especiales).
+// Ac· defino las piezas destacadas con sus siluetas base, artes preestablecidos
 // para frente y espalda, coordenadas de prensado y gama de colores disponibles.
 
-import { PRESET_ARTWORKS } from '../components/svg_templates.js?v=20261022_v1';
+import { PRESET_ARTWORKS } from '../components/svg_templates.js?v=20261022_v2';
 
 export const DEFAULT_CATALOG_CATEGORIES = [
   {
     id: "urbanas",
     label: "Poleras Oversized (240G)",
-    subcategories: ["Drop Shoulder 240g", "Gr√°fica Cyberpunk", "Heavy Acid Wash"]
+    subcategories: ["Drop Shoulder 240g", "Gr·fica Cyberpunk", "Heavy Acid Wash"]
   },
   {
     id: "hoodies",
     label: "Polerones & Hoodies (320G)",
-    subcategories: ["Hoodie Canguro 320g", "Crewneck 300g", "Fleece T√©rmico"]
+    subcategories: ["Hoodie Canguro 320g", "Crewneck 300g", "Fleece TÈrmico"]
   },
   {
     id: "minimalista",
-    label: "L√≠nea Regular (180G)",
+    label: "LÌnea Regular (180G)",
     subcategories: ["Regular Fit 180g", "Esenciales Taller", "Monocromo"]
   },
   {
@@ -33,9 +33,9 @@ export const COLLECTION_ITEMS = [
     garmentId: "garment-polera-heavyweight-240",
     name: "Polera Oversized 'Cyber Kanji 2026'",
     price: 22990,
-    badge: "240g Peinado ‚Ä¢ Heavyweight",
+    badge: "240g Peinado ï Heavyweight",
     category: "urbanas",
-    subcategory: "Gr√°fica Cyberpunk",
+    subcategory: "Gr·fica Cyberpunk",
     garmentType: "tshirt",
     colorHex: "#121212",
     currentView: "front",
@@ -52,7 +52,7 @@ export const COLLECTION_ITEMS = [
     garmentId: "garment-poleron-hoodie-320",
     name: "Hoodie Canguro 'Mecha Unit Eva-01'",
     price: 34990,
-    badge: "320g Afelpado ‚Ä¢ Heavyweight",
+    badge: "320g Afelpado ï Heavyweight",
     category: "hoodies",
     subcategory: "Hoodie Canguro 320g",
     garmentType: "hoodie",
@@ -71,7 +71,7 @@ export const COLLECTION_ITEMS = [
     garmentId: "garment-polera-heavyweight-240",
     name: "Polera Heavy 'Acid Type Streetwear'",
     price: 21990,
-    badge: "240g Peinado ‚Ä¢ Drop Shoulder",
+    badge: "240g Peinado ï Drop Shoulder",
     category: "urbanas",
     subcategory: "Drop Shoulder 240g",
     garmentType: "tshirt",
@@ -90,7 +90,7 @@ export const COLLECTION_ITEMS = [
     garmentId: "garment-poleron-crewneck-300",
     name: "Crewneck 'Tokyo Minimalist Studio'",
     price: 29990,
-    badge: "300g Peinado ‚Ä¢ Cuello Redondo",
+    badge: "300g Peinado ï Cuello Redondo",
     category: "hoodies",
     subcategory: "Crewneck 300g",
     garmentType: "crewneck",
@@ -107,9 +107,9 @@ export const COLLECTION_ITEMS = [
   {
     id: "col-polera-classic-regular",
     garmentId: "garment-polera-classic-180",
-    name: "Polera Cl√°sica Regular 'Senkai Original'",
+    name: "Polera Cl·sica Regular 'Senkai Original'",
     price: 16990,
-    badge: "180g Jersey ‚Ä¢ Regular Fit",
+    badge: "180g Jersey ï Regular Fit",
     category: "minimalista",
     subcategory: "Regular Fit 180g",
     garmentType: "tshirt",
@@ -128,7 +128,7 @@ export const COLLECTION_ITEMS = [
     garmentId: "garment-poleron-hoodie-320",
     name: "Hoodie Heavy 'Senkai Stealth Edition'",
     price: 35990,
-    badge: "320g Afelpado ‚Ä¢ Edici√≥n Taller",
+    badge: "320g Afelpado ï EdiciÛn Taller",
     category: "propios",
     subcategory: "Stealth Edition",
     garmentType: "hoodie",

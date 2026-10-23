@@ -1,13 +1,13 @@
-ï»¿// SubmÃ³dulo del Personalizador: Enlace de eventos del DOM y controles de usuario.
-// AcÃ¡ centralizo la escucha de clics, inputs de calibraciÃ³n, subida de archivos
+// Submódulo del Personalizador: Enlace de eventos del DOM y controles de usuario.
+// Acá centralizo la escucha de clics, inputs de calibración, subida de archivos
 // y conecto el drag & drop del lienzo interactivo con el estado del estudio.
 
-import { attachDragController } from './drag_controller.js?v=20261022_v1';
+import { attachDragController } from './drag_controller.js?v=20261022_v2';
 
 export function attachCustomizerEvents(container, studio) {
   if (!container || !studio) return;
 
-  // 1. PestaÃ±as de navegaciÃ³n de la consola (Paso 01, 02, 03)
+  // 1. Pestañas de navegación de la consola (Paso 01, 02, 03)
   container.querySelectorAll('.atelier-tab-btn[data-step]').forEach(btn => {
     btn.addEventListener('click', (e) => {
       studio.state.activeStep = e.currentTarget.dataset.step;
@@ -49,7 +49,7 @@ export function attachCustomizerEvents(container, studio) {
     });
   });
 
-  // 6. SelecciÃ³n de prenda base en el catÃ¡logo de siluetas
+  // 6. Selección de prenda base en el catálogo de siluetas
   container.querySelectorAll('.garment-card-btn').forEach(btn => {
     btn.addEventListener('click', (e) => {
       studio.setGarmentById(e.currentTarget.dataset.garmentId);
@@ -62,7 +62,7 @@ export function attachCustomizerEvents(container, studio) {
       const hex = e.currentTarget.dataset.colorHex;
       const name = e.currentTarget.dataset.colorName;
 
-      // Si el color ya estÃ¡ activo, no demollemos el lienzo ni reiniciamos el estado del mouse
+      // Si el color ya está activo, no demollemos el lienzo ni reiniciamos el estado del mouse
       if (studio.state.selectedColor?.hex_code?.toLowerCase() === hex?.toLowerCase()) {
         studio.state.userSelectedColor = true;
         return;
@@ -72,7 +72,7 @@ export function attachCustomizerEvents(container, studio) {
       studio.state.userSelectedColor = true;
       studio.saveDraft();
 
-      // ActualizaciÃ³n reactiva sin demoler el escenario ni perder el contexto de puntero
+      // Actualización reactiva sin demoler el escenario ni perder el contexto de puntero
       const colorLayers = container.querySelectorAll('.garment-color-base');
       if (colorLayers.length > 0) {
         colorLayers.forEach(layer => {
@@ -93,7 +93,7 @@ export function attachCustomizerEvents(container, studio) {
     });
   });
 
-  // 8. Pastillas de selecciÃ³n de talla (S, M, L, XL, etc.)
+  // 8. Pastillas de selección de talla (S, M, L, XL, etc.)
   container.querySelectorAll('.size-pill-btn[data-size]').forEach(btn => {
     btn.addEventListener('click', (e) => {
       studio.state.selectedSize = e.currentTarget.dataset.size;
@@ -105,7 +105,7 @@ export function attachCustomizerEvents(container, studio) {
     });
   });
 
-  // 9. Acciones para agregar estampa cuando la cara estÃ¡ lisa
+  // 9. Acciones para agregar estampa cuando la cara está lisa
   const addFacePrintBtn = container.querySelector('#addFacePrintBtn');
   if (addFacePrintBtn) {
     addFacePrintBtn.addEventListener('click', () => studio.addPrint(studio.state.currentView));
@@ -121,7 +121,7 @@ export function attachCustomizerEvents(container, studio) {
     removeFacePrintBtn.addEventListener('click', () => studio.clearCurrentFace());
   }
 
-  // 11. Carga directa de arte desde el estado vacÃ­o de cara lisa
+  // 11. Carga directa de arte desde el estado vacío de cara lisa
   const uploadDirectBtn = container.querySelector('#uploadDirectBtn');
   const fileInputDirect = container.querySelector('#fileInputDirect');
   if (uploadDirectBtn && fileInputDirect) {
@@ -131,7 +131,7 @@ export function attachCustomizerEvents(container, studio) {
     });
   }
 
-  // 12. Centrado anatÃ³mico de la estampa sobre el pecho o espalda
+  // 12. Centrado anatómico de la estampa sobre el pecho o espalda
   const centerBtn = container.querySelector('#centerActivePrintBtn');
   const centerShortcutBtn = container.querySelector('#centerShortcutBtn');
   const applyCenter = () => {
@@ -147,7 +147,7 @@ export function attachCustomizerEvents(container, studio) {
   if (centerBtn) centerBtn.addEventListener('click', applyCenter);
   if (centerShortcutBtn) centerShortcutBtn.addEventListener('click', applyCenter);
 
-  // 13. Sliders de calibraciÃ³n fina (X, Y y Zoom de escala)
+  // 13. Sliders de calibración fina (X, Y y Zoom de escala)
   const posXSlider = container.querySelector('#posXSlider');
   const posYSlider = container.querySelector('#posYSlider');
   const scaleSlider = container.querySelector('#scaleSlider');
@@ -236,7 +236,7 @@ export function attachCustomizerEvents(container, studio) {
     });
   }
 
-  // 16. BotÃ³n para aÃ±adir la configuraciÃ³n a la orden de trabajo
+  // 16. Botón para añadir la configuración a la orden de trabajo
   const addBtn = container.querySelector('#addToCartCustomizerBtn');
   if (addBtn) {
     addBtn.addEventListener('click', () => studio.triggerAddToCart());

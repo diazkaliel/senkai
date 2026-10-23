@@ -1,12 +1,12 @@
-Ôªø// Subm√≥dulo del Personalizador: Pasos guiados de configuraci√≥n textil (Atelier Console).
+// SubmÛdulo del Personalizador: Pasos guiados de configuraciÛn textil (Atelier Console).
 // Divido la consola en 3 pasos ordenados:
 // 1. Silueta textil, gama de colores y tabla de tallas.
-// 2. Personalizaci√≥n gr√°fica (carga de arte, controles milim√©tricos y centrado).
-// 3. Cantidad de lote con escala de descuentos y desglose de cotizaci√≥n.
+// 2. PersonalizaciÛn gr·fica (carga de arte, controles milimÈtricos y centrado).
+// 3. Cantidad de lote con escala de descuentos y desglose de cotizaciÛn.
 
-import { SVG_GARMENT_THUMBS } from '../svg_templates.js?v=20261022_v1';
+import { SVG_GARMENT_THUMBS } from '../svg_templates.js?v=20261022_v2';
 
-// Mapeo la categor√≠a del producto al tipo de miniatura vectorial que le corresponde
+// Mapeo la categorÌa del producto al tipo de miniatura vectorial que le corresponde
 export function getGarmentThumbType(category) {
   if (category === "poleron_hoodie" || category === "hoodie") return "hoodie";
   if (category === "poleron_crewneck" || category === "crewneck") return "crewneck";
@@ -23,7 +23,7 @@ export function renderGarmentStep(state, garmentsList) {
       <div class="inspector-box">
         <div class="control-label-row">
           <span class="control-label">Silueta Textil</span>
-          <span class="control-meta">${g.weight_gsm}g/m¬≤ ‚Ä¢ ${g.composition}</span>
+          <span class="control-meta">${g.weight_gsm}g/m≤ ï ${g.composition}</span>
         </div>
         <div class="garment-cards-grid">
           ${garmentsList.map(item => {
@@ -45,7 +45,7 @@ export function renderGarmentStep(state, garmentsList) {
                 <div class="garment-card-content">
                   <div class="garment-card-title">${item.name}</div>
                   <div class="garment-card-meta">
-                    <span class="garment-gsm-tag">${item.weight_gsm}g/m¬≤</span>
+                    <span class="garment-gsm-tag">${item.weight_gsm}g/m≤</span>
                     ${isAvailable
                       ? `<span class="garment-price-tag">$${displayPrice.toLocaleString('es-CL')}</span>`
                       : `<span class="garment-unavailable-tag">NO DISPONIBLE</span>`
@@ -61,8 +61,8 @@ export function renderGarmentStep(state, garmentsList) {
       <!-- Color de la Tela -->
       <div class="inspector-box">
         <div class="control-label-row">
-          <span class="control-label">Tono de Confecci√≥n</span>
-          <span class="control-meta selected-color-name">Edici√≥n All-Black ‚Ä¢ <strong>Negro Industrial</strong></span>
+          <span class="control-label">Tono de ConfecciÛn</span>
+          <span class="control-meta selected-color-name">EdiciÛn All-Black ï <strong>Negro Industrial</strong></span>
         </div>
         <div class="color-swatches-row" style="display: flex; align-items: center; gap: 0.65rem;">
           <button class="color-swatch-btn active" 
@@ -84,7 +84,7 @@ export function renderGarmentStep(state, garmentsList) {
       <div class="inspector-box">
         <div class="control-label-row">
           <span class="control-label">Talla de la Prenda</span>
-          <span class="control-meta">Seleccionada: <strong>${state.selectedSize}</strong> ‚Ä¢ $${((g.size_prices && g.size_prices[state.selectedSize]) ? g.size_prices[state.selectedSize] : g.base_price).toLocaleString('es-CL')}</span>
+          <span class="control-meta">Seleccionada: <strong>${state.selectedSize}</strong> ï $${((g.size_prices && g.size_prices[state.selectedSize]) ? g.size_prices[state.selectedSize] : g.base_price).toLocaleString('es-CL')}</span>
         </div>
         <div class="size-pills-row">
           ${g.sizes.map(sz => {
@@ -100,26 +100,26 @@ export function renderGarmentStep(state, garmentsList) {
         </div>
       </div>
 
-      <!-- Bot√≥n de avance -->
+      <!-- BotÛn de avance -->
       <div class="step-nav-footer">
         <button class="btn btn-primary step-advance-btn" data-goto-step="print" type="button">
-          <span>CONTINUAR A ESTAMPA & ARTE ‚Üí</span>
+          <span>CONTINUAR A ESTAMPA & ARTE ?</span>
         </button>
       </div>
     </div>
   `;
 }
 
-// Paso 02: Carga de dise√±o, posici√≥n milim√©trica en X/Y y escala
+// Paso 02: Carga de diseÒo, posiciÛn milimÈtrica en X/Y y escala
 export function renderPrintStep(state, activePrint) {
   const isFront = state.currentView === 'front';
 
   return `
     <div class="inspector-step-pane">
       <div class="step-face-indicator-bar">
-        <span>Cara en Edici√≥n: <strong>${isFront ? 'FRENTE' : 'ESPALDA'}</strong></span>
+        <span>Cara en EdiciÛn: <strong>${isFront ? 'FRENTE' : 'ESPALDA'}</strong></span>
         <button class="btn-switch-face-link" id="switchFaceFromStepBtn" type="button">
-          Alternar a ${isFront ? 'Espalda ‚Ü∑' : 'Frente ‚Ü∂'}
+          Alternar a ${isFront ? 'Espalda ?' : 'Frente ?'}
         </button>
       </div>
 
@@ -138,17 +138,17 @@ export function renderPrintStep(state, activePrint) {
             <input type="file" id="fileInputDtf" accept="image/png, image/jpeg, image/webp, image/svg+xml, application/pdf" style="display: none;">
           </div>
 
-          <!-- Bot√≥n de Quitar Estampa / Dejar Lisa -->
-          <button class="btn-remove-face-print" id="removeFacePrintBtn" type="button" title="Quitar dise√±o y dejar cara lisa">
+          <!-- BotÛn de Quitar Estampa / Dejar Lisa -->
+          <button class="btn-remove-face-print" id="removeFacePrintBtn" type="button" title="Quitar diseÒo y dejar cara lisa">
             <span class="material-symbols-outlined" style="font-size: 16px;">delete_outline</span>
             <span>Quitar estampa de esta cara (Dejar Lisa)</span>
           </button>
         </div>
 
-        <!-- Posici√≥n y Ajuste Milim√©trico en Mockup -->
+        <!-- PosiciÛn y Ajuste MilimÈtrico en Mockup -->
         <div class="inspector-box">
           <div class="control-label-row">
-            <span class="control-label">Ajuste de Posici√≥n y Tama√±o</span>
+            <span class="control-label">Ajuste de PosiciÛn y TamaÒo</span>
             <span class="control-meta">Arrastra en la prenda o calibra con sliders</span>
           </div>
 
@@ -176,7 +176,7 @@ export function renderPrintStep(state, activePrint) {
             </div>
           </div>
 
-          <!-- Bot√≥n de centrado anat√≥mico -->
+          <!-- BotÛn de centrado anatÛmico -->
           <div style="margin-top: 0.85rem;">
             <button class="preset-pos-shortcut" id="centerShortcutBtn" type="button" style="width: 100%; justify-content: center; display: inline-flex; align-items: center; gap: 0.4rem;">
               <span class="material-symbols-outlined" style="font-size: 15px;">filter_center_focus</span>
@@ -189,7 +189,7 @@ export function renderPrintStep(state, activePrint) {
         <div class="face-empty-state">
           <span class="material-symbols-outlined face-empty-icon">check_circle_outline</span>
           <div class="face-empty-title">CARA ${isFront ? 'FRONTAL' : 'TRASERA'} LISA</div>
-          <p class="face-empty-desc">Esta cara no tiene estampas. La prenda se confeccionar√° limpia en este lado.</p>
+          <p class="face-empty-desc">Esta cara no tiene estampas. La prenda se confeccionar· limpia en este lado.</p>
           <div style="display: flex; gap: 0.75rem; flex-wrap: wrap; justify-content: center; width: 100%;">
             <button class="btn-add-face-print" id="addFacePrintBtn" type="button">
               <span class="material-symbols-outlined" style="font-size: 16px;">add</span>
@@ -206,17 +206,17 @@ export function renderPrintStep(state, activePrint) {
 
       <div class="step-nav-footer step-nav-between">
         <button class="btn btn-secondary step-advance-btn" data-goto-step="garment" type="button">
-          <span>‚Üê Prenda Base</span>
+          <span>? Prenda Base</span>
         </button>
         <button class="btn btn-primary step-advance-btn" data-goto-step="order" type="button">
-          <span>CONTINUAR A LOTE & CANTIDAD ‚Üí</span>
+          <span>CONTINUAR A LOTE & CANTIDAD ?</span>
         </button>
       </div>
     </div>
   `;
 }
 
-// Paso 03: Selector de lote por volumen, desglose t√©cnico de costos y notas de producci√≥n
+// Paso 03: Selector de lote por volumen, desglose tÈcnico de costos y notas de producciÛn
 export function renderOrderStep(state, discountBadge, g) {
   const printsCount = state.prints.length;
   const effectiveSizePrice = (g.size_prices && g.size_prices[state.selectedSize]) ? Number(g.size_prices[state.selectedSize]) : g.base_price;
@@ -230,7 +230,7 @@ export function renderOrderStep(state, discountBadge, g) {
         </div>
         <div class="qty-selector-row">
           <div class="qty-stepper">
-            <button class="qty-stepper-btn" id="qtyMinus" type="button" aria-label="Disminuir cantidad">‚àí</button>
+            <button class="qty-stepper-btn" id="qtyMinus" type="button" aria-label="Disminuir cantidad">-</button>
             <input type="number" class="qty-stepper-val" id="qtyInput" min="1" max="500" value="${state.quantity}" aria-label="Cantidad de prendas">
             <button class="qty-stepper-btn" id="qtyPlus" type="button" aria-label="Aumentar cantidad">+</button>
           </div>
@@ -241,7 +241,7 @@ export function renderOrderStep(state, discountBadge, g) {
       <div class="inspector-box">
         <div class="control-label-row">
           <span class="control-label">Desglose Unitario</span>
-          <span class="control-meta">Par√°metros de Taller</span>
+          <span class="control-meta">Par·metros de Taller</span>
         </div>
         <div class="quote-row">
           <span>Prenda + Estampado (${g.name} - ${state.selectedSize})</span>
@@ -256,20 +256,20 @@ export function renderOrderStep(state, discountBadge, g) {
       <div class="order-multi-item-tip">
         <span class="material-symbols-outlined order-multi-item-tip-icon">info</span>
         <p>
-          <strong>¬øDeseas personalizar m√°s prendas?</strong> Puedes agregar esta prenda a tu orden y luego configurar otra prenda (mismo dise√±o o diferente) para enviarlas juntas en un solo pedido.
+          <strong>øDeseas personalizar m·s prendas?</strong> Puedes agregar esta prenda a tu orden y luego configurar otra prenda (mismo diseÒo o diferente) para enviarlas juntas en un solo pedido.
         </p>
       </div>
 
       <div class="step-nav-footer">
         <button class="btn btn-secondary step-advance-btn" data-goto-step="print" type="button">
-          <span>‚Üê Calibrar Estampa</span>
+          <span>? Calibrar Estampa</span>
         </button>
       </div>
     </div>
   `;
 }
 
-// Columna derecha completa: Pesta√±as de navegaci√≥n, panel del paso activo y barra fija de cotizaci√≥n
+// Columna derecha completa: PestaÒas de navegaciÛn, panel del paso activo y barra fija de cotizaciÛn
 export function renderAtelierConsole(state, garmentsList, activePrint) {
   const g = state.selectedGarment;
   const printsCount = state.prints.length;
@@ -286,7 +286,7 @@ export function renderAtelierConsole(state, garmentsList, activePrint) {
     <div class="customizer-inspector-column">
       <div class="atelier-console-card">
         
-        <!-- Barra de Pesta√±as de Paso -->
+        <!-- Barra de PestaÒas de Paso -->
         <div class="atelier-tabs-nav" role="tablist">
           <button class="atelier-tab-btn ${state.activeStep === 'garment' ? 'active' : ''}" data-step="garment" type="button">
             <span class="tab-index">01</span>
@@ -303,19 +303,19 @@ export function renderAtelierConsole(state, garmentsList, activePrint) {
           </button>
         </div>
 
-        <!-- Cuerpo del Panel seg√∫n Paso Activo -->
+        <!-- Cuerpo del Panel seg˙n Paso Activo -->
         <div class="atelier-tab-body">
           ${state.activeStep === 'garment' ? renderGarmentStep(state, garmentsList) : ''}
           ${state.activeStep === 'print' ? renderPrintStep(state, activePrint) : ''}
           ${state.activeStep === 'order' ? renderOrderStep(state, discountBadge, g) : ''}
         </div>
 
-        <!-- Dock de Cotizaci√≥n Fijo y Bot√≥n de Acci√≥n -->
+        <!-- Dock de CotizaciÛn Fijo y BotÛn de AcciÛn -->
         <div class="live-quote-dock">
           <div class="quote-dock-row">
             <div class="quote-dock-info">
               <span class="quote-dock-garment">${g.name} [${state.selectedSize}]</span>
-              <span class="quote-dock-sub">${printsCount} estampa${printsCount !== 1 ? 's' : ''} ‚Ä¢ Lote ${state.quantity} un.</span>
+              <span class="quote-dock-sub">${printsCount} estampa${printsCount !== 1 ? 's' : ''} ï Lote ${state.quantity} un.</span>
             </div>
             <div class="quote-dock-price">
               <span class="quote-dock-total" id="quoteTotalVal">$${state.pricing.total.toLocaleString('es-CL')}</span>

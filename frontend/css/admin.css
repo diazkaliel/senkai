@@ -1,14 +1,14 @@
-ï»¿/* ==========================================================================
-   SENKAI // PORTAL DE TALLER & ADMINISTRACIÃ“N (Dark Industrial Atelier)
+/* ==========================================================================
+   SENKAI // PORTAL DE TALLER & ADMINISTRACIÓN (Dark Industrial Atelier)
    Hoja de estilos unificada de la consola administrativa.
-   Importo los submÃ³dulos de Kanban, Modal de ProducciÃ³n, PestaÃ±as,
-   Editor CMS, AnalÃ­tica, Inventario y AdaptaciÃ³n MÃ³vil.
+   Importo los submódulos de Kanban, Modal de Producción, Pestañas,
+   Editor CMS, Analítica, Inventario y Adaptación Móvil.
    ========================================================================== */
 
-@import url("./admin/admin_kanban.css?v=20261022_v1");
-@import url("./admin/admin_mockup_modal.css?v=20261022_v1");
-@import url("./admin/admin_tabs.css?v=20261022_v1");
-@import url("./admin/admin_cms.css?v=20261022_v1");
-@import url("./admin/admin_analytics.css?v=20261022_v1");
-@import url("./admin/admin_inventory.css?v=20261022_v1");
-@import url("./admin/admin_responsive.css?v=20261022_v1");
+@import url("./admin/admin_kanban.css?v=20261022_v2");
+@import url("./admin/admin_mockup_modal.css?v=20261022_v2");
+@import url("./admin/admin_tabs.css?v=20261022_v2");
+@import url("./admin/admin_cms.css?v=20261022_v2");
+@import url("./admin/admin_analytics.css?v=20261022_v2");
+@import url("./admin/admin_inventory.css?v=20261022_v2");
+@import url("./admin/admin_responsive.css?v=20261022_v2");

@@ -1,5 +1,5 @@
-import { SVG_GARMENTS } from './svg_templates.js?v=20261022_v1';
-import { COLLECTION_ITEMS, DEFAULT_CATALOG_CATEGORIES } from '../data/collection_items.js?v=20261022_v1';
+import { SVG_GARMENTS } from './svg_templates.js?v=20261022_v2';
+import { COLLECTION_ITEMS, DEFAULT_CATALOG_CATEGORIES } from '../data/collection_items.js?v=20261022_v2';
 
 export { COLLECTION_ITEMS, DEFAULT_CATALOG_CATEGORIES };
 
@@ -668,8 +668,8 @@ export function renderProductCardMarkup(item, garments = [], categories = DEFAUL
   const galleryImages = Array.isArray(item.gallery_images) ? item.gallery_images.filter(Boolean) : [];
   const observationText = (item.observation || garment?.observation || "").trim();
 
-  const isCustomFrontPhoto = !!(item.photo_front || item.photoFront);
-  const isCustomBackPhoto = !!(item.photo_back || item.photoBack);
+  const isCustomFrontPhoto = !!(item.photo_front || item.photoFront || garment?.photo_front);
+  const isCustomBackPhoto = !!(item.photo_back || item.photoBack || garment?.photo_back);
   const hasCustomPhotos = isCustomFrontPhoto || isCustomBackPhoto;
   const showCustomFront = isCustomFrontPhoto && viewMode === 'photo';
   const showCustomBack = isCustomBackPhoto && viewMode === 'photo';
@@ -719,8 +719,8 @@ export function renderProductCardMarkup(item, garments = [], categories = DEFAUL
                   ${garmentSvgFront}
                 `}
               </div>
-              ${(!showCustomFront) ? `
-              <div class="card-pro-artwork-overlay" style="top: ${item.frontSpecs.top}; left: ${item.frontSpecs.left}; width: ${item.frontSpecs.width}; height: ${item.frontSpecs.height};">
+              ${(!showCustomFront && item.frontSpecs && item.frontArt?.svgContent) ? `
+              <div class="card-pro-artwork-overlay" style="top: ${item.frontSpecs.top || '35%'}; left: ${item.frontSpecs.left || '50%'}; width: ${item.frontSpecs.width || '100px'}; height: ${item.frontSpecs.height || '100px'};">
                 ${item.frontArt.svgContent}
               </div>
               ` : ''}
@@ -735,8 +735,8 @@ export function renderProductCardMarkup(item, garments = [], categories = DEFAUL
                   ${garmentSvgBack}
                 `}
               </div>
-              ${(!showCustomBack) ? `
-              <div class="card-pro-artwork-overlay" style="top: ${item.backSpecs.top}; left: ${item.backSpecs.left}; width: ${item.backSpecs.width}; height: ${item.backSpecs.height};">
+              ${(!showCustomBack && item.backSpecs && item.backArt?.svgContent) ? `
+              <div class="card-pro-artwork-overlay" style="top: ${item.backSpecs.top || '40%'}; left: ${item.backSpecs.left || '50%'}; width: ${item.backSpecs.width || '180px'}; height: ${item.backSpecs.height || '180px'};">
                 ${item.backArt.svgContent}
               </div>
               ` : ''}

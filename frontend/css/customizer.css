@@ -1,9 +1,9 @@
-﻿/* ==========================================================================
+/* ==========================================================================
    SENKAI // PERSONALIZADOR TEXTIL DTF (Dark Industrial Editorial)
-   Hoja de estilos principal del personalizador técnico.
+   Hoja de estilos principal del personalizador t�cnico.
    Importo de forma desacoplada el escenario 3D, la consola de taller y el responsive.
    ========================================================================== */
 
-@import url("./customizer/stage.css?v=20261022_v1");
-@import url("./customizer/atelier.css?v=20261022_v1");
-@import url("./customizer/responsive.css?v=20261022_v1");
+@import url("./customizer/stage.css?v=20261022_v2");
+@import url("./customizer/atelier.css?v=20261022_v2");
+@import url("./customizer/responsive.css?v=20261022_v2");

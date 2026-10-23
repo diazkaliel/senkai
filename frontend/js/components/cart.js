@@ -1,8 +1,8 @@
 // Carrito de compras y pasarela de checkout.
 // Manejo los productos seleccionados, cálculo de totales (con o sin envío) y envío del pedido a taller.
 
-import { apiService } from '../services/api.js?v=20261022_v1';
-import { notificationService } from '../services/notification_service.js?v=20261022_v1';
+import { apiService } from '../services/api.js?v=20261022_v2';
+import { notificationService } from '../services/notification_service.js?v=20261022_v2';
 
 const CART_STORAGE_KEY = 'senkai_cart_items_v1';
 

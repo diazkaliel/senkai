@@ -2,21 +2,21 @@
 // Acá orquesto el estado reactivo de la prenda (color, talla, cara activa),
 // conecto el visor 3D con la consola de taller e integro la cotización en tiempo real.
 
-import { PRESET_ARTWORKS } from './svg_templates.js?v=20261022_v1';
-import { apiService } from '../services/api.js?v=20261022_v1';
-import { notificationService } from '../services/notification_service.js?v=20261022_v1';
-import { attachCustomizerEvents } from './customizer/customizer_events.js?v=20261022_v1';
+import { PRESET_ARTWORKS } from './svg_templates.js?v=20261022_v2';
+import { apiService } from '../services/api.js?v=20261022_v2';
+import { notificationService } from '../services/notification_service.js?v=20261022_v2';
+import { attachCustomizerEvents } from './customizer/customizer_events.js?v=20261022_v2';
 import {
   renderVisualizerStage,
   renderDraggablePrintMarkup,
   getGarmentSvgMarkup,
   getPrintArtworkMarkup,
   getPrintBaseDimensions
-} from './customizer/customizer_stage.js?v=20261022_v1';
+} from './customizer/customizer_stage.js?v=20261022_v2';
 import {
   renderAtelierConsole,
   getGarmentThumbType
-} from './customizer/customizer_steps.js?v=20261022_v1';
+} from './customizer/customizer_steps.js?v=20261022_v2';
 
 const CUSTOMIZER_DRAFT_KEY = 'senkai_customizer_draft_v1';
 

@@ -361,7 +361,7 @@ export function renderLookbookItemCardMarkup(item, idx, garments, activeCategori
 }
 
 // Genero el HTML de la tarjeta de administración del Lookbook y Categorías
-export function renderLookbookSection(lookbookItems, garments, escapeHtml, categories = DEFAULT_LOOKBOOK_CATEGORIES) {
+export function renderLookbookSection(lookbookItems, garments, escapeHtml, categories = DEFAULT_LOOKBOOK_CATEGORIES, catalogHeaders = {}) {
   const activeCategories = Array.isArray(categories) && categories.length > 0
     ? categories
     : DEFAULT_LOOKBOOK_CATEGORIES;
@@ -385,6 +385,34 @@ export function renderLookbookSection(lookbookItems, garments, escapeHtml, categ
       <div class="cms-lookbook-notice">
         <span class="material-symbols-outlined" style="font-size: 16px; color: var(--accent-admin); vertical-align: middle;">info</span>
         <span><strong>Gestor Integral de Colecciones:</strong> Puedes agregar tantas piezas como desees con <strong>+ AGREGAR PRENDA AL CATÁLOGO</strong>, subir múltiples fotos por prenda a su galería en formato WebP liviano, agregar especificaciones u observaciones técnicas, y quitar prendas con <strong>Quitar de Colección</strong>. Los cambios se sincronizan en vivo.</span>
+      </div>
+
+      <!-- ENCABEZADOS PRINCIPALES DE LA ZONA DE CATÁLOGO / VITRINA -->
+      <div class="cms-categories-manager-box" style="margin-bottom: 1.25rem;">
+        <div class="cms-categories-manager-header">
+          <div>
+            <h4 style="font-family: var(--font-display); font-size: 0.98rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-primary); margin: 0;">
+              Encabezados de la Zona de Catálogo & Colecciones
+            </h4>
+            <p style="font-size: 0.78rem; color: var(--text-muted); margin: 0.2rem 0 0;">
+              Define el título, tag y texto descriptivo que los clientes ven sobre la grilla de productos en la vitrina pública.
+            </p>
+          </div>
+        </div>
+        <div style="display: grid; grid-template-columns: 1fr 2fr; gap: 0.75rem; margin-top: 0.85rem;">
+          <div class="cms-field-group">
+            <label class="cms-label" for="cms-lookbook-catalog-tag">Tag Superior Catálogo</label>
+            <input type="text" id="cms-lookbook-catalog-tag" class="cms-input" maxlength="60" value="${escapeHtml(catalogHeaders?.catalog_tag || 'LOOKBOOK 2026 // EDICIÓN LIMITADA')}">
+          </div>
+          <div class="cms-field-group">
+            <label class="cms-label" for="cms-lookbook-catalog-title">Título de la Zona de Catálogo</label>
+            <input type="text" id="cms-lookbook-catalog-title" class="cms-input" maxlength="100" value="${escapeHtml(catalogHeaders?.catalog_title || 'Bases y Prendas de Taller')}">
+          </div>
+        </div>
+        <div class="cms-field-group" style="margin-top: 0.65rem;">
+          <label class="cms-label" for="cms-lookbook-catalog-desc">Descripción de la Zona de Catálogo</label>
+          <textarea id="cms-lookbook-catalog-desc" class="cms-textarea" style="min-height: 55px;">${escapeHtml(catalogHeaders?.catalog_desc || 'Confección en algodón pesado de 240g a 320g con estampados DTF de alta resolución.')}</textarea>
+        </div>
       </div>
 
       <!-- GESTOR DE CATEGORÍAS Y SUBCATEGORÍAS DEL CATÁLOGO -->
@@ -537,8 +565,19 @@ export function collectLookbookPayload(container) {
     };
   });
 
+  const tagInp = container.querySelector('#cms-lookbook-catalog-tag') || document.getElementById('cms-headers-catalog-tag');
+  const titleInp = container.querySelector('#cms-lookbook-catalog-title') || document.getElementById('cms-headers-catalog-title');
+  const descInp = container.querySelector('#cms-lookbook-catalog-desc') || document.getElementById('cms-headers-catalog-desc');
+
+  const catalogHeadersPayload = {
+    catalog_tag: tagInp && tagInp.value.trim() ? tagInp.value.trim() : 'LOOKBOOK 2026 // EDICIÓN LIMITADA',
+    catalog_title: titleInp && titleInp.value.trim() ? titleInp.value.trim() : 'Bases y Prendas de Taller',
+    catalog_desc: descInp ? descInp.value.trim() : ''
+  };
+
   return {
     items,
-    categories: categories.length > 0 ? categories : DEFAULT_LOOKBOOK_CATEGORIES
+    categories: categories.length > 0 ? categories : DEFAULT_LOOKBOOK_CATEGORIES,
+    catalogHeaders: catalogHeadersPayload
   };
 }

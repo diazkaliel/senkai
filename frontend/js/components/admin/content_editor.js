@@ -3,7 +3,7 @@
 // Editorial, Anuncios, Marquee, Encabezados, Stats, Manifiesto, Protocolo y Contacto)
 // permitiendo guardar cambios de forma atómica en el backend mediante FastAPI y Pydantic v2.
 
-import { apiService } from '../../services/api.js?v=20261022_v1';
+import { apiService } from '../../services/api.js?v=20261022_v2';
 import {
   DEFAULT_LOOKBOOK_ITEMS,
   DEFAULT_LOOKBOOK_CATEGORIES,
@@ -13,9 +13,9 @@ import {
   renderGalleryImageItemMarkup,
   renderLookbookSection,
   collectLookbookPayload
-} from './cms/cms_lookbook.js?v=20261022_v1';
-import { renderHeroSection, collectHeroPayload } from './cms/cms_hero.js?v=20261022_v1';
-import { renderEditorialSection, collectEditorialPayload } from './cms/cms_editorial.js?v=20261022_v1';
+} from './cms/cms_lookbook.js?v=20261022_v2';
+import { renderHeroSection, collectHeroPayload } from './cms/cms_hero.js?v=20261022_v2';
+import { renderEditorialSection, collectEditorialPayload } from './cms/cms_editorial.js?v=20261022_v2';
 import {
   renderAnnouncementSection, collectAnnouncementPayload,
   renderMarqueeSection, collectMarqueePayload,
@@ -24,8 +24,8 @@ import {
   renderStatementSection, collectStatementPayload,
   renderProtocolSection, collectProtocolPayload,
   renderContactSection, collectContactPayload
-} from './cms/cms_sections.js?v=20261022_v1';
-import { attachImageManagementEvents } from './cms/cms_uploader.js?v=20261022_v1';
+} from './cms/cms_sections.js?v=20261022_v2';
+import { attachImageManagementEvents } from './cms/cms_uploader.js?v=20261022_v2';
 
 export class ContentEditorComponent {
   constructor(container) {
@@ -165,7 +165,7 @@ export class ContentEditorComponent {
 
         <!-- Cuadrícula con las tarjetas de edición por sección -->
         <div class="cms-grid">
-          ${renderLookbookSection(lookbookItems, this.garments, (s) => this.escapeHtml(s), lookbookCategories)}
+          ${renderLookbookSection(lookbookItems, this.garments, (s) => this.escapeHtml(s), lookbookCategories, headers)}
           ${renderProtocolSection(protocol, (s) => this.escapeHtml(s))}
           ${renderHeroSection(hero, (s) => this.escapeHtml(s))}
           ${renderEditorialSection(editorial, (s) => this.escapeHtml(s))}
@@ -420,6 +420,19 @@ export class ContentEditorComponent {
         await this.handleSaveSection(targetSection, saveBtn);
       }
     });
+
+    // Sincronización bidireccional en tiempo real entre los campos de encabezados del catálogo
+    const bindSync = (idA, idB) => {
+      const elA = this.container.querySelector(idA);
+      const elB = this.container.querySelector(idB);
+      if (elA && elB) {
+        elA.addEventListener('input', () => { elB.value = elA.value; });
+        elB.addEventListener('input', () => { elA.value = elB.value; });
+      }
+    };
+    bindSync('#cms-lookbook-catalog-tag', '#cms-headers-catalog-tag');
+    bindSync('#cms-lookbook-catalog-title', '#cms-headers-catalog-title');
+    bindSync('#cms-lookbook-catalog-desc', '#cms-headers-catalog-desc');
 
     // 3. Gestor de previsualización y subida de fotos
     attachImageManagementEvents(this.container, (msg, type) => this.showToast(msg, type));
@@ -708,15 +721,54 @@ export class ContentEditorComponent {
     buttonEl.innerHTML = `<span class="material-symbols-outlined cms-spin" style="font-size: 16px;">progress_activity</span> <span>Guardando...</span>`;
 
     try {
-      const payload = this.collectSectionPayload(sectionKey);
-      await apiService.updateSiteSection(sectionKey, payload);
+      const rawPayload = this.collectSectionPayload(sectionKey);
+      let payload = rawPayload;
 
-      // Actualizo la copia local en memoria
-      this.content[sectionKey] = payload;
-      this.showToast(`Sección '${sectionKey}' guardada con éxito en línea.`, "success");
+      if (sectionKey === 'lookbook') {
+        const { catalogHeaders, ...lookbookOnly } = rawPayload;
+        payload = lookbookOnly;
+        await apiService.updateSiteSection('lookbook', payload);
+        this.content.lookbook = payload;
 
-      // Notifico a la vitrina pública para que se refresque reactivamente
-      window.dispatchEvent(new CustomEvent('senkai:cms-updated', { detail: { sectionKey, payload } }));
+        if (catalogHeaders) {
+          const currentHeaders = this.content.headers || {};
+          const mergedHeaders = {
+            ...currentHeaders,
+            ...catalogHeaders,
+            customizer_title: currentHeaders.customizer_title || "Atelier de Personalización DTF",
+            customizer_desc: currentHeaders.customizer_desc || "Selecciona la prenda base, modula el color y posiciona tu arte con cotización en tiempo real."
+          };
+          await apiService.updateSiteSection('headers', mergedHeaders);
+          this.content.headers = mergedHeaders;
+
+          const hTag = document.getElementById('cms-headers-catalog-tag');
+          const hTitle = document.getElementById('cms-headers-catalog-title');
+          const hDesc = document.getElementById('cms-headers-catalog-desc');
+          if (hTag && catalogHeaders.catalog_tag) hTag.value = catalogHeaders.catalog_tag;
+          if (hTitle && catalogHeaders.catalog_title) hTitle.value = catalogHeaders.catalog_title;
+          if (hDesc && catalogHeaders.catalog_desc !== undefined) hDesc.value = catalogHeaders.catalog_desc;
+
+          window.dispatchEvent(new CustomEvent('senkai:cms-updated', { detail: { sectionKey: 'headers', payload: mergedHeaders } }));
+        }
+
+        this.showToast("Catálogo, prendas y encabezados guardados con éxito en línea.", "success");
+        window.dispatchEvent(new CustomEvent('senkai:cms-updated', { detail: { sectionKey: 'lookbook', payload } }));
+      } else {
+        await apiService.updateSiteSection(sectionKey, payload);
+        this.content[sectionKey] = payload;
+
+        if (sectionKey === 'headers') {
+          const lbTag = document.getElementById('cms-lookbook-catalog-tag');
+          const lbTitle = document.getElementById('cms-lookbook-catalog-title');
+          const lbDesc = document.getElementById('cms-lookbook-catalog-desc');
+          if (lbTag && payload.catalog_tag) lbTag.value = payload.catalog_tag;
+          if (lbTitle && payload.catalog_title) lbTitle.value = payload.catalog_title;
+          if (lbDesc && payload.catalog_desc !== undefined) lbDesc.value = payload.catalog_desc;
+        }
+
+        this.showToast(`Sección '${sectionKey}' guardada con éxito en línea.`, "success");
+        window.dispatchEvent(new CustomEvent('senkai:cms-updated', { detail: { sectionKey, payload } }));
+      }
     } catch (err) {
       console.error(`Error guardando ${sectionKey}:`, err);
       if (err.message === "UNAUTHORIZED") {

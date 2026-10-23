@@ -2,7 +2,7 @@
 // Acá centralizo la interacción con los inputs de archivos, la llamada al endpoint
 // de streaming del backend (/api/v1/admin/upload-image) y la actualización de miniaturas.
 
-import { apiService } from '../../../services/api.js?v=20261022_v1';
+import { apiService } from '../../../services/api.js?v=20261022_v2';
 
 export function attachImageManagementEvents(container, showToast) {
   if (!container || container._cmsUploaderAttached) return;

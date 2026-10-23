@@ -1,11 +1,11 @@
-Ôªø/**
- * SENKAI // GESTOR DE INVENTARIO F√çSICO, MATRIZ DE STOCK Y PRECIOS OFICIALES
- * M√≥dulo para control de existencias por Talla x Color, alerta de stock cr√≠tico,
- * edici√≥n de precios base de tela y sincronizaci√≥n directa con los precios de la p√°gina web principal.
+/**
+ * SENKAI // GESTOR DE INVENTARIO FÕSICO, MATRIZ DE STOCK Y PRECIOS OFICIALES
+ * MÛdulo para control de existencias por Talla x Color, alerta de stock crÌtico,
+ * ediciÛn de precios base de tela y sincronizaciÛn directa con los precios de la p·gina web principal.
  */
 
-import { apiService } from '../../services/api.js?v=20261022_v1';
-import { DEFAULT_LOOKBOOK_ITEMS, DEFAULT_LOOKBOOK_CATEGORIES } from './cms/cms_lookbook.js?v=20261022_v1';
+import { apiService } from '../../services/api.js?v=20261022_v2';
+import { DEFAULT_LOOKBOOK_ITEMS, DEFAULT_LOOKBOOK_CATEGORIES } from './cms/cms_lookbook.js?v=20261022_v2';
 
 export class InventoryManagerComponent {
   constructor(containerElement, garments = []) {
@@ -93,7 +93,7 @@ export class InventoryManagerComponent {
         this.lookbookCategories = siteContent.lookbook.categories;
       }
 
-      // Respetar exactamente las prendas de colecci√≥n guardadas (no resucitar las eliminadas)
+      // Respetar exactamente las prendas de colecciÛn guardadas (no resucitar las eliminadas)
       this.lookbookItems = (savedItems !== null)
         ? savedItems
         : DEFAULT_LOOKBOOK_ITEMS.map(defItem => ({ ...defItem }));
@@ -154,7 +154,7 @@ export class InventoryManagerComponent {
     const hasCustomSizes = this.hasCustomSizePrices(currentGarment);
     const isCurrentGarmentActive = currentGarment ? currentGarment.is_active !== false : true;
 
-    // Prendas de la p√°gina web principal vinculadas a este modelo textil
+    // Prendas de la p·gina web principal vinculadas a este modelo textil
     const linkedLookbookItems = currentGarment
       ? this.lookbookItems.filter(item => (item.garment_id || item.garmentId) === currentGarment.id)
       : [];
@@ -166,16 +166,16 @@ export class InventoryManagerComponent {
     this.container.innerHTML = `
       <div class="inventory-module-wrap">
         
-        <!-- BANNER DE ORIENTACI√ìN R√ÅPIDA -->
+        <!-- BANNER DE ORIENTACI”N R¡PIDA -->
         <div class="inventory-help-callout">
           <span class="material-symbols-outlined inventory-help-icon" style="font-size: 24px; color: var(--accent-admin);">payments</span>
           <div class="inventory-help-text">
             <strong>Control de Disponibilidad de Prendas, Stock y Valor Individual por Talla</strong>
-            <p>Desde aqu√≠ puedes <strong>encender o apagar tipos de prenda</strong> (ej. deshabilitar <em>Oversized</em> temporalmente sin eliminarla), seleccionar cualquier talla (<strong>S, M, L, XL, XXL</strong>) para asignarle un <strong>valor individual independiente</strong> (con estampado incluido) y gestionar el stock f√≠sico.</p>
+            <p>Desde aquÌ puedes <strong>encender o apagar tipos de prenda</strong> (ej. deshabilitar <em>Oversized</em> temporalmente sin eliminarla), seleccionar cualquier talla (<strong>S, M, L, XL, XXL</strong>) para asignarle un <strong>valor individual independiente</strong> (con estampado incluido) y gestionar el stock fÌsico.</p>
           </div>
           <button type="button" class="btn btn-secondary inventory-jump-to-cms-btn" id="jumpToCmsFromInventory">
             <span class="material-symbols-outlined" style="font-size: 14px; vertical-align: middle;">edit_note</span>
-            <span>Ir a Editor CMS (Textos y Categor√≠as) ‚Üó</span>
+            <span>Ir a Editor CMS (Textos y CategorÌas) ?</span>
           </button>
         </div>
 
@@ -187,9 +187,9 @@ export class InventoryManagerComponent {
         <div class="inventory-availability-panel">
           <div class="availability-panel-header" style="display: flex; justify-content: space-between; align-items: flex-start; gap: 1rem; flex-wrap: wrap;">
             <div>
-              <span class="badge badge-admin">CONTROL DE CAT√ÅLOGO ACTIVO</span>
+              <span class="badge badge-admin">CONTROL DE CAT¡LOGO ACTIVO</span>
               <h4>Disponibilidad de Tipos de Prenda & Productos</h4>
-              <p>Gestiona los productos disponibles en taller. Puedes encenderlos o apagarlos para pausar pedidos, crear nuevos productos (poleras, pendones, accesorios) o quitarlos del cat√°logo.</p>
+              <p>Gestiona los productos disponibles en taller. Puedes encenderlos o apagarlos para pausar pedidos, crear nuevos productos (poleras, pendones, accesorios) o quitarlos del cat·logo.</p>
             </div>
             <button
               type="button"
@@ -209,14 +209,14 @@ export class InventoryManagerComponent {
                   <div class="availability-card-top">
                     <div class="availability-model-meta">
                       <strong>${this.escapeHtml(g.name)}</strong>
-                      <small>${this.escapeHtml(g.category || 'textil')} ‚Ä¢ ${g.weight_gsm || 240} GSM ‚Ä¢ $${(g.base_price || 0).toLocaleString('es-CL')} CLP</small>
+                      <small>${this.escapeHtml(g.category || 'textil')} ï ${g.weight_gsm || 240} GSM ï $${(g.base_price || 0).toLocaleString('es-CL')} CLP</small>
                     </div>
                     <span class="availability-status-pill ${isActive ? 'online' : 'offline'}">
                       ${isActive ? 'ENCENDIDA' : 'APAGADA'}
                     </span>
                   </div>
                   ${g.observation ? `
-                    <div class="availability-card-obs" title="Observaciones t√©cnicas de la prenda">
+                    <div class="availability-card-obs" title="Observaciones tÈcnicas de la prenda">
                       <span class="material-symbols-outlined" style="font-size: 13px; color: var(--accent-admin);">description</span>
                       <span>${this.escapeHtml(g.observation)}</span>
                     </div>
@@ -234,13 +234,13 @@ export class InventoryManagerComponent {
                       type="button"
                       class="btn-select-garment-edit ${isSelected ? 'active' : ''}"
                       data-garment-id="${g.id}">
-                      ${isSelected ? 'Editando ‚úì' : 'Editar'}
+                      ${isSelected ? 'Editando ?' : 'Editar'}
                     </button>
                     <button
                       type="button"
                       class="btn-delete-garment"
                       data-delete-garment="${g.id}"
-                      title="Eliminar permanentemente este producto del cat√°logo">
+                      title="Eliminar permanentemente este producto del cat·logo">
                       <span class="material-symbols-outlined" style="font-size: 14px;">delete</span>
                       <span>Quitar</span>
                     </button>
@@ -251,13 +251,13 @@ export class InventoryManagerComponent {
           </div>
         </div>
 
-        <!-- CABECERA DEL M√ìDULO -->
+        <!-- CABECERA DEL M”DULO -->
         <div class="inventory-top-row">
           <div>
-            <span class="badge badge-admin">LOG√çSTICA & TALLER INDUSTRIAL</span>
+            <span class="badge badge-admin">LOGÕSTICA & TALLER INDUSTRIAL</span>
             <h3 class="inventory-title">Bodega, Tallas & Precios Independientes</h3>
             <p class="inventory-desc">
-              Editando actualmente: <strong>${currentGarment ? this.escapeHtml(currentGarment.name) : ''}</strong> (${isCurrentGarmentActive ? 'Habilitada para clientes' : 'Pausada ‚Äî No disponible para clientes'}).
+              Editando actualmente: <strong>${currentGarment ? this.escapeHtml(currentGarment.name) : ''}</strong> (${isCurrentGarmentActive ? 'Habilitada para clientes' : 'Pausada ó No disponible para clientes'}).
             </p>
           </div>
 
@@ -291,7 +291,7 @@ export class InventoryManagerComponent {
             <span class="kpi-note" id="kpiBasePriceNote">${hasCustomSizes ? 'Tallas con valores individuales independientes' : 'Estampado DTF incluido en el valor'}</span>
           </div>
           <div class="inventory-kpi-card ${lowStockCount > 0 ? 'warning' : ''}">
-            <span class="kpi-label">Variantes con Stock Cr√≠tico (&lt;10)</span>
+            <span class="kpi-label">Variantes con Stock CrÌtico (&lt;10)</span>
             <span class="kpi-val">${lowStockCount} <small>variantes</small></span>
             <span class="kpi-note">${lowStockCount > 0 ? 'Reabastecer corte/tela pronto' : 'Existencias saludables'}</span>
           </div>
@@ -311,7 +311,7 @@ export class InventoryManagerComponent {
               <div>
                 <h4>Matriz de Tallas, Stock y Valores Individuales // ${currentGarment ? this.escapeHtml(currentGarment.name) : ''}</h4>
                 <p style="font-size: 0.775rem; color: var(--text-muted); margin: 0.2rem 0 0;">
-                  Especificaci√≥n textil: <strong>${currentGarment ? `${currentGarment.weight_gsm} GSM ‚Ä¢ ${this.escapeHtml(currentGarment.composition)}` : ''}</strong>. Cada talla conserva su valor de forma independiente.
+                  EspecificaciÛn textil: <strong>${currentGarment ? `${currentGarment.weight_gsm} GSM ï ${this.escapeHtml(currentGarment.composition)}` : ''}</strong>. Cada talla conserva su valor de forma independiente.
                 </p>
               </div>
               <span class="badge badge-lime">TALLAS & PRECIOS INDEPENDIENTES</span>
@@ -327,7 +327,7 @@ export class InventoryManagerComponent {
                 <table class="inventory-matrix-table">
                   <thead>
                     <tr>
-                      <th>Color / Par√°metro</th>
+                      <th>Color / Par·metro</th>
                       ${sizeOrder.map(s => {
                         const hasSize = availableSizesInVariants.has(s);
                         const effPrice = currentGarment ? this.getEffectiveSizePrice(currentGarment, s) : 0;
@@ -352,13 +352,13 @@ export class InventoryManagerComponent {
                           <span class="color-dot" style="background-color: ${colorData.hex};"></span>
                           <div class="color-info-wrap">
                             <strong>${this.escapeHtml(colorName)}</strong>
-                            <small>Stock f√≠sico (un.)</small>
+                            <small>Stock fÌsico (un.)</small>
                           </div>
                         </td>
                         ${sizeOrder.map(size => {
                           const variant = colorData.sizes[size];
                           if (!variant) {
-                            return `<td class="cell-na" style="text-align: center; color: var(--text-muted); font-family: var(--font-mono); font-size: 0.75rem;">‚Äî</td>`;
+                            return `<td class="cell-na" style="text-align: center; color: var(--text-muted); font-family: var(--font-mono); font-size: 0.75rem;">ó</td>`;
                           }
 
                           let statusClass = "stock-ok";
@@ -406,7 +406,7 @@ export class InventoryManagerComponent {
                         ${sizeOrder.map(size => {
                           const hasSize = availableSizesInVariants.has(size);
                           if (!hasSize) {
-                            return `<td class="cell-na" style="text-align: center; color: var(--text-muted); font-family: var(--font-mono); font-size: 0.75rem;">‚Äî</td>`;
+                            return `<td class="cell-na" style="text-align: center; color: var(--text-muted); font-family: var(--font-mono); font-size: 0.75rem;">ó</td>`;
                           }
                           const effPrice = this.getEffectiveSizePrice(currentGarment, size);
                           const isSelectedSz = size === this.selectedPriceSize;
@@ -435,7 +435,7 @@ export class InventoryManagerComponent {
                                   </button>
                                 </div>
                                 <span class="matrix-size-price-tag ${isSelectedSz ? 'is-custom' : ''}" data-size-tag="${size}">
-                                  Talla ${size} ‚Ä¢ Independiente
+                                  Talla ${size} ï Independiente
                                 </span>
                               </div>
                             </td>
@@ -449,20 +449,20 @@ export class InventoryManagerComponent {
             `}
           </div>
 
-          <!-- COLUMNA DERECHA: SELECTOR DE TALLA Y ASIGNACI√ìN DE VALOR INDIVIDUAL + VITRINA -->
+          <!-- COLUMNA DERECHA: SELECTOR DE TALLA Y ASIGNACI”N DE VALOR INDIVIDUAL + VITRINA -->
           ${currentGarment ? `
             <div class="inventory-garment-settings-card">
               <div class="matrix-card-header">
                 <div>
                   <h4>Valor Individual por Talla</h4>
                   <p style="font-size: 0.775rem; color: var(--text-muted); margin: 0.2rem 0 0;">
-                    Selecciona una talla y as√≠gnale su valor propio sin alterar las dem√°s tallas
+                    Selecciona una talla y asÌgnale su valor propio sin alterar las dem·s tallas
                   </p>
                 </div>
                 <span class="badge badge-crimson">ESTAMPADO INCLUIDO</span>
               </div>
 
-              <!-- 1. Selector de Talla y Asignaci√≥n de Valor Individual Independiente -->
+              <!-- 1. Selector de Talla y AsignaciÛn de Valor Individual Independiente -->
               <div class="inventory-price-section-box">
                 <label class="cms-label">
                   <span>1. Selecciona la Talla para Asignar su Valor Individual</span>
@@ -471,7 +471,7 @@ export class InventoryManagerComponent {
                   Elige cualquier talla de <strong>${this.escapeHtml(currentGarment.name)}</strong> y define su precio final (estampado incluido). El valor que asignes es 100% independiente de las otras tallas:
                 </p>
 
-                <!-- P√≠ldoras selectoras de talla -->
+                <!-- PÌldoras selectoras de talla -->
                 <div class="inv-size-selector-pills" role="group" aria-label="Seleccionar talla para editar precio">
                   ${selectableSizes.map(sz => {
                     const szPrice = this.getEffectiveSizePrice(currentGarment, sz);
@@ -536,7 +536,7 @@ export class InventoryManagerComponent {
                 <div class="inventory-size-pricing-Subbox">
                   <div class="size-pricing-header-row" style="margin-bottom: 0.55rem;">
                     <span style="font-size: 0.76rem; font-weight: 700; color: var(--text-primary); text-transform: uppercase;">
-                      Resumen de Valores por Talla (Edici√≥n Directa)
+                      Resumen de Valores por Talla (EdiciÛn Directa)
                     </span>
                   </div>
 
@@ -562,7 +562,7 @@ export class InventoryManagerComponent {
                                 value="${effPrice}"
                                 min="1000"
                                 step="500"
-                                aria-label="Precio espec√≠fico Talla ${sz}"
+                                aria-label="Precio especÌfico Talla ${sz}"
                               >
                             </div>
                           </div>
@@ -573,11 +573,11 @@ export class InventoryManagerComponent {
                 </div>
               </div>
 
-              <!-- 2. Precios en P√°gina Web Principal (Cat√°logo y Carrusel) -->
+              <!-- 2. Precios en P·gina Web Principal (Cat·logo y Carrusel) -->
               <div class="inventory-price-section-box" style="margin-top: 1.15rem;">
                 <div style="display: flex; justify-content: space-between; align-items: center; gap: 0.5rem; margin-bottom: 0.35rem;">
                   <label class="cms-label" style="margin: 0;">
-                    <span>2. Precios de Vitrina (Cat√°logo & Carrusel)</span>
+                    <span>2. Precios de Vitrina (Cat·logo & Carrusel)</span>
                   </label>
                   ${linkedLookbookItems.length > 0 ? `
                     <button type="button" class="btn-match-base-price" id="invMatchBasePriceBtn" title="Copia el valor de la talla seleccionada en las tarjetas vinculadas">
@@ -586,7 +586,7 @@ export class InventoryManagerComponent {
                   ` : ''}
                 </div>
                 <p class="inventory-price-hint">
-                  Tarjetas del cat√°logo vinculadas a este tipo de prenda (al elegir una talla en el cat√°logo, se cobra el valor individual de esa talla):
+                  Tarjetas del cat·logo vinculadas a este tipo de prenda (al elegir una talla en el cat·logo, se cobra el valor individual de esa talla):
                 </p>
 
                 ${linkedLookbookItems.length > 0 ? `
@@ -595,7 +595,7 @@ export class InventoryManagerComponent {
                       <div class="inventory-linked-item-row" data-lookbook-item-id="${this.escapeHtml(item.id)}">
                         <div class="linked-item-info">
                           <strong>${this.escapeHtml(item.name)}</strong>
-                          <small>${this.escapeHtml(item.category || 'urbanas').toUpperCase()}${item.subcategory ? ` ‚Ä¢ ${this.escapeHtml(item.subcategory)}` : ''}</small>
+                          <small>${this.escapeHtml(item.category || 'urbanas').toUpperCase()}${item.subcategory ? ` ï ${this.escapeHtml(item.subcategory)}` : ''}</small>
                         </div>
                         <div class="inventory-currency-input-wrap compact">
                           <span class="currency-prefix">$</span>
@@ -620,7 +620,7 @@ export class InventoryManagerComponent {
                 `}
               </div>
 
-              <!-- Vista previa fotogr√°fica y plantillas -->
+              <!-- Vista previa fotogr·fica y plantillas -->
               <div class="inventory-photos-preview" style="margin-top: 1.25rem;">
                 <div class="photo-preview-box">
                   <span class="photo-preview-label">Frontal</span>
@@ -644,10 +644,10 @@ export class InventoryManagerComponent {
 
               <div class="cms-field-group" style="margin-bottom: 1.25rem;">
                 <label class="cms-label" for="inv-observation">
-                  <span>Observaci√≥n T√©cnica / Medidas / Especificaciones</span>
+                  <span>ObservaciÛn TÈcnica / Medidas / Especificaciones</span>
                   <span class="cms-label-hint">Visible en la tarjeta de vitrina</span>
                 </label>
-                <input type="text" id="inv-observation" class="cms-input" value="${this.escapeHtml(currentGarment.observation || '')}" placeholder="Ej: Medidas: 100x200cm con ojetillos met√°licos perimetrales...">
+                <input type="text" id="inv-observation" class="cms-input" value="${this.escapeHtml(currentGarment.observation || '')}" placeholder="Ej: Medidas: 100x200cm con ojetillos met·licos perimetrales...">
               </div>
 
               <button class="btn btn-primary" id="invSaveGarmentDetailsBtn" style="width: 100%; padding: 0.85rem; display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem;">
@@ -669,16 +669,16 @@ export class InventoryManagerComponent {
             <form id="invAddGarmentForm">
               <div class="cms-field-group" style="margin-bottom: 0.75rem;">
                 <label class="cms-label">Nombre del Producto / Silueta *</label>
-                <input type="text" id="newGarmentName" class="cms-input" required placeholder="Ej: Pend√≥n Roller 100x200, Polera Boxy 280g...">
+                <input type="text" id="newGarmentName" class="cms-input" required placeholder="Ej: PendÛn Roller 100x200, Polera Boxy 280g...">
               </div>
               <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; margin-bottom: 0.75rem;">
                 <div class="cms-field-group">
-                  <label class="cms-label">Categor√≠a *</label>
+                  <label class="cms-label">CategorÌa *</label>
                   <input type="text" id="newGarmentCategory" class="cms-input" list="garmentCatDatalist" value="poleras" required>
                   <datalist id="garmentCatDatalist">
                     <option value="poleras">Poleras</option>
                     <option value="polerones">Polerones</option>
-                    <option value="pendones">Pendones & Gr√°fica</option>
+                    <option value="pendones">Pendones & Gr·fica</option>
                     <option value="accesorios">Accesorios</option>
                   </datalist>
                 </div>
@@ -689,12 +689,12 @@ export class InventoryManagerComponent {
               </div>
               <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; margin-bottom: 0.75rem;">
                 <div class="cms-field-group">
-                  <label class="cms-label">Gramaje / Densidad (g/m¬≤)</label>
+                  <label class="cms-label">Gramaje / Densidad (g/m≤)</label>
                   <input type="number" id="newGarmentGsm" class="cms-input" min="0" max="2000" value="240">
                 </div>
                 <div class="cms-field-group">
-                  <label class="cms-label">Composici√≥n / Material</label>
-                  <input type="text" id="newGarmentComposition" class="cms-input" value="100% Algod√≥n Peinado">
+                  <label class="cms-label">ComposiciÛn / Material</label>
+                  <input type="text" id="newGarmentComposition" class="cms-input" value="100% AlgodÛn Peinado">
                 </div>
               </div>
               <div class="cms-field-group" style="margin-bottom: 0.75rem;">
@@ -703,10 +703,10 @@ export class InventoryManagerComponent {
               </div>
               <div class="cms-field-group" style="margin-bottom: 0.75rem;">
                 <label class="cms-label">
-                  <span>Observaci√≥n T√©cnica / Medidas / Especificaciones</span>
+                  <span>ObservaciÛn TÈcnica / Medidas / Especificaciones</span>
                   <span class="cms-label-hint">Visible en las tarjetas de la vitrina</span>
                 </label>
-                <input type="text" id="newGarmentObservation" class="cms-input" placeholder="Ej: Medidas: 100x200cm con terminaci√≥n reforzada y bolso...">
+                <input type="text" id="newGarmentObservation" class="cms-input" placeholder="Ej: Medidas: 100x200cm con terminaciÛn reforzada y bolso...">
               </div>
               <div class="cms-field-group" style="margin-bottom: 0.75rem;">
                 <label class="cms-label">Stock Inicial por Variante (unidades)</label>
@@ -830,7 +830,7 @@ export class InventoryManagerComponent {
       const sz = input.dataset.size;
       const val = parseInt(input.value, 10);
       if (isNaN(val) || val < 1000) {
-        return { error: `‚ö†Ô∏è El valor de la talla ${sz} debe ser mayor o igual a $1.000 CLP.` };
+        return { error: `?? El valor de la talla ${sz} debe ser mayor o igual a $1.000 CLP.` };
       }
       sizePrices[sz] = val;
     }
@@ -842,7 +842,7 @@ export class InventoryManagerComponent {
     if (!currentGarment) return;
 
     if (isNaN(newSizePrice) || newSizePrice < 1000) {
-      this.showFeedback(`‚ö†Ô∏è El valor para la talla ${size} debe ser de al menos $1.000 CLP.`, "error");
+      this.showFeedback(`?? El valor para la talla ${size} debe ser de al menos $1.000 CLP.`, "error");
       return;
     }
 
@@ -891,7 +891,7 @@ export class InventoryManagerComponent {
       }
 
       this.showFeedback(
-        `‚úì Valor individual de Talla ${size} guardado en $${newSizePrice.toLocaleString('es-CL')} CLP (las dem√°s tallas mantienen su valor independiente).`,
+        `? Valor individual de Talla ${size} guardado en $${newSizePrice.toLocaleString('es-CL')} CLP (las dem·s tallas mantienen su valor independiente).`,
         "success"
       );
 
@@ -900,7 +900,7 @@ export class InventoryManagerComponent {
       }));
     } catch (err) {
       if (err.message === "UNAUTHORIZED") {
-        this.showFeedback("Sesi√≥n de taller no autorizada o expirada.", "error");
+        this.showFeedback("SesiÛn de taller no autorizada o expirada.", "error");
         window.dispatchEvent(new CustomEvent('senkai:workshop-unauthorized'));
       } else {
         this.showFeedback(`Error al guardar valor de talla ${size}: ${err.message}`, "error");
@@ -913,7 +913,7 @@ export class InventoryManagerComponent {
   }
 
   attachEvents() {
-    // Salto r√°pido a la pesta√±a CMS y realce de la secci√≥n lookbook
+    // Salto r·pido a la pestaÒa CMS y realce de la secciÛn lookbook
     const jumpBtn = this.container.querySelector('#jumpToCmsFromInventory');
     if (jumpBtn) {
       jumpBtn.addEventListener('click', () => {
@@ -953,8 +953,8 @@ export class InventoryManagerComponent {
 
           this.feedbackMessage = {
             text: nextActive
-              ? `‚úì "${targetGarment.name}" ENCENDIDA: Ahora est√° disponible para pedidos en el Simulador y Cat√°logo.`
-              : `‚úì "${targetGarment.name}" APAGADA: Se conserva en el panel pero los clientes no podr√°n pedirla temporalmente.`,
+              ? `? "${targetGarment.name}" ENCENDIDA: Ahora est· disponible para pedidos en el Simulador y Cat·logo.`
+              : `? "${targetGarment.name}" APAGADA: Se conserva en el panel pero los clientes no podr·n pedirla temporalmente.`,
             type: "success"
           };
 
@@ -967,7 +967,7 @@ export class InventoryManagerComponent {
         } catch (err) {
           btn.disabled = false;
           if (err.message === "UNAUTHORIZED") {
-            this.showFeedback("Sesi√≥n de taller no autorizada o expirada.", "error");
+            this.showFeedback("SesiÛn de taller no autorizada o expirada.", "error");
             window.dispatchEvent(new CustomEvent('senkai:workshop-unauthorized'));
           } else {
             this.showFeedback(`Error al cambiar disponibilidad: ${err.message}`, "error");
@@ -976,7 +976,7 @@ export class InventoryManagerComponent {
       });
     });
 
-    // 1. Selector de modelo textil (tanto desde las p√≠ldoras como desde las tarjetas de disponibilidad)
+    // 1. Selector de modelo textil (tanto desde las pÌldoras como desde las tarjetas de disponibilidad)
     this.container.querySelectorAll('[data-garment-id].inventory-model-pill, [data-garment-id].btn-select-garment-edit').forEach(btn => {
       btn.addEventListener('click', async (e) => {
         const gId = e.currentTarget.dataset.garmentId;
@@ -998,7 +998,7 @@ export class InventoryManagerComponent {
 
         const newQty = parseInt(input.value, 10);
         if (isNaN(newQty) || newQty < 0) {
-          this.showFeedback("‚ö†Ô∏è El valor de existencias debe ser un n√∫mero entero mayor o igual a 0.", "error");
+          this.showFeedback("?? El valor de existencias debe ser un n˙mero entero mayor o igual a 0.", "error");
           return;
         }
 
@@ -1008,7 +1008,7 @@ export class InventoryManagerComponent {
         try {
           await apiService.updateVariantStock(garmentId, variantId, newQty);
           
-          // Actualizar cach√© local
+          // Actualizar cachÈ local
           const v = this.variants.find(it => it.id === variantId);
           if (v) v.stock_quantity = newQty;
 
@@ -1020,13 +1020,13 @@ export class InventoryManagerComponent {
 
           this.showFeedback(`Existencias actualizadas correctamente (${newQty} unidades).`, "success");
 
-          // Disparar sincronizaci√≥n con tienda p√∫blica
+          // Disparar sincronizaciÛn con tienda p˙blica
           window.dispatchEvent(new CustomEvent('senkai:catalog-updated', {
             detail: { garmentId, variantId, stockQuantity: newQty }
           }));
         } catch (err) {
           if (err.message === "UNAUTHORIZED") {
-            this.showFeedback("Sesi√≥n de taller no autorizada o expirada.", "error");
+            this.showFeedback("SesiÛn de taller no autorizada o expirada.", "error");
             window.dispatchEvent(new CustomEvent('senkai:workshop-unauthorized'));
           } else {
             this.showFeedback(`Error al guardar stock: ${err.message}`, "error");
@@ -1048,7 +1048,7 @@ export class InventoryManagerComponent {
       });
     });
 
-    // 2.B. Selector de Talla Individual y Edici√≥n Independiente por Talla
+    // 2.B. Selector de Talla Individual y EdiciÛn Independiente por Talla
     this.container.querySelectorAll('[data-select-price-size]').forEach(pill => {
       pill.addEventListener('click', (e) => {
         const sz = e.currentTarget.dataset.selectPriceSize;
@@ -1070,7 +1070,7 @@ export class InventoryManagerComponent {
       selectedSizePriceInput.addEventListener('input', () => {
         const sz = this.selectedPriceSize;
         const val = parseInt(selectedSizePriceInput.value || '0', 10);
-        // Solo actualiza la talla seleccionada, sin modificar las dem√°s tallas
+        // Solo actualiza la talla seleccionada, sin modificar las dem·s tallas
         this._syncSizePriceVisuals(sz, val);
       });
       selectedSizePriceInput.addEventListener('keydown', (e) => {
@@ -1094,7 +1094,7 @@ export class InventoryManagerComponent {
       applySelectedToAllBtn.addEventListener('click', () => {
         const val = parseInt(selectedSizePriceInput.value || '0', 10);
         if (isNaN(val) || val < 1000) {
-          this.showFeedback("‚ö†Ô∏è Ingresa un valor mayor o igual a $1.000 CLP antes de igualar las tallas.", "error");
+          this.showFeedback("?? Ingresa un valor mayor o igual a $1.000 CLP antes de igualar las tallas.", "error");
           return;
         }
         this.container.querySelectorAll('.inv-size-price-input').forEach(inp => {
@@ -1104,7 +1104,7 @@ export class InventoryManagerComponent {
       });
     }
 
-    // Sincronizaci√≥n en vivo al editar un precio por talla en la grilla de resumen
+    // SincronizaciÛn en vivo al editar un precio por talla en la grilla de resumen
     this.container.querySelectorAll('.inv-size-price-input').forEach(input => {
       input.addEventListener('focus', () => {
         const sz = input.dataset.size;
@@ -1129,7 +1129,7 @@ export class InventoryManagerComponent {
       });
     });
 
-    // Sincronizaci√≥n en vivo al editar un precio por talla directamente en la matriz izquierda
+    // SincronizaciÛn en vivo al editar un precio por talla directamente en la matriz izquierda
     this.container.querySelectorAll('.matrix-size-price-input').forEach(input => {
       input.addEventListener('focus', () => {
         const sz = input.dataset.size;
@@ -1152,7 +1152,7 @@ export class InventoryManagerComponent {
       });
     });
 
-    // Guardado r√°pido del valor de una talla desde el bot√≥n ‚úì de la matriz
+    // Guardado r·pido del valor de una talla desde el botÛn ? de la matriz
     this.container.querySelectorAll('.btn-save-size-price').forEach(btn => {
       btn.addEventListener('click', async (e) => {
         const size = e.currentTarget.dataset.size;
@@ -1204,7 +1204,7 @@ export class InventoryManagerComponent {
           const lbId = lbInput.dataset.lookbookId;
           const lbPrice = parseInt(lbInput.value, 10);
           if (isNaN(lbPrice) || lbPrice < 1000) {
-            this.showFeedback("‚ö†Ô∏è Todos los precios de vitrina deben ser mayores o iguales a $1.000 CLP.", "error");
+            this.showFeedback("?? Todos los precios de vitrina deben ser mayores o iguales a $1.000 CLP.", "error");
             return;
           }
           lookbookPriceUpdates.set(lbId, lbPrice);
@@ -1235,7 +1235,7 @@ export class InventoryManagerComponent {
             }
           });
 
-          // B) Actualizar precios de las prendas vinculadas en el Lookbook / Cat√°logo principal
+          // B) Actualizar precios de las prendas vinculadas en el Lookbook / Cat·logo principal
           if (lookbookPriceUpdates.size > 0 && this.lookbookItems.length > 0) {
             this.lookbookItems = this.lookbookItems.map(item => {
               if (lookbookPriceUpdates.has(item.id)) {
@@ -1262,19 +1262,19 @@ export class InventoryManagerComponent {
             }));
           }
 
-          // Actualizar etiquetas de precio en las p√≠ldoras y KPIs del taller
+          // Actualizar etiquetas de precio en las pÌldoras y KPIs del taller
           const activePillPrice = this.container.querySelector(`.inventory-model-pill[data-garment-id="${currentGarment.id}"] .pill-price-tag`);
           if (activePillPrice && currentGarment.is_active !== false) {
             activePillPrice.textContent = `$${newPrice.toLocaleString('es-CL')}`;
           }
 
-          // Actualizar previsualizaciones fotogr√°ficas
+          // Actualizar previsualizaciones fotogr·ficas
           const frontImg = this.container.querySelector('#inv-preview-front');
           const backImg = this.container.querySelector('#inv-preview-back');
           if (frontImg && newPhotoFront) frontImg.src = newPhotoFront;
           if (backImg && newPhotoBack) backImg.src = newPhotoBack;
 
-          // C) Disparar evento global para refrescar Cat√°logo, Carrusel y Personalizador en vivo
+          // C) Disparar evento global para refrescar Cat·logo, Carrusel y Personalizador en vivo
           window.dispatchEvent(new CustomEvent('senkai:catalog-updated', {
             detail: {
               garmentId: currentGarment.id,
@@ -1286,13 +1286,13 @@ export class InventoryManagerComponent {
           }));
 
           this.showFeedback(
-            `‚úì Valores individuales por talla guardados y sincronizados en toda la tienda web.`,
+            `? Valores individuales por talla guardados y sincronizados en toda la tienda web.`,
             "success"
           );
         } catch (err) {
           console.error("Error al actualizar precios de prenda:", err);
           if (err.message === "UNAUTHORIZED") {
-            this.showFeedback("Sesi√≥n de taller no autorizada o expirada. Ingresa nuevamente la clave.", "error");
+            this.showFeedback("SesiÛn de taller no autorizada o expirada. Ingresa nuevamente la clave.", "error");
             window.dispatchEvent(new CustomEvent('senkai:workshop-unauthorized'));
           } else {
             this.showFeedback(`Error al actualizar: ${err.message || err}`, "error");
@@ -1304,7 +1304,7 @@ export class InventoryManagerComponent {
       });
     }
 
-    // 5. Bot√≥n y modal para agregar un nuevo tipo de producto o prenda
+    // 5. BotÛn y modal para agregar un nuevo tipo de producto o prenda
     const openAddModalBtn = this.container.querySelector('#invBtnOpenAddGarmentModal');
     const addModal = this.container.querySelector('#invAddGarmentModal');
     const closeAddModalBtn = this.container.querySelector('#invCloseAddGarmentModal');
@@ -1338,7 +1338,7 @@ export class InventoryManagerComponent {
           const category = this.container.querySelector('#newGarmentCategory')?.value.trim() || 'poleras';
           const price = parseInt(this.container.querySelector('#newGarmentPrice')?.value || '19990', 10);
           const gsm = parseInt(this.container.querySelector('#newGarmentGsm')?.value || '240', 10);
-          const composition = this.container.querySelector('#newGarmentComposition')?.value.trim() || '100% Algod√≥n Peinado';
+          const composition = this.container.querySelector('#newGarmentComposition')?.value.trim() || '100% AlgodÛn Peinado';
           const rawSizes = this.container.querySelector('#newGarmentSizes')?.value || 'S, M, L, XL';
           const observation = this.container.querySelector('#newGarmentObservation')?.value.trim() || null;
           const initialStock = parseInt(this.container.querySelector('#newGarmentInitialStock')?.value || '10', 10);
@@ -1383,11 +1383,11 @@ export class InventoryManagerComponent {
         const gName = targetGarment ? targetGarment.name : garmentId;
 
         if (this.garments.length <= 1) {
-          this.showFeedback("‚ö†Ô∏è No puedes eliminar el √∫nico producto existente en el cat√°logo.", "error");
+          this.showFeedback("?? No puedes eliminar el ˙nico producto existente en el cat·logo.", "error");
           return;
         }
 
-        if (!confirm(`¬øEst√°s seguro de eliminar "${gName}" de forma permanente del cat√°logo y de la bodega? Esta acci√≥n no se puede deshacer.`)) {
+        if (!confirm(`øEst·s seguro de eliminar "${gName}" de forma permanente del cat·logo y de la bodega? Esta acciÛn no se puede deshacer.`)) {
           return;
         }
 

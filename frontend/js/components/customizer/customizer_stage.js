@@ -1,21 +1,21 @@
-ï»¿// SubmÃ³dulo del Personalizador: Escenario y Canvas Textil con Volteo 3D.
-// AcÃ¡ renderizo la silueta SVG de la prenda seleccionada, el Ã¡rea segura de prensado
+// Submódulo del Personalizador: Escenario y Canvas Textil con Volteo 3D.
+// Acá renderizo la silueta SVG de la prenda seleccionada, el área segura de prensado
 // y la estampa activa con sus gizmos de escala y centrado.
 
-import { SVG_GARMENTS, PRESET_ARTWORKS } from '../svg_templates.js?v=20261022_v1';
+import { SVG_GARMENTS, PRESET_ARTWORKS } from '../svg_templates.js?v=20261022_v2';
 
-// Medidas base en pÃ­xeles del film DTF sobre el mockup
+// Medidas base en píxeles del film DTF sobre el mockup
 export function getPrintBaseDimensions(printSize) {
   const map = {
-    A6: { width: 90, height: 90, cm: "10 Ã— 10 cm", desc: "Bolsillo" },
-    A5: { width: 130, height: 160, cm: "15 Ã— 20 cm", desc: "Mediano" },
-    A4: { width: 185, height: 230, cm: "20 Ã— 30 cm", desc: "EstÃ¡ndar" },
-    A3: { width: 245, height: 320, cm: "30 Ã— 40 cm", desc: "Maxi" }
+    A6: { width: 90, height: 90, cm: "10 × 10 cm", desc: "Bolsillo" },
+    A5: { width: 130, height: 160, cm: "15 × 20 cm", desc: "Mediano" },
+    A4: { width: 185, height: 230, cm: "20 × 30 cm", desc: "Estándar" },
+    A3: { width: 245, height: 320, cm: "30 × 40 cm", desc: "Maxi" }
   };
   return map[printSize] || map.A4;
 }
 
-// Devuelvo el SVG vectorial de la prenda segÃºn su categorÃ­a y cara (frente o espalda)
+// Devuelvo el SVG vectorial de la prenda según su categoría y cara (frente o espalda)
 export function getGarmentSvgMarkup(category, view, colorHex) {
   if (category === "poleron_hoodie" || category === "hoodie") {
     return view === "back" ? SVG_GARMENTS.hoodie_back(colorHex) : SVG_GARMENTS.hoodie_front(colorHex);
@@ -26,7 +26,7 @@ export function getGarmentSvgMarkup(category, view, colorHex) {
   }
 }
 
-// Devuelvo el arte de la estampa: si subiÃ³ una foto propia muestro el <img>, si no el SVG predeterminado
+// Devuelvo el arte de la estampa: si subió una foto propia muestro el <img>, si no el SVG predeterminado
 export function getPrintArtworkMarkup(print) {
   const imgSrc = print.designImageUrl || print.customArtworkDataUrl;
   if (imgSrc) {
@@ -35,7 +35,7 @@ export function getPrintArtworkMarkup(print) {
   return print.artwork ? print.artwork.svgContent : PRESET_ARTWORKS[0].svgContent;
 }
 
-// Renderizo la caja arrastrable de la estampa con su manilla de tamaÃ±o si estÃ¡ seleccionada
+// Renderizo la caja arrastrable de la estampa con su manilla de tamaño si está seleccionada
 export function renderDraggablePrintMarkup(p, activePrint) {
   const dims = getPrintBaseDimensions(p.print_size);
   const isActive = activePrint && p.id === activePrint.id;
@@ -59,7 +59,7 @@ export function renderDraggablePrintMarkup(p, activePrint) {
   `;
 }
 
-// Estructura completa del visor: Toolbar de conmutaciÃ³n de cara, flipper 3D y badge de especificaciones
+// Estructura completa del visor: Toolbar de conmutación de cara, flipper 3D y badge de especificaciones
 export function renderVisualizerStage(state, g, currentColor, activePrint, frontPrints, backPrints) {
   const frontCount = frontPrints.length;
   const backCount = backPrints.length;
@@ -83,7 +83,7 @@ export function renderVisualizerStage(state, g, currentColor, activePrint, front
 
           <div class="visualizer-actions-right">
             ${activePrint ? `
-              <button class="canvas-action-btn btn-magnetic" id="centerActivePrintBtn" title="Centrar estampa en el eje anatÃ³mico" type="button">
+              <button class="canvas-action-btn btn-magnetic" id="centerActivePrintBtn" title="Centrar estampa en el eje anatómico" type="button">
                 <span class="material-symbols-outlined" style="font-size: 15px;">filter_center_focus</span>
                 <span>Centrar</span>
               </button>
@@ -97,7 +97,7 @@ export function renderVisualizerStage(state, g, currentColor, activePrint, front
         </div>
 
         <!-- Escenario interactivo con Volteo 3D -->
-        <div class="canvas-viewport" id="canvasViewport" title="Arrastra directamente sobre la prenda para calibrar la posiciÃ³n">
+        <div class="canvas-viewport" id="canvasViewport" title="Arrastra directamente sobre la prenda para calibrar la posición">
           <div class="canvas-snap-guide snap-x" id="canvasSnapX"></div>
           <div class="canvas-snap-guide snap-y" id="canvasSnapY"></div>
 
@@ -109,7 +109,7 @@ export function renderVisualizerStage(state, g, currentColor, activePrint, front
                 <div class="garment-svg-wrapper">
                   ${getGarmentSvgMarkup(g.category, 'front', currentColor)}
                 </div>
-                <div class="safe-print-boundary" title="Ãrea Ãºtil de prensado frontal"></div>
+                <div class="safe-print-boundary" title="Área útil de prensado frontal"></div>
                 ${frontPrints.map(p => renderDraggablePrintMarkup(p, activePrint)).join('')}
               </div>
 
@@ -118,21 +118,21 @@ export function renderVisualizerStage(state, g, currentColor, activePrint, front
                 <div class="garment-svg-wrapper">
                   ${getGarmentSvgMarkup(g.category, 'back', currentColor)}
                 </div>
-                <div class="safe-print-boundary" title="Ãrea Ãºtil de prensado dorsal"></div>
+                <div class="safe-print-boundary" title="Área útil de prensado dorsal"></div>
                 ${backPrints.map(p => renderDraggablePrintMarkup(p, activePrint)).join('')}
               </div>
 
             </div>
           </div>
 
-          <!-- Ficha tÃ©cnica flotante al pie del lienzo -->
+          <!-- Ficha técnica flotante al pie del lienzo -->
           <div class="canvas-badge-info">
             <div class="canvas-info-left">
               <span class="canvas-garment-title">${g.name}</span>
-              <span class="canvas-info-sep">â€¢</span>
+              <span class="canvas-info-sep">•</span>
               <span class="canvas-color-dot" style="background: ${currentColor};"></span>
               <span class="canvas-color-label">${state.selectedColor.name}</span>
-              <span class="canvas-info-sep">â€¢</span>
+              <span class="canvas-info-sep">•</span>
               <span class="canvas-size-label">TALLA ${state.selectedSize}</span>
             </div>
             <div class="canvas-info-right">

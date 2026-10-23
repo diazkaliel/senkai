@@ -1,16 +1,16 @@
-ï»¿// Portal de AdministraciÃ³n y Taller de Senkai DTF Studio.
-// Este archivo actÃºa como contenedor y router de las 4 herramientas del taller:
-// 1. Tablero Kanban de producciÃ³n (kanban_board.js)
-// 2. AnalÃ­tica y mÃ©tricas de facturaciÃ³n (analytics_dashboard.js)
+// Portal de Administración y Taller de Senkai DTF Studio.
+// Este archivo actúa como contenedor y router de las 4 herramientas del taller:
+// 1. Tablero Kanban de producción (kanban_board.js)
+// 2. Analítica y métricas de facturación (analytics_dashboard.js)
 // 3. Editor editorial CMS (content_editor.js)
-// 4. Gestor de catÃ¡logo y stock fÃ­sico (inventory_manager.js)
+// 4. Gestor de catálogo y stock físico (inventory_manager.js)
 
-import { apiService } from '../services/api.js?v=20261022_v1';
-import { KanbanBoardComponent } from './admin/kanban_board.js?v=20261022_v1';
-import { ContentEditorComponent } from './admin/content_editor.js?v=20261022_v1';
-import { AnalyticsDashboardComponent } from './admin/analytics_dashboard.js?v=20261022_v1';
-import { InventoryManagerComponent } from './admin/inventory_manager.js?v=20261022_v1';
-import { MockupModalComponent } from './admin/mockup_modal.js?v=20261022_v1';
+import { apiService } from '../services/api.js?v=20261022_v2';
+import { KanbanBoardComponent } from './admin/kanban_board.js?v=20261022_v2';
+import { ContentEditorComponent } from './admin/content_editor.js?v=20261022_v2';
+import { AnalyticsDashboardComponent } from './admin/analytics_dashboard.js?v=20261022_v2';
+import { InventoryManagerComponent } from './admin/inventory_manager.js?v=20261022_v2';
+import { MockupModalComponent } from './admin/mockup_modal.js?v=20261022_v2';
 
 export class AdminWorkshopPortal {
   constructor(containerId) {
@@ -20,7 +20,7 @@ export class AdminWorkshopPortal {
     this.garments = [];
     this.activeTab = "kanban"; // "kanban" | "analytics" | "cms" | "inventory"
 
-    // Ficha CAD y visor de producciÃ³n en modal
+    // Ficha CAD y visor de producción en modal
     this.mockupModal = new MockupModalComponent('adminMockupModal', 'adminMockupCard', {
       onStatusChanged: () => this.refreshData()
     });
@@ -28,7 +28,7 @@ export class AdminWorkshopPortal {
     // Si el backend nos rebota con 401, borro el token y muestro la pantalla de login
     window.addEventListener('senkai:workshop-unauthorized', () => {
       apiService.setWorkshopToken('');
-      this.renderAuthGate("La clave de taller no es vÃ¡lida o expirÃ³. IngrÃ©sala nuevamente.");
+      this.renderAuthGate("La clave de taller no es válida o expiró. Ingrésala nuevamente.");
     });
   }
 
@@ -36,7 +36,7 @@ export class AdminWorkshopPortal {
     await this.refreshData();
   }
 
-  // Pido las Ã³rdenes, mÃ©tricas y catÃ¡logo al backend
+  // Pido las órdenes, métricas y catálogo al backend
   async refreshData() {
     if (!apiService.hasWorkshopToken()) {
       this.renderAuthGate();
@@ -51,14 +51,14 @@ export class AdminWorkshopPortal {
       this.attachEvents();
     } catch (err) {
       if (err.message === "UNAUTHORIZED") {
-        this.renderAuthGate("Token de taller invÃ¡lido o no autorizado. Revisa tus credenciales.");
+        this.renderAuthGate("Token de taller inválido o no autorizado. Revisa tus credenciales.");
         return;
       }
       console.error("Error al cargar datos del taller:", err);
     }
   }
 
-  // Pantalla de bloqueo si no hay sesiÃ³n activa en el taller
+  // Pantalla de bloqueo si no hay sesión activa en el taller
   renderAuthGate(errorMessage = "") {
     if (!this.container) return;
     this.container.innerHTML = `
@@ -69,7 +69,7 @@ export class AdminWorkshopPortal {
           </div>
           <h2 style="font-family: var(--font-display); font-size: 1.5rem; margin-bottom: 0.5rem; letter-spacing: -0.02em;">Acceso Restringido al Taller</h2>
           <p style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 1.5rem;">
-            Ingresa la clave de seguridad para acceder al tablero de producciÃ³n y las mÃ©tricas de Senkai.
+            Ingresa la clave de seguridad para acceder al tablero de producción y las métricas de Senkai.
           </p>
 
           ${errorMessage ? `
@@ -121,7 +121,7 @@ export class AdminWorkshopPortal {
     }
   }
 
-  // Estructura base del panel: Cabecera, PestaÃ±as y Contenedor de la pestaÃ±a activa
+  // Estructura base del panel: Cabecera, Pestañas y Contenedor de la pestaña activa
   render() {
     if (!this.container) return;
 
@@ -130,11 +130,11 @@ export class AdminWorkshopPortal {
         <!-- Cabecera del panel de taller -->
         <div class="admin-header-row">
           <div class="admin-title-badge">
-            <span class="badge badge-admin">ATELIER OPERATIVO // GESTIÃ“N DE PEDIDOS Y PRODUCCIÃ“N</span>
+            <span class="badge badge-admin">ATELIER OPERATIVO // GESTIÓN DE PEDIDOS Y PRODUCCIÓN</span>
             <h2>Centro de Operaciones // DTF Studio</h2>
           </div>
           <div class="admin-header-actions">
-            <button class="btn btn-secondary" id="logoutWorkshopBtn" title="Cerrar sesiÃ³n de taller">
+            <button class="btn btn-secondary" id="logoutWorkshopBtn" title="Cerrar sesión de taller">
               <span class="material-symbols-outlined" style="font-size: 16px;">lock</span>
               <span>Salir</span>
             </button>
@@ -144,23 +144,23 @@ export class AdminWorkshopPortal {
             </button>
             <button class="btn btn-primary" id="returnStorefrontBtn" title="Volver a la vitrina">
               <span class="material-symbols-outlined" style="font-size: 16px;">storefront</span>
-              <span>Tienda PÃºblica</span>
+              <span>Tienda Pública</span>
             </button>
           </div>
         </div>
 
-        <!-- PestaÃ±as de navegaciÃ³n -->
+        <!-- Pestañas de navegación -->
         <div class="admin-tabs-nav" role="tablist">
           <button class="admin-tab-btn ${this.activeTab === 'kanban' ? 'active' : ''}" data-tab="kanban" role="tab" aria-selected="${this.activeTab === 'kanban'}">
             <span class="material-symbols-outlined tab-icon">receipt_long</span>
-            <span class="tab-text-full">GestiÃ³n de Pedidos</span>
+            <span class="tab-text-full">Gestión de Pedidos</span>
             <span class="tab-text-short">Pedidos</span>
             <span class="tab-badge">${this.orders.length}</span>
           </button>
           <button class="admin-tab-btn ${this.activeTab === 'analytics' ? 'active' : ''}" data-tab="analytics" role="tab" aria-selected="${this.activeTab === 'analytics'}">
             <span class="material-symbols-outlined tab-icon">monitoring</span>
-            <span class="tab-text-full">AnalÃ­tica & Rendimiento</span>
-            <span class="tab-text-short">MÃ©tricas</span>
+            <span class="tab-text-full">Analítica & Rendimiento</span>
+            <span class="tab-text-short">Métricas</span>
           </button>
           <button class="admin-tab-btn ${this.activeTab === 'cms' ? 'active' : ''}" data-tab="cms" role="tab" aria-selected="${this.activeTab === 'cms'}">
             <span class="material-symbols-outlined tab-icon">edit_note</span>
@@ -169,12 +169,12 @@ export class AdminWorkshopPortal {
           </button>
           <button class="admin-tab-btn ${this.activeTab === 'inventory' ? 'active' : ''}" data-tab="inventory" role="tab" aria-selected="${this.activeTab === 'inventory'}">
             <span class="material-symbols-outlined tab-icon">inventory_2</span>
-            <span class="tab-text-full">Bodega & Stock FÃ­sico</span>
+            <span class="tab-text-full">Bodega & Stock Físico</span>
             <span class="tab-text-short">Bodega</span>
           </button>
         </div>
 
-        <!-- Host dinÃ¡mico donde se monta el componente de la pestaÃ±a activa -->
+        <!-- Host dinámico donde se monta el componente de la pestaña activa -->
         <div id="adminTabContentHost"></div>
       </div>
     `;
@@ -182,7 +182,7 @@ export class AdminWorkshopPortal {
     this._mountActiveTab();
   }
 
-  // Monto el componente correspondiente segÃºn la pestaÃ±a seleccionada
+  // Monto el componente correspondiente según la pestaña seleccionada
   _mountActiveTab() {
     const host = this.container.querySelector('#adminTabContentHost');
     if (!host) return;
@@ -204,7 +204,7 @@ export class AdminWorkshopPortal {
     }
   }
 
-  // Eventos globales del portal (cambio de tabs, logout, recarga y navegaciÃ³n)
+  // Eventos globales del portal (cambio de tabs, logout, recarga y navegación)
   attachEvents() {
     const logoutBtn = this.container.querySelector('#logoutWorkshopBtn');
     if (logoutBtn) {
