@@ -53,9 +53,13 @@ export class CatalogComponent {
     const tagEl = this.container?.querySelector('.collection-tag-badge');
     if (titleEl && title) titleEl.textContent = title;
     if (descEl && desc) descEl.textContent = desc;
-    if (tagEl && tag) {
-      tagEl.textContent = tag;
-      tagEl.style.display = '';
+    if (tagEl) {
+      if (tag) {
+        tagEl.textContent = tag;
+        tagEl.style.display = '';
+      } else {
+        tagEl.style.display = 'none';
+      }
     }
   }
 
@@ -72,14 +76,17 @@ export class CatalogComponent {
       // Mantenemos los datos gráficos base (vectores/coordenadas) y aplicamos los cambios del CMS
       const merged = [];
       newItems.forEach((updated, idx) => {
-        const baseItem = COLLECTION_ITEMS.find(b => b.id === updated.id) || COLLECTION_ITEMS[idx % COLLECTION_ITEMS.length];
+        const baseItem = COLLECTION_ITEMS.find(b => b.id === updated.id) || COLLECTION_ITEMS[idx % COLLECTION_ITEMS.length] || COLLECTION_ITEMS[0];
         merged.push({
           ...baseItem,
           ...updated,
+          id: updated.id,
+          name: updated.name || baseItem.name,
           garmentId: updated.garment_id || updated.garmentId || baseItem.garmentId,
           subcategory: updated.subcategory || baseItem.subcategory || "Edición Taller",
-          photo_front: (updated.photo_front !== undefined) ? updated.photo_front : baseItem.photo_front,
-          photo_back: (updated.photo_back !== undefined) ? updated.photo_back : baseItem.photo_back
+          colorHex: updated.colorHex || baseItem.colorHex || "#121212",
+          photo_front: (updated.photo_front !== undefined && updated.photo_front !== null) ? updated.photo_front : baseItem.photo_front,
+          photo_back: (updated.photo_back !== undefined && updated.photo_back !== null) ? updated.photo_back : baseItem.photo_back
         });
       });
       this.collectionItems = merged;
@@ -674,13 +681,16 @@ export function renderProductCardMarkup(item, garments = [], categories = DEFAUL
   const showCustomFront = isCustomFrontPhoto && viewMode === 'photo';
   const showCustomBack = isCustomBackPhoto && viewMode === 'photo';
 
-  const garmentSvgFront = SVG_GARMENTS[`${item.garmentType}_front`]
-    ? SVG_GARMENTS[`${item.garmentType}_front`](item.colorHex)
-    : SVG_GARMENTS.tshirt_front(item.colorHex);
+  const colorHex = item.colorHex || "#121212";
+  const gType = item.garmentType || (garment?.category === "polera_oversized" || garment?.category === "polera_classic" ? "tshirt" : (garment?.category === "poleron_hoodie" ? "hoodie" : (garment?.category === "poleron_crewneck" ? "crewneck" : "tshirt")));
 
-  const garmentSvgBack = SVG_GARMENTS[`${item.garmentType}_back`]
-    ? SVG_GARMENTS[`${item.garmentType}_back`](item.colorHex)
-    : SVG_GARMENTS.tshirt_back(item.colorHex);
+  const garmentSvgFront = SVG_GARMENTS[`${gType}_front`]
+    ? SVG_GARMENTS[`${gType}_front`](colorHex)
+    : SVG_GARMENTS.tshirt_front(colorHex);
+
+  const garmentSvgBack = SVG_GARMENTS[`${gType}_back`]
+    ? SVG_GARMENTS[`${gType}_back`](colorHex)
+    : SVG_GARMENTS.tshirt_back(colorHex);
 
   return `
     <div class="collection-card-pro corner-brackets reactive-border ${!isGarmentAvailable ? 'is-garment-disabled' : ''}" data-card-id="${item.id}" data-category="${item.category || ''}" data-subcategory="${subcategoryLabel}">

@@ -116,25 +116,26 @@ export class ProductCarousel {
 
   updateItems(newItems) {
     if (!newItems || !newItems.length) return;
-    this.items = COLLECTION_ITEMS.map(baseItem => {
-      const updated = newItems.find(n => n.id === baseItem.id);
-      if (!updated) {
-        const existing = this.items.find(i => i.id === baseItem.id);
-        return existing || { ...baseItem };
-      }
-      return {
-        ...baseItem,
+    const merged = [];
+    newItems.forEach((updated, idx) => {
+      const fallbackBase = COLLECTION_ITEMS.find(b => b.id === updated.id) || COLLECTION_ITEMS[idx % COLLECTION_ITEMS.length] || COLLECTION_ITEMS[0];
+      merged.push({
+        ...fallbackBase,
         ...updated,
-        garmentId: updated.garment_id || updated.garmentId || baseItem.garmentId,
-        photo_front: (updated.photo_front !== undefined) ? updated.photo_front : baseItem.photo_front,
-        photo_back: (updated.photo_back !== undefined) ? updated.photo_back : baseItem.photo_back
-      };
+        id: updated.id,
+        name: updated.name || fallbackBase.name,
+        garmentId: updated.garment_id || updated.garmentId || fallbackBase.garmentId,
+        colorHex: updated.colorHex || fallbackBase.colorHex || "#121212",
+        availableColors: updated.availableColors || fallbackBase.availableColors || [{ name: "Negro", hex: "#121212" }],
+        frontSpecs: updated.frontSpecs || fallbackBase.frontSpecs,
+        backSpecs: updated.backSpecs || fallbackBase.backSpecs,
+        frontArt: updated.frontArt || fallbackBase.frontArt,
+        backArt: updated.backArt || fallbackBase.backArt,
+        photo_front: (updated.photo_front !== undefined) ? updated.photo_front : fallbackBase.photo_front,
+        photo_back: (updated.photo_back !== undefined) ? updated.photo_back : fallbackBase.photo_back
+      });
     });
-    newItems.forEach(newItem => {
-      if (!this.items.some(i => i.id === newItem.id)) {
-        this.items.push(newItem);
-      }
-    });
+    this.items = merged;
     this.init(this.garments);
   }
 
@@ -144,7 +145,7 @@ export class ProductCarousel {
 
   findGarment(item) {
     const gId = item.garment_id || item.garmentId;
-    return this.garments.find(g => g.id === gId) || null;
+    return this.garments.find(g => g.id === gId) || this.garments[0] || null;
   }
 
   render() {
@@ -207,15 +208,22 @@ export class ProductCarousel {
     const garment = this.findGarment(item);
     const { line, title } = splitItemName(item.name);
     const isBack = item.currentView === 'back';
-    const color = item.availableColors.find(c => sameHex(c.hex, item.colorHex)) || item.availableColors[0];
+    const availableColors = (Array.isArray(item.availableColors) && item.availableColors.length > 0)
+      ? item.availableColors
+      : (garment?.colors ? garment.colors.map(c => ({ name: c.name, hex: c.hex_code })) : [{ name: "Negro", hex: item.colorHex || "#121212" }]);
+    const color = availableColors.find(c => sameHex(c.hex, item.colorHex)) || availableColors[0] || { name: "Negro", hex: "#121212" };
     const weight = garment?.weight_gsm;
     const code = `SK-${weight || '000'} / ${pad2(index + 1)}`;
     const price = resolveItemPrice(item, garment);
 
+    const printSpecText = (item.frontArt?.suggestedSize || item.backArt?.suggestedSize)
+      ? `${item.frontArt?.suggestedSize || '—'} frente · ${item.backArt?.suggestedSize || '—'} espalda`
+      : (item.badge || 'DTF Ultra HD');
+
     const specs = [
-      ['Gramaje', weight ? `${weight} g/m²` : item.badge],
-      ['Tela', garment?.composition || '—'],
-      ['Estampa', `${item.frontArt.suggestedSize || '—'} frente · ${item.backArt.suggestedSize || '—'} espalda`],
+      ['Gramaje', weight ? `${weight} g/m²` : (item.badge || '240 GSM')],
+      ['Tela', garment?.composition || '100% Algodón Peinado'],
+      ['Estampa', printSpecText],
       ['Curado', HEAT_PRESS_SPEC],
     ];
 
@@ -318,9 +326,9 @@ export class ProductCarousel {
           <img src="${photoSrc}" alt="${escapeHtml(item.name)} ${side}" class="card-real-photo-img" style="position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; pointer-events: none;" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
           <div class="drop-slide__fallback-wrap" style="display: none; width: 100%; height: 100%; position: absolute; inset: 0; align-items: center; justify-content: center;">
             ${render ? render(item.colorHex) : ''}
-            ${art && spec ? `
-            <div class="drop-slide__art" style="top: ${spec.top}; left: ${spec.left}; width: ${toPct(spec.width)}; height: ${toPct(spec.height)};">
-              ${art.svgContent}
+            ${art && spec && spec.top && spec.left ? `
+            <div class="drop-slide__art" style="top: ${spec.top}; left: ${spec.left}; width: ${toPct(spec.width || '120px')}; height: ${toPct(spec.height || '120px')};">
+              ${art.svgContent || ''}
             </div>
             ` : ''}
           </div>
@@ -361,9 +369,9 @@ export class ProductCarousel {
     const isBack = item.currentView === 'back';
     const spec = isBack ? item.backSpecs : item.frontSpecs;
     const art = isBack ? item.backArt : item.frontArt;
-    const x = (parseFloat(spec.left) || 0).toFixed(1);
-    const y = (parseFloat(spec.top) || 0).toFixed(1);
-    return `${isBack ? 'Espalda' : 'Frente'} · DTF ${art.suggestedSize || '—'} · X ${x} Y ${y}`;
+    const x = (parseFloat(spec?.left) || 0).toFixed(1);
+    const y = (parseFloat(spec?.top) || 0).toFixed(1);
+    return `${isBack ? 'Espalda' : 'Frente'} · DTF ${art?.suggestedSize || 'Full HD'} · X ${x} Y ${y}`;
   }
 
   cacheDom() {
