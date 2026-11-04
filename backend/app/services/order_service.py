@@ -20,7 +20,7 @@ from app.repositories.order_repository import order_repository, OrderRepository
 from app.repositories.catalog_repository import catalog_repository, CatalogRepository
 from app.services.catalog_service import catalog_service, CatalogService
 from app.services.pricing_service import pricing_service, PricingService
-from app.core.exceptions import EntityNotFoundException
+from app.core.exceptions import EntityNotFoundException, IdempotencyConflictException
 
 
 class OrderService:
@@ -48,11 +48,23 @@ class OrderService:
         Crea y persiste un nuevo pedido tras recalcular todos los costos de forma autoritativa.
         Soporta Idempotency-Key para prevenir duplicación por doble clic.
         """
-        # 1. Verificación de Idempotencia
-        if idempotency_key:
+        # La exclusión mutua debe obtenerse antes de la PRIMERA lectura de folios,
+        # idempotencia o stock. El bloqueo transaccional cubre toda la compra.
+        await self.repository.lock_order_creation(session)
+
+        request_hash = hashlib.sha256(payload.model_dump_json().encode("utf-8")).hexdigest()
+        if idempotency_key is not None:
+            idempotency_key = idempotency_key.strip()
+            if not 1 <= len(idempotency_key) <= 128:
+                raise ValueError("Idempotency-Key debe tener entre 1 y 128 caracteres.")
+
             existing_record = await self.repository.get_idempotency_record(session, idempotency_key)
             if existing_record:
-                # Retornar la orden original sin duplicar cobros ni descontar inventario
+                if existing_record.request_hash != request_hash:
+                    raise IdempotencyConflictException(
+                        "Idempotency-Key ya utilizada para un pedido con contenido diferente."
+                    )
+                # La repetición devuelve la respuesta original y no reserva stock.
                 return OrderResponse.model_validate_json(existing_record.response_payload)
 
         verified_items: List[OrderItemResponse] = []
@@ -207,18 +219,19 @@ class OrderService:
         saved_order = await self.repository.create(session, db_order, items=relational_items)
         response_dto = self.to_response_dto(saved_order)
 
-        # 2. Registrar llave de idempotencia si fue suministrada
         if idempotency_key:
-            req_hash = hashlib.sha256(payload.model_dump_json().encode()).hexdigest()
             idemp_record = IdempotencyRecordModel(
                 key=idempotency_key,
-                request_hash=req_hash,
+                request_hash=request_hash,
                 response_payload=response_dto.model_dump_json(),
                 status_code=201,
                 created_at=now
             )
             await self.repository.save_idempotency_record(session, idemp_record)
 
+        # Único punto de confirmación: stock, orden, líneas e idempotencia.
+        # Un fallo previo dispara rollback desde get_db y no genera ventas parciales.
+        await session.commit()
         return response_dto
 
     async def get_by_identifier(

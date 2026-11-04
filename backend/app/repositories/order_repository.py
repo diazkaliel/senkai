@@ -5,7 +5,7 @@ Aísla la construcción de consultas SQL del dominio y la lógica de negocio.
 
 from typing import List, Optional
 from datetime import datetime, timezone
-from sqlalchemy import select, func
+from sqlalchemy import select, func, text
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.db.models import OrderModel, OrderItemModel, IdempotencyRecordModel
@@ -13,6 +13,26 @@ from app.db.models import OrderModel, OrderItemModel, IdempotencyRecordModel
 
 class OrderRepository:
     """Encapsula el acceso a datos para órdenes, ítems e idempotencia."""
+
+    async def lock_order_creation(self, session: AsyncSession) -> None:
+        """
+        Serializa la asignación del folio y la comprobación de idempotencia entre
+        procesos. En SQLite BEGIN IMMEDIATE obtiene el bloqueo de escritura antes
+        de leer el último folio; en PostgreSQL usamos un advisory lock transaccional.
+        """
+        dialect = session.get_bind().dialect.name
+        if dialect == "sqlite":
+            await session.execute(text("BEGIN IMMEDIATE"))
+            return
+
+        if dialect == "postgresql":
+            # Constante fija de 64 bits: un único escritor asigna los folios de SENKAI.
+            # Es un cuello de botella consciente para preservar secuencias sin una
+            # migración DDL prematura. El lock se libera con COMMIT/ROLLBACK.
+            await session.execute(text("SELECT pg_advisory_xact_lock(5999147880601186642)"))
+            return
+
+        raise RuntimeError(f"Motor de base de datos no soportado para ventas concurrentes: {dialect}")
 
     async def get_by_id(self, session: AsyncSession, order_id: str) -> Optional[OrderModel]:
         stmt = select(OrderModel).where(OrderModel.id == order_id)
@@ -88,8 +108,8 @@ class OrderRepository:
             for item in items:
                 item.order_id = order.id
                 session.add(item)
-        await session.commit()
-        await session.refresh(order)
+        # El servicio realiza un solo commit para pedido, stock e idempotencia.
+        await session.flush()
         return order
 
     async def update_status(
@@ -132,7 +152,8 @@ class OrderRepository:
     ) -> IdempotencyRecordModel:
         """Almacena el resultado de una operación idempotente exitosa."""
         session.add(record)
-        await session.commit()
+        # Guardamos en la MISMA transacción que reservó stock y creó el pedido.
+        await session.flush()
         return record
 
 
