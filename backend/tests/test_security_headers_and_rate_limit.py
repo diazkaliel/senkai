@@ -117,3 +117,57 @@ def test_cache_control_headers_for_api_and_static(client):
     assert res_static.status_code == 200
     assert res_static.headers.get("Cache-Control") == "no-cache"
 
+
+
+def test_client_cannot_bypass_order_limiter_with_header(client, monkeypatch):
+    """El control se aplica al endpoint real, con y sin barra final."""
+    monkeypatch.setattr(settings, "RATE_LIMIT_ORDERS_PER_MINUTE", 1)
+    limiter._history.clear()
+    try:
+        first = client.post(
+            f"{settings.API_V1_PREFIX}/orders/",
+            json={"items": []}
+        )
+        assert first.status_code != 429
+
+        blocked = client.post(
+            f"{settings.API_V1_PREFIX}/orders/",
+            json={"items": []},
+            headers={"X-Bypass-Rate-Limit": "true"}
+        )
+        assert blocked.status_code == 429
+
+        # La ruta sin barra final comparte exactamente el mismo cupo.
+        no_slash = client.post(
+            f"{settings.API_V1_PREFIX}/orders",
+            json={"items": []}
+        )
+        assert no_slash.status_code == 429
+    finally:
+        limiter._history.clear()
+
+
+def test_uploaded_svg_is_sandboxed_and_forced_to_download(client):
+    """El SVG vectorial sigue aceptándose, pero no recibe permisos de documento web."""
+    from pathlib import Path
+
+    svg_content = b'<svg xmlns="http://www.w3.org/2000/svg"><script>alert(1)</script></svg>'
+    response = client.post(
+        f"{settings.API_V1_PREFIX}/customizer/upload",
+        files={"file": ("artwork.svg", svg_content, "image/svg+xml")}
+    )
+    assert response.status_code == 201
+    upload_name = response.json()["filename"]
+    static_url = response.json()["url"]
+    local_file = Path(__file__).resolve().parents[2] / "frontend" / "assets" / "uploads" / upload_name
+
+    try:
+        served = client.get(static_url)
+        assert served.status_code == 200
+        assert served.headers["Content-Disposition"] == "attachment"
+        assert "sandbox" in served.headers["Content-Security-Policy"]
+        assert "script-src 'none'" in served.headers["Content-Security-Policy"]
+        assert served.headers["Cache-Control"] == "private, no-store"
+        assert "noindex" in served.headers["X-Robots-Tag"]
+    finally:
+        local_file.unlink(missing_ok=True)

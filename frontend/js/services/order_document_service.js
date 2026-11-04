@@ -1,8 +1,9 @@
-// Servicio de Generación y Descarga de Documentos Oficiales de Taller (Senkai Studio).
-// Genera fichas de trabajo, comprobantes de producción y órdenes oficiales en formato
+// Servicio de GeneraciÃ³n y Descarga de Documentos Oficiales de Taller (Senkai Studio).
+// Genera fichas de trabajo, comprobantes de producciÃ³n y Ã³rdenes oficiales en formato
 // A4 descargables directamente como archivo HTML autosuficiente e imprimibles como PDF.
 
 import { normalizeItemPrints } from './api.js?v=20261022_v2';
+import { escapeHtml } from './html_escape.js';
 
 export function generateOrderHtmlDocument(order) {
   if (!order) return "";
@@ -21,8 +22,8 @@ export function generateOrderHtmlDocument(order) {
 
   const statusLabels = {
     pendiente_pago: "PENDIENTE DE PAGO",
-    cola_impresion_dtf: "1. COLA DE IMPRESIÓN DTF",
-    en_planchado_curado: "2. PLANCHADO / TERMOFIJADO (160°C)",
+    cola_impresion_dtf: "1. COLA DE IMPRESIÃ“N DTF",
+    en_planchado_curado: "2. PLANCHADO / TERMOFIJADO (160Â°C)",
     control_calidad: "3. CONTROL DE CALIDAD",
     listo_despacho: "4. LISTO PARA DESPACHO",
     entregado: "5. COMPLETADO Y ENTREGADO",
@@ -34,15 +35,15 @@ export function generateOrderHtmlDocument(order) {
   const itemsRows = items.map((item, idx) => {
     const prints = normalizeItemPrints(item);
     const printsDesc = prints.length > 0
-      ? prints.map(p => `<strong>${p.view === 'back' ? 'Espalda' : 'Frontal'}</strong> [${p.print_size}] — X:${Math.round(p.offset_x_pct)}% Y:${Math.round(p.offset_y_pct)}% (${p.design_name || 'Arte DTF'})`).join('<br>')
+      ? prints.map(p => `<strong>${p.view === 'back' ? 'Espalda' : 'Frontal'}</strong> [${p.print_size}] â€” X:${Math.round(p.offset_x_pct)}% Y:${Math.round(p.offset_y_pct)}% (${escapeHtml(p.design_name || 'Arte DTF')})`).join('<br>')
       : '<em>Prenda Lisa (Sin estampa)</em>';
 
     return `
       <tr>
         <td style="padding: 10px 12px; border-bottom: 1px solid #e5e5e5; font-family: monospace; font-size: 13px;">${idx + 1}</td>
         <td style="padding: 10px 12px; border-bottom: 1px solid #e5e5e5;">
-          <strong style="font-size: 14px; text-transform: uppercase;">${item.garment_name}</strong><br>
-          <span style="font-size: 12px; color: #555;">Talla: <strong>${item.selected_size}</strong> • Color: <strong>${item.selected_color?.name || 'Negro'}</strong></span>
+          <strong style="font-size: 14px; text-transform: uppercase;">${escapeHtml(item.garment_name)}</strong><br>
+          <span style="font-size: 12px; color: #555;">Talla: <strong>${escapeHtml(item.selected_size)}</strong> â€¢ Color: <strong>${escapeHtml(item.selected_color?.name || 'Negro')}</strong></span>
         </td>
         <td style="padding: 10px 12px; border-bottom: 1px solid #e5e5e5; font-size: 12px;">
           ${printsDesc}
@@ -58,7 +59,7 @@ export function generateOrderHtmlDocument(order) {
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <title>Orden de Producción // ${order.order_number} // Senkai Studio</title>
+  <title>Orden de ProducciÃ³n // ${escapeHtml(order.order_number)} // Senkai Studio</title>
   <style>
     @page {
       size: A4 portrait;
@@ -279,7 +280,7 @@ export function generateOrderHtmlDocument(order) {
 <body>
   <div class="sheet-wrapper">
     <div class="no-print-bar">
-      <span><strong>Senkai Atelier</strong> // Vista de Impresión y Descarga de Orden</span>
+      <span><strong>Senkai Atelier</strong> // Vista de ImpresiÃ³n y Descarga de Orden</span>
       <button class="print-action-btn" onclick="window.print()">GUARDAR COMO PDF / IMPRIMIR</button>
     </div>
 
@@ -287,13 +288,13 @@ export function generateOrderHtmlDocument(order) {
       <tr>
         <td>
           <div class="brand-title">SENKAI // ATELIER TEXTIL</div>
-          <div class="brand-sub">DTF Studio • Confección y Termofijado Industrial • Providencia, Santiago</div>
-          <div style="font-size: 11px; color: #555; margin-top: 6px;">Emisión: ${dateStr}</div>
+          <div class="brand-sub">DTF Studio â€¢ ConfecciÃ³n y Termofijado Industrial â€¢ Providencia, Santiago</div>
+          <div style="font-size: 11px; color: #555; margin-top: 6px;">EmisiÃ³n: ${dateStr}</div>
         </td>
         <td class="order-badge-box">
-          <div class="order-num">${order.order_number}</div>
+          <div class="order-num">${escapeHtml(order.order_number)}</div>
           <div class="order-status">${statusText}</div>
-          ${order.tracking_code ? `<div style="font-size: 11px; font-family: monospace; margin-top: 4px;">Seguimiento: <strong>${order.tracking_code}</strong></div>` : ''}
+          ${order.tracking_code ? `<div style="font-size: 11px; font-family: monospace; margin-top: 4px;">Seguimiento: <strong>${escapeHtml(order.tracking_code)}</strong></div>` : ''}
         </td>
       </tr>
     </table>
@@ -301,12 +302,12 @@ export function generateOrderHtmlDocument(order) {
     <div class="dossier-grid">
       <div class="dossier-col">
         <div class="section-label">Datos del Cliente</div>
-        <div class="client-field"><strong>Nombre:</strong> ${c.full_name || 'Sin especificar'}</div>
-        <div class="client-field"><strong>Email:</strong> ${c.email || '—'}</div>
-        <div class="client-field"><strong>Teléfono:</strong> ${c.phone || '—'}</div>
+        <div class="client-field"><strong>Nombre:</strong> ${escapeHtml(c.full_name || 'Sin especificar')}</div>
+        <div class="client-field"><strong>Email:</strong> ${escapeHtml(c.email || 'â€”')}</div>
+        <div class="client-field"><strong>TelÃ©fono:</strong> ${escapeHtml(c.phone || 'â€”')}</div>
       </div>
       <div class="dossier-col">
-        <div class="section-label">Método de Entrega</div>
+        <div class="section-label">MÃ©todo de Entrega</div>
         <div class="client-field">
           <strong>Modalidad:</strong> 
           <span style="font-weight: bold; background: #eee; padding: 2px 6px; font-size: 11px;">
@@ -314,26 +315,26 @@ export function generateOrderHtmlDocument(order) {
           </span>
         </div>
         ${!isPickup ? `
-          <div class="client-field"><strong>Dirección:</strong> ${c.shipping_address || '—'}</div>
-          <div class="client-field"><strong>Ciudad/Comuna:</strong> ${c.shipping_city || 'Santiago'}</div>
+          <div class="client-field"><strong>DirecciÃ³n:</strong> ${escapeHtml(c.shipping_address || 'â€”')}</div>
+          <div class="client-field"><strong>Ciudad/Comuna:</strong> ${escapeHtml(c.shipping_city || 'Santiago')}</div>
         ` : `
           <div class="client-field" style="color: #666; font-size: 11.5px;">Listo para entrega en taller central una vez completado el control de calidad.</div>
         `}
         ${c.notes ? `
           <div class="client-field" style="margin-top: 6px; padding: 6px; background: #fff8e6; border: 1px solid #ffd591; font-size: 11.5px;">
-            <strong>Nota Cliente:</strong> "${c.notes}"
+            <strong>Nota Cliente:</strong> "${escapeHtml(c.notes)}"
           </div>
         ` : ''}
       </div>
     </div>
 
-    <div class="section-label" style="font-size: 11px; margin-bottom: 8px;">Detalle de Prendas & Especificación DTF</div>
+    <div class="section-label" style="font-size: 11px; margin-bottom: 8px;">Detalle de Prendas & EspecificaciÃ³n DTF</div>
     <table class="items-table">
       <thead>
         <tr>
           <th style="width: 30px;">#</th>
           <th>Prenda / Silueta</th>
-          <th>Especificación de Estampa DTF</th>
+          <th>EspecificaciÃ³n de Estampa DTF</th>
           <th style="width: 50px; text-align: center;">Cant.</th>
           <th style="width: 85px; text-align: right;">Unitario</th>
           <th style="width: 95px; text-align: right;">Subtotal</th>
@@ -364,23 +365,23 @@ export function generateOrderHtmlDocument(order) {
       <div class="thermal-grid">
         <div class="thermal-card">
           <div class="thermal-param">Temperatura</div>
-          <div class="thermal-val">160 °C (320 °F)</div>
+          <div class="thermal-val">160 Â°C (320 Â°F)</div>
         </div>
         <div class="thermal-card">
           <div class="thermal-param">Tiempo Prensa</div>
           <div class="thermal-val">15 Segundos</div>
         </div>
         <div class="thermal-card">
-          <div class="thermal-param">Presión Neumática</div>
+          <div class="thermal-param">PresiÃ³n NeumÃ¡tica</div>
           <div class="thermal-val">4.5 Bares</div>
         </div>
         <div class="thermal-card">
           <div class="thermal-param">Despegue Film</div>
-          <div class="thermal-val">Cold Peel (Frío)</div>
+          <div class="thermal-val">Cold Peel (FrÃ­o)</div>
         </div>
       </div>
       <div style="font-size: 10.5px; color: #555; margin-top: 8px; text-align: center;">
-        * Curado final: aplicar reprensado de 5 segundos con teflón/siliconado tras retirar el film PET para fijación profunda.
+        * Curado final: aplicar reprensado de 5 segundos con teflÃ³n/siliconado tras retirar el film PET para fijaciÃ³n profunda.
       </div>
     </div>
 
@@ -388,11 +389,11 @@ export function generateOrderHtmlDocument(order) {
       <tr>
         <td>
           <div class="sign-line"></div>
-          <strong>Operador RIP / Impresión</strong><br><span style="color: #777; font-size: 9.5px;">Calibración de color</span>
+          <strong>Operador RIP / ImpresiÃ³n</strong><br><span style="color: #777; font-size: 9.5px;">CalibraciÃ³n de color</span>
         </td>
         <td>
           <div class="sign-line"></div>
-          <strong>Prensado Térmico</strong><br><span style="color: #777; font-size: 9.5px;">160°C / 15s</span>
+          <strong>Prensado TÃ©rmico</strong><br><span style="color: #777; font-size: 9.5px;">160Â°C / 15s</span>
         </td>
         <td>
           <div class="sign-line"></div>
@@ -400,20 +401,20 @@ export function generateOrderHtmlDocument(order) {
         </td>
         <td>
           <div class="sign-line"></div>
-          <strong>Empaque & Despacho</strong><br><span style="color: #777; font-size: 9.5px;">Recepción / Courier</span>
+          <strong>Empaque & Despacho</strong><br><span style="color: #777; font-size: 9.5px;">RecepciÃ³n / Courier</span>
         </td>
       </tr>
     </table>
 
     <div class="footer-stamp">
-      Senkai Studio — All-Black Garment Manufacturing — Documento Oficial de Producción
+      Senkai Studio â€” All-Black Garment Manufacturing â€” Documento Oficial de ProducciÃ³n
     </div>
   </div>
 </body>
 </html>`;
 }
 
-// Descarga directa del archivo HTML y apertura instantánea del diálogo de impresión a PDF
+// Descarga directa del archivo HTML y apertura instantÃ¡nea del diÃ¡logo de impresiÃ³n a PDF
 export function downloadOrderDossier(order) {
   if (!order) return;
 
@@ -421,7 +422,7 @@ export function downloadOrderDossier(order) {
   const blob = new Blob([htmlContent], { type: 'text/html;charset=utf-8' });
   const filename = `Orden_${order.order_number || 'SENKAI'}.html`;
 
-  // 1. Descarga del archivo físico directamente al dispositivo
+  // 1. Descarga del archivo fÃ­sico directamente al dispositivo
   const link = document.createElement('a');
   link.href = URL.createObjectURL(blob);
   link.download = filename;

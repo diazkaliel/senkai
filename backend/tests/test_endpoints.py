@@ -350,7 +350,8 @@ def test_multi_print_order_creation_and_recalculation(client):
     assert len(saved["items"][0]["prints"]) == 2
     assert saved["items"][0]["preview_front_summary"] == "A4 (Logotipo Senkai Pecho)"
     assert saved["items"][0]["preview_back_summary"] == "A3 (Ilustración Mecha Unit)"
-    assert saved["customer"]["notes"] == "Centrar estampa frontal 4cm bajo cuello"
+    # La vista pública preserva las especificaciones DTF, pero nunca revela notas privadas.
+    assert "notes" not in saved["customer"]
 
 
 def test_admin_auth_strictly_rejects_missing_token(client):
@@ -619,7 +620,7 @@ def test_public_tracking_masks_pii_and_auth_reveals(client):
     assert "phone" not in customer_pub, "FUGA DE PRIVACIDAD: El teléfono fue expuesto a clientes no autenticados"
     assert "shipping_address" not in customer_pub, "FUGA DE PRIVACIDAD: La dirección exacta fue expuesta públicamente"
     assert customer_pub["shipping_city"] == "Santiago"
-    assert customer_pub["notes"] == "Dejar en conserjería"
+    assert "notes" not in customer_pub, "FUGA DE PRIVACIDAD: Las instrucciones del cliente no son públicas"
 
     # Consulta Autenticada con Token de Taller
     admin_headers = {"X-Workshop-Token": settings.WORKSHOP_SECRET_KEY}

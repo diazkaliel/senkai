@@ -49,10 +49,18 @@ class NotificationService {
 
     const iconName = iconMap[type] || 'info';
 
-    toast.innerHTML = `
-      <span class="material-symbols-outlined" style="font-size: 18px; flex-shrink: 0;">${iconName}</span>
-      <span class="toast-message">${message}</span>
-    `;
+    const iconEl = document.createElement('span');
+    iconEl.className = 'material-symbols-outlined';
+    iconEl.style.fontSize = '18px';
+    iconEl.style.flexShrink = '0';
+    iconEl.textContent = iconName;
+
+    const messageEl = document.createElement('span');
+    messageEl.className = 'toast-message';
+    messageEl.textContent = String(message ?? '');
+
+    // Los avisos incluyen mensajes de errores y clientes: nunca admiten HTML.
+    toast.append(iconEl, messageEl);
 
     container.appendChild(toast);
 
