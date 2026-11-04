@@ -57,7 +57,7 @@ export class CartController {
     this.saveToStorage();
     this.updateUI();
     this.openDrawer();
-    notificationService.success(`Prenda agregada a la orden de trabajo: ${escapeHtml(item.garment_name)}`);
+    notificationService.success(`Prenda agregada a la orden de trabajo: ${item.garment_name}`);
   }
 
   removeItem(index) {
