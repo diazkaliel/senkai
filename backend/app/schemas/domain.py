@@ -215,11 +215,10 @@ class CustomerInfo(BaseModel):
 
 
 class CustomerTrackingInfo(BaseModel):
-    """Información sanitizada del cliente para consulta pública de tracking (cero fuga de PII)."""
+    """Vista pública limitada: las instrucciones de entrega son información privada de taller."""
     full_name: str = Field(..., description="Nombre protegido/enmascarado para privacidad")
     delivery_method: str = Field(..., description="'pickup' o 'shipping'")
     shipping_city: Optional[str] = None
-    notes: Optional[str] = None
 
 
 class OrderCreate(BaseModel):

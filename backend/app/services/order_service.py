@@ -287,8 +287,7 @@ class OrderService:
             customer=CustomerTrackingInfo(
                 full_name=cls._mask_name(o.customer_name),
                 delivery_method=o.delivery_method,
-                shipping_city=o.shipping_city,
-                notes=o.notes
+                shipping_city=o.shipping_city
             ),
             items=o.items,
             total_amount=o.total_amount,
