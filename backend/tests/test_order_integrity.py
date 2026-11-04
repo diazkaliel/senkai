@@ -209,3 +209,37 @@ def test_parallel_retries_with_same_key_create_only_one_order(client):
         assert variant_stock("XL") == 1
     finally:
         set_variant_stock("XL", initial_stock)
+
+
+def test_idempotency_record_failure_rolls_back_order_and_stock(client, monkeypatch):
+    """Ni el pedido ni el descuento sobreviven si falla el último paso transaccional."""
+    from sqlalchemy import func
+
+    from app.db.models import OrderModel
+    from app.services.order_service import order_service
+
+    async def count_orders():
+        async with async_session_factory() as session:
+            return await session.scalar(select(func.count()).select_from(OrderModel))
+
+    async def fail_idempotency_record(session, record):
+        raise ValueError("Fallo simulado guardando la clave de idempotencia")
+
+    original_stock = variant_stock("XL")
+    original_order_count = asyncio.run(count_orders())
+
+    try:
+        set_variant_stock("XL", 2)
+        monkeypatch.setattr(order_service.repository, "save_idempotency_record", fail_idempotency_record)
+
+        failed = client.post(
+            ORDER_URL,
+            json=make_order("Compra con fallo de persistencia"),
+            headers={"Idempotency-Key": str(uuid4())},
+        )
+
+        assert failed.status_code == 400, failed.text
+        assert variant_stock("XL") == 2
+        assert asyncio.run(count_orders()) == original_order_count
+    finally:
+        set_variant_stock("XL", original_stock)
