@@ -13,7 +13,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.schemas.domain import (
     OrderCreate, OrderResponse, OrderItemResponse, OrderProductionStatus,
-    DTFPrintItem, DTFPrintPosition, OrderTrackingResponse, CustomerTrackingInfo
+    DTFPrintItem, DTFPrintPosition, OrderTrackingResponse
 )
 from app.db.models import OrderModel, OrderItemModel, IdempotencyRecordModel
 from app.repositories.order_repository import order_repository, OrderRepository
@@ -73,17 +73,17 @@ class OrderService:
         subtotal_accumulated = 0
 
         # Consultar precios oficiales de vitrina (Lookbook) por si el ítem proviene directamente del catálogo
-        lookbook_prices_by_name: Dict[str, int] = {}
-        lookbook_prices_by_id: Dict[str, int] = {}
+        lookbook_by_name: Dict[str, Any] = {}
+        lookbook_by_id: Dict[str, Any] = {}
         try:
             from app.services.content_service import content_service
             consolidated = await content_service.get_consolidated_content(session)
             if consolidated and consolidated.lookbook and consolidated.lookbook.items:
                 for lb_it in consolidated.lookbook.items:
                     if lb_it.name and lb_it.price:
-                        lookbook_prices_by_name[lb_it.name.strip().lower()] = int(lb_it.price)
+                        lookbook_by_name[lb_it.name.strip().casefold()] = lb_it
                     if lb_it.id and lb_it.price:
-                        lookbook_prices_by_id[lb_it.id.strip().lower()] = int(lb_it.price)
+                        lookbook_by_id[lb_it.id.strip()] = lb_it
         except Exception:
             pass
 
@@ -129,12 +129,20 @@ class OrderService:
             # Si la prenda fue agregada directamente desde el Catálogo Lookbook, usar su precio oficial
             raw_item_name = (item.garment_name or "").strip()
             resolved_garment_name = garment.name
-            lb_price = lookbook_prices_by_name.get(raw_item_name.lower()) or lookbook_prices_by_id.get(item.garment_id.lower())
-            if lb_price is not None:
-                lb_base_price = lb_price
-                size_delta = (size_prices_map[size_key] - garment.base_price) if size_key in size_prices_map else 0
-                effective_garment_price = max(1000, lb_base_price + size_delta)
-                resolved_garment_name = raw_item_name
+            if item.lookbook_item_id:
+                lookbook_entry = lookbook_by_id.get(item.lookbook_item_id)
+                if not lookbook_entry or lookbook_entry.garment_id != garment.id:
+                    raise ValueError("El artículo del Lookbook no corresponde a la prenda seleccionada.")
+            else:
+                # Carritos guardados antes de incorporar IDs: solo se permite un precio
+                # de Lookbook cuando el nombre y la prenda física coinciden.
+                candidate = lookbook_by_name.get(raw_item_name.casefold())
+                lookbook_entry = candidate if candidate and candidate.garment_id == garment.id else None
+
+            if lookbook_entry:
+                size_delta = size_prices_map.get(size_key, garment.base_price) - garment.base_price
+                effective_garment_price = max(1000, int(lookbook_entry.price) + size_delta)
+                resolved_garment_name = lookbook_entry.name
 
             unit_price = effective_garment_price
             item_subtotal = unit_price * item.quantity
@@ -281,33 +289,11 @@ class OrderService:
         )
 
     @staticmethod
-    def _mask_name(name: str) -> str:
-        parts = name.strip().split()
-        if not parts:
-            return "Cliente Senkai"
-        if len(parts) == 1:
-            return parts[0]
-        return f"{parts[0]} {parts[1][0]}."
-
-    @classmethod
-    def to_tracking_dto(cls, o: OrderModel) -> OrderTrackingResponse:
-        """Mapeo a contrato de tracking público sanitizado sin datos de contacto directos."""
-        created_str = o.created_at.isoformat() if isinstance(o.created_at, datetime) else str(o.created_at)
-        updated_str = o.updated_at.isoformat() if isinstance(o.updated_at, datetime) else str(o.updated_at)
+    def to_tracking_dto(o: OrderModel) -> OrderTrackingResponse:
+        """Exponer solo el estado operativo; ni identidad, ni diseños, ni importes."""
         return OrderTrackingResponse(
-            id=o.id,
             order_number=o.order_number,
-            customer=CustomerTrackingInfo(
-                full_name=cls._mask_name(o.customer_name),
-                delivery_method=o.delivery_method,
-                shipping_city=o.shipping_city
-            ),
-            items=o.items,
-            total_amount=o.total_amount,
-            shipping_cost=o.shipping_cost,
             status=OrderProductionStatus(o.status),
-            created_at=created_str,
-            updated_at=updated_str,
             estimated_delivery=o.estimated_delivery,
             tracking_code=o.tracking_code
         )

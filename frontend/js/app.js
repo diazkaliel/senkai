@@ -219,11 +219,11 @@ class SenkaiApp {
     }
     if (trackOrderFromSuccessBtn && successModal) {
       trackOrderFromSuccessBtn.addEventListener('click', () => {
-        const orderCode = document.getElementById('successOrderNumber')?.textContent?.trim();
+        const trackingToken = successModal.dataset.trackingId;
         successModal.classList.remove('open');
         window.location.hash = '#rastreo';
-        if (orderCode && this.orderTracker) {
-          this.orderTracker.trackOrder(orderCode);
+        if (trackingToken && this.orderTracker) {
+          this.orderTracker.trackOrder(trackingToken);
         }
       });
     }
@@ -235,9 +235,10 @@ class SenkaiApp {
     const orderNumEl = document.getElementById('successOrderNumber');
     const orderDetailsEl = document.getElementById('successOrderDetails');
 
-    if (this.orderTracker && order.order_number) {
-      this.orderTracker.saveLastOrderNumber(order.order_number);
+    if (this.orderTracker && order.id && order.order_number) {
+      this.orderTracker.saveLastTrackingToken(order.id, order.order_number);
     }
+    if (modal) modal.dataset.trackingId = order.id || '';
 
     if (orderNumEl) orderNumEl.textContent = order.order_number;
     if (orderDetailsEl) {
@@ -247,6 +248,7 @@ class SenkaiApp {
           <p style="font-size: 0.9rem; color: var(--text-primary); margin-bottom: 0.35rem;"><strong>Modalidad:</strong> ${order.customer.delivery_method === 'pickup' ? 'Retiro en Taller Senkai (Providencia)' : 'Despacho Express a Domicilio'}</p>
           <p style="font-size: 0.9rem; color: var(--text-primary); margin-bottom: 0.35rem;"><strong>Fecha estimada:</strong> ${escapeHtml(order.estimated_delivery)}</p>
           <p style="font-size: 0.9rem; color: var(--accent-primary); margin-top: 0.5rem; font-family: var(--font-mono);"><strong>Estado de Producción:</strong> ${escapeHtml(order.status.toUpperCase())}</p>
+          <p style="font-size: 0.75rem; margin-top: 0.5rem; overflow-wrap: anywhere;"><strong>Código privado de seguimiento (guárdalo):</strong> <code>${escapeHtml(order.id)}</code></p>
         </div>
       `;
     }

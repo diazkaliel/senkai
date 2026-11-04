@@ -1,23 +1,24 @@
-// Módulo público de rastreo de pedidos en tiempo real por número de orden (ej. SNK-2026-0001).
-// Permite al cliente consultar en qué etapa técnica del taller se encuentra su pedido.
+// Seguimiento privado por identificador aleatorio; el folio SNK es solo una referencia visible.
+// Permite al cliente consultar en quÃ© etapa tÃ©cnica del taller se encuentra su pedido.
 
 import { apiService } from '../services/api.js?v=20261022_v2';
 
-const LAST_ORDER_STORAGE_KEY = 'senkai_last_order_number';
+const LAST_TRACKING_STORAGE_KEY = 'senkai_last_tracking_capability_v1';
+const PRIVATE_TRACKING_ID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/;
 
 const PRODUCTION_STAGES = [
   {
     key: 'cola_impresion_dtf',
     code: 'FASE 01',
-    label: 'Cola de Impresión DTF',
-    desc: 'Recepción de orden, procesado RIP a 300 DPI e inyección sobre film técnico.',
+    label: 'Cola de ImpresiÃ³n DTF',
+    desc: 'RecepciÃ³n de orden, procesado RIP a 300 DPI e inyecciÃ³n sobre film tÃ©cnico.',
     icon: 'print'
   },
   {
     key: 'en_planchado_curado',
     code: 'FASE 02',
-    label: 'Planchado & Curado 160°C',
-    desc: 'Transferencia térmica en prensa neumática y control de calidad de costuras.',
+    label: 'Planchado & Curado 160Â°C',
+    desc: 'Transferencia tÃ©rmica en prensa neumÃ¡tica y control de calidad de costuras.',
     icon: 'iron'
   },
   {
@@ -38,17 +39,17 @@ const PRODUCTION_STAGES = [
 
 const STATUS_META = {
   pendiente_pago: {
-    label: 'Pendiente de Validación',
+    label: 'Pendiente de ValidaciÃ³n',
     stageIndex: 0,
     badgeClass: 'status-warning'
   },
   cola_impresion_dtf: {
-    label: 'En Cola de Impresión DTF',
+    label: 'En Cola de ImpresiÃ³n DTF',
     stageIndex: 0,
     badgeClass: 'status-active'
   },
   en_planchado_curado: {
-    label: 'En Planchado y Curado Térmico (160°C)',
+    label: 'En Planchado y Curado TÃ©rmico (160Â°C)',
     stageIndex: 1,
     badgeClass: 'status-active'
   },
@@ -93,37 +94,43 @@ export class OrderTrackerComponent {
       .replace(/'/g, '&#039;');
   }
 
-  saveLastOrderNumber(orderNumber) {
-    if (!orderNumber) return;
+  saveLastTrackingToken(orderId, orderNumber) {
+    const trackingId = String(orderId || '').trim().toLowerCase();
+    if (!PRIVATE_TRACKING_ID_PATTERN.test(trackingId)) return;
     try {
-      localStorage.setItem(LAST_ORDER_STORAGE_KEY, String(orderNumber).trim().toUpperCase());
+      // Solo el UUID aleatorio autoriza el seguimiento. El folio es una etiqueta.
+      localStorage.setItem(LAST_TRACKING_STORAGE_KEY, JSON.stringify({
+        id: trackingId,
+        number: String(orderNumber || '').trim().toUpperCase()
+      }));
       this.render();
       this.attachEvents();
     } catch (_) {}
   }
 
-  getLastOrderNumber() {
+  getLastTrackingOrder() {
     try {
-      return localStorage.getItem(LAST_ORDER_STORAGE_KEY) || '';
+      const stored = JSON.parse(localStorage.getItem(LAST_TRACKING_STORAGE_KEY) || 'null');
+      return stored && PRIVATE_TRACKING_ID_PATTERN.test(stored.id) ? stored : null;
     } catch (_) {
-      return '';
+      return null;
     }
   }
 
   init() {
     if (!this.container) return;
-    const saved = this.getLastOrderNumber();
+    const saved = this.getLastTrackingOrder();
     if (saved && !this.queryValue) {
-      this.queryValue = saved;
+      this.queryValue = saved.id;
     }
     this.render();
     this.attachEvents();
   }
 
   async trackOrder(orderNumberInput) {
-    const cleanCode = String(orderNumberInput || '').trim().toUpperCase();
-    if (!cleanCode) {
-      this.errorMessage = 'Ingresa tu número de orden (por ejemplo: SNK-2026-0001).';
+    const cleanCode = String(orderNumberInput || '').trim().toLowerCase();
+    if (!PRIVATE_TRACKING_ID_PATTERN.test(cleanCode)) {
+      this.errorMessage = 'Ingresa el cÃ³digo privado de seguimiento (UUID) que recibiste al comprar. El folio SNK no autoriza consultas pÃºblicas.';
       this.currentOrder = null;
       this.render();
       this.attachEvents();
@@ -139,10 +146,10 @@ export class OrderTrackerComponent {
     try {
       const order = await apiService.getOrderByNumber(cleanCode);
       this.currentOrder = order;
-      this.saveLastOrderNumber(order.order_number);
+      this.saveLastTrackingToken(cleanCode, order.order_number);
     } catch (err) {
       this.currentOrder = null;
-      this.errorMessage = `No encontramos ningún pedido con el código "${cleanCode}". Verifica que esté bien escrito (ej: SNK-2026-0001).`;
+      this.errorMessage = `No encontramos ningÃºn pedido con el cÃ³digo "${cleanCode}". Verifica que corresponda al cÃ³digo privado de seguimiento.`;
     } finally {
       this.isLoading = false;
       this.render();
@@ -152,7 +159,7 @@ export class OrderTrackerComponent {
 
   render() {
     if (!this.container) return;
-    const recentOrderCode = this.getLastOrderNumber();
+    const recentOrderCode = this.getLastTrackingOrder();
 
     this.container.innerHTML = `
       <div class="order-tracker-card">
@@ -164,9 +171,9 @@ export class OrderTrackerComponent {
                 type="text"
                 id="orderTrackerInput"
                 class="tracker-code-input"
-                placeholder="Ingresa tu N° de Orden (ej: SNK-2026-0001)"
+                placeholder="CÃ³digo privado de seguimiento (UUID)"
                 value="${this.escapeHtml(this.queryValue)}"
-                aria-label="Número de orden para rastrear pedido"
+                aria-label="CÃ³digo privado de seguimiento del pedido"
                 autocomplete="off"
               >
             </div>
@@ -178,9 +185,9 @@ export class OrderTrackerComponent {
 
           ${recentOrderCode ? `
             <div class="tracker-recent-hint">
-              <span>Tu último pedido registrado:</span>
-              <button type="button" class="tracker-quick-code-btn" data-quick-order="${this.escapeHtml(recentOrderCode)}">
-                ${this.escapeHtml(recentOrderCode)} ?
+              <span>Tu Ãºltimo pedido registrado:</span>
+              <button type="button" class="tracker-quick-code-btn" data-quick-order="${this.escapeHtml(recentOrderCode.id)}">
+                ${this.escapeHtml(recentOrderCode.number || 'Pedido reciente')} ?
               </button>
             </div>
           ` : ''}
@@ -196,7 +203,7 @@ export class OrderTrackerComponent {
         ${this.currentOrder ? this.renderOrderStatusResult(this.currentOrder) : `
           <div class="tracker-empty-prompt">
             <span class="material-symbols-outlined tracker-empty-icon">local_shipping</span>
-            <p>Ingresa el código <strong>SNK-2026-XXXX</strong> que recibiste al confirmar tu compra para ver en tiempo real si tu prenda está en impresión DTF, curado térmico o lista para entrega.</p>
+            <p>Ingresa el <strong>cÃ³digo privado de seguimiento</strong> mostrado al confirmar tu compra. Tu folio SNK sigue siendo la referencia de taller, pero no autoriza el acceso pÃºblico.</p>
           </div>
         `}
       </div>
@@ -220,7 +227,7 @@ export class OrderTrackerComponent {
       <div class="tracker-result-panel">
         <div class="tracker-result-header">
           <div class="tracker-order-id-group">
-            <span class="tracker-order-eyebrow">ORDEN DE PRODUCCIÓN VERIFICADA</span>
+            <span class="tracker-order-eyebrow">ORDEN DE PRODUCCIÃ“N VERIFICADA</span>
             <h3 class="tracker-order-number">${this.escapeHtml(order.order_number)}</h3>
           </div>
           <div class="tracker-status-pill ${meta.badgeClass}">
@@ -232,10 +239,10 @@ export class OrderTrackerComponent {
         ${isCancelled ? `
           <div class="tracker-feedback-error" style="margin-bottom: 1.5rem;">
             <span class="material-symbols-outlined">cancel</span>
-            <span>Esta orden se encuentra cancelada. Si tienes dudas, contáctanos por WhatsApp indicando tu código ${this.escapeHtml(order.order_number)}.</span>
+            <span>Esta orden se encuentra cancelada. Si tienes dudas, contÃ¡ctanos por WhatsApp indicando tu cÃ³digo ${this.escapeHtml(order.order_number)}.</span>
           </div>
         ` : `
-          <div class="tracker-pipeline-steps" role="list" aria-label="Etapas de producción del pedido">
+          <div class="tracker-pipeline-steps" role="list" aria-label="Etapas de producciÃ³n del pedido">
             ${PRODUCTION_STAGES.map((stage, idx) => {
               const isCompleted = idx < meta.stageIndex || statusKey === 'entregado';
               const isCurrent = idx === meta.stageIndex && statusKey !== 'entregado';
@@ -259,48 +266,23 @@ export class OrderTrackerComponent {
           </div>
         `}
 
+
         <div class="tracker-details-grid">
           <div class="tracker-meta-box">
-            <span class="tracker-meta-label">INFORMACIÓN DE ENTREGA</span>
+            <span class="tracker-meta-label">INFORMACIÃ“N DE PRODUCCIÃ“N</span>
             <div class="tracker-meta-rows">
               <div class="tracker-meta-row">
-                <span>Cliente:</span>
-                <strong>${this.escapeHtml(order.customer?.full_name || 'Cliente Senkai')}</strong>
-              </div>
-              <div class="tracker-meta-row">
-                <span>Modalidad:</span>
-                <strong>${deliveryLabel}</strong>
-              </div>
-              <div class="tracker-meta-row">
-                <span>Entrega Estimada:</span>
-                <strong>${this.escapeHtml(order.estimated_delivery || '24 a 48 hrs hábiles')}</strong>
+                <span>Entrega estimada:</span>
+                <strong>${this.escapeHtml(order.estimated_delivery || 'Por confirmar')}</strong>
               </div>
               ${order.tracking_code ? `
                 <div class="tracker-meta-row">
-                  <span>Código Courier / Seguimiento:</span>
+                  <span>CÃ³digo courier:</span>
                   <strong class="tracker-courier-code">${this.escapeHtml(order.tracking_code)}</strong>
                 </div>
               ` : ''}
             </div>
-          </div>
-
-          <div class="tracker-meta-box">
-            <span class="tracker-meta-label">PRENDAS EN ESTA ORDEN (${(order.items || []).length})</span>
-            <div class="tracker-items-list">
-              ${(order.items || []).map(item => `
-                <div class="tracker-item-row">
-                  <div class="tracker-item-info">
-                    <strong>${this.escapeHtml(item.garment_name)}</strong>
-                    <small>Talla ${this.escapeHtml(item.selected_size)} • Cant: ${item.quantity}</small>
-                  </div>
-                  <span class="tracker-item-subtotal">$${Number(item.subtotal || 0).toLocaleString('es-CL')} CLP</span>
-                </div>
-              `).join('')}
-              <div class="tracker-total-footer">
-                <span>TOTAL ORDEN</span>
-                <strong>$${Number(order.total_amount || 0).toLocaleString('es-CL')} CLP</strong>
-              </div>
-            </div>
+            <p class="tracker-meta-label">Por privacidad, esta consulta no publica nombres, direcciones, compras ni importes.</p>
           </div>
         </div>
       </div>
