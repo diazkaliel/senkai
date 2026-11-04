@@ -3,6 +3,7 @@
 
 import { apiService } from '../services/api.js?v=20261022_v2';
 import { notificationService } from '../services/notification_service.js?v=20261022_v2';
+import { escapeHtml, safeColorHex } from '../services/html_escape.js';
 
 const CART_STORAGE_KEY = 'senkai_cart_items_v1';
 
@@ -56,7 +57,7 @@ export class CartController {
     this.saveToStorage();
     this.updateUI();
     this.openDrawer();
-    notificationService.success(`Prenda agregada a la orden de trabajo: ${item.garment_name}`);
+    notificationService.success(`Prenda agregada a la orden de trabajo: ${escapeHtml(item.garment_name)}`);
   }
 
   removeItem(index) {
@@ -136,15 +137,15 @@ export class CartController {
     } else {
       this.itemsListEl.innerHTML = this.items.map((item, idx) => `
         <div class="cart-item">
-          <div class="cart-item-preview" style="background: ${item.selected_color.hex_code};">
+          <div class="cart-item-preview" style="background: ${safeColorHex(item.selected_color.hex_code)};">
             <span style="font-size: 0.75rem; color: ${item.selected_color.hex_code === '#F4F4F0' || item.selected_color.hex_code === '#FFFFFF' ? '#000' : '#fff'}; font-weight: 800; font-family: var(--font-mono);">
-              ${item.selected_size}
+              ${escapeHtml(item.selected_size)}
             </span>
           </div>
           <div class="cart-item-details">
-            <div class="cart-item-title">${item.garment_name}</div>
+            <div class="cart-item-title">${escapeHtml(item.garment_name)}</div>
             <div class="cart-item-specs">
-              Color: <strong>${item.selected_color.name}</strong> • Talla: <strong>${item.selected_size}</strong><br>
+              Color: <strong>${escapeHtml(item.selected_color.name)}</strong> • Talla: <strong>${escapeHtml(item.selected_size)}</strong><br>
               ${this.formatItemPrintsSpecs(item)}
             </div>
             <div style="display: flex; justify-content: space-between; align-items: center;">
@@ -180,8 +181,8 @@ export class CartController {
       const back = item.preview_back_summary || 'Cara Lisa';
       return `
         <div style="font-size: 0.775rem; margin-top: 3px; line-height: 1.4;">
-          <span style="color: var(--text-primary); font-weight: 700;">Frente:</span> ${front} &bull; 
-          <span style="color: var(--text-primary); font-weight: 700;">Espalda:</span> ${back}
+          <span style="color: var(--text-primary); font-weight: 700;">Frente:</span> ${escapeHtml(front)} &bull; 
+          <span style="color: var(--text-primary); font-weight: 700;">Espalda:</span> ${escapeHtml(back)}
         </div>
       `;
     }
@@ -192,8 +193,8 @@ export class CartController {
       const back = backPrints.length > 0 ? backPrints.map(p => p.print_size).join(', ') : 'Cara Lisa';
       return `
         <div style="font-size: 0.775rem; margin-top: 3px; line-height: 1.4;">
-          <span style="color: var(--text-primary); font-weight: 700;">Frente:</span> ${front} &bull; 
-          <span style="color: var(--text-primary); font-weight: 700;">Espalda:</span> ${back}
+          <span style="color: var(--text-primary); font-weight: 700;">Frente:</span> ${escapeHtml(front)} &bull; 
+          <span style="color: var(--text-primary); font-weight: 700;">Espalda:</span> ${escapeHtml(back)}
         </div>
       `;
     }
@@ -222,7 +223,7 @@ export class CartController {
         return `
           <div style="display: flex; justify-content: space-between; font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 0.5rem; padding-bottom: 0.5rem; border-bottom: 1px dashed rgba(255,255,255,0.06);">
             <div>
-              <div style="color: var(--text-primary); font-weight: 600;">${i.quantity}x ${i.garment_name} (${i.selected_size}) - ${i.selected_color.name}</div>
+              <div style="color: var(--text-primary); font-weight: 600;">${i.quantity}x ${escapeHtml(i.garment_name)} (${escapeHtml(i.selected_size)}) - ${escapeHtml(i.selected_color.name)}</div>
               <div style="font-size: 0.75rem; color: var(--text-muted); font-family: var(--font-mono);">
                 Frente: [${frontSpec}] &bull; Espalda: [${backSpec}]
               </div>
