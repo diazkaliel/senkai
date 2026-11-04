@@ -73,6 +73,16 @@ class SecurityHeadersMiddleware(BaseHTTPMiddleware):
         response.headers["X-Frame-Options"] = "DENY"
         response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
         response.headers["Permissions-Policy"] = "camera=(), microphone=(), geolocation=()"
+
+        # Los artes vectoriales de clientes no son documentos de la aplicación.
+        # Si se abren directamente, nunca deben heredar permisos para ejecutar scripts.
+        path = request.url.path.lower()
+        if path.startswith("/static/assets/uploads/"):
+            response.headers["X-Robots-Tag"] = "noindex, nofollow, noarchive"
+            response.headers["Cache-Control"] = "private, no-store"
+            if path.endswith((".svg", ".pdf")):
+                response.headers["Content-Security-Policy"] = "sandbox; default-src 'none'; script-src 'none'; object-src 'none'"
+                response.headers["Content-Disposition"] = "attachment"
         return response
 
 
