@@ -110,21 +110,38 @@ def test_duplicate_lines_consume_aggregate_stock(client):
 
 
 def test_failed_multi_variant_order_rolls_back_first_stock_reservation(client):
-    initial_medium = variant_stock("M")
-    initial_large = variant_stock("L")
+    async def read_variant_ids():
+        async with async_session_factory() as session:
+            rows = await session.execute(
+                select(GarmentVariantModel.id, GarmentVariantModel.size).where(
+                    GarmentVariantModel.garment_id == GARMENT_ID,
+                    GarmentVariantModel.color_hex == "#121212",
+                    GarmentVariantModel.size.in_(["M", "L"]),
+                )
+            )
+            return sorted(rows.all())
+
+    # El repositorio ordena las escrituras por ID físico. Elegimos la variante
+    # que se actualizará PRIMERO para demostrar rollback de un UPDATE ya realizado.
+    first_variant, second_variant = asyncio.run(read_variant_ids())
+    first_size = first_variant[1]
+    second_size = second_variant[1]
+    original_first = variant_stock(first_size)
+    original_second = variant_stock(second_size)
+
     try:
-        set_variant_stock("M", 1)
-        set_variant_stock("L", 0)
-        payload = make_order("Rollback entre dos tallas", size="M")
-        payload["items"].append(make_order("Rollback", size="L")["items"][0])
+        set_variant_stock(first_size, 1)
+        set_variant_stock(second_size, 0)
+        payload = make_order("Rollback entre dos tallas", size=first_size)
+        payload["items"].append(make_order("Rollback", size=second_size)["items"][0])
 
         response = client.post(ORDER_URL, json=payload)
         assert response.status_code == 400, response.text
-        assert variant_stock("M") == 1
-        assert variant_stock("L") == 0
+        assert variant_stock(first_size) == 1
+        assert variant_stock(second_size) == 0
     finally:
-        set_variant_stock("M", initial_medium)
-        set_variant_stock("L", initial_large)
+        set_variant_stock(first_size, original_first)
+        set_variant_stock(second_size, original_second)
 
 
 def test_reused_idempotency_key_with_different_payload_is_conflict(client):
