@@ -315,8 +315,13 @@ export class CartController {
       this.onOrderSuccess(createdOrder);
       notificationService.success(`Pedido #${createdOrder.order_number} ingresado con éxito a cola de taller.`);
     } catch (err) {
-      notificationService.error("Hubo un problema al procesar tu pedido. Por favor intenta nuevamente.");
-      console.error(err);
+      if (err.message === "MAINTENANCE_MODE") {
+        // Conservamos el carrito y la clave de idempotencia para reintentar tras la reapertura.
+        notificationService.warning("Estamos realizando mantenimiento. Tu carrito sigue guardado; vuelve a intentarlo más tarde.");
+      } else {
+        notificationService.error("Hubo un problema al procesar tu pedido. Por favor intenta nuevamente.");
+        console.error(err);
+      }
     } finally {
       if (submitBtn) {
         submitBtn.disabled = false;

@@ -96,6 +96,10 @@ export const apiService = {
       headers,
       body: JSON.stringify(orderPayload)
     });
+    if (res.status === 503) {
+      const rejection = await res.json().catch(() => ({}));
+      if (rejection.code === "MAINTENANCE_MODE") throw new Error("MAINTENANCE_MODE");
+    }
     if (!res.ok) throw new Error("Error al procesar el pedido");
     return await res.json();
   },

@@ -17,6 +17,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.core.config import settings
 from app.core.exceptions import EntityNotFoundException, SenkaiDomainException, InvalidStateTransitionException
 from app.core.middleware import CorrelationIdMiddleware, SecurityHeadersMiddleware, CacheControlMiddleware
+from app.core.maintenance import MaintenanceModeMiddleware
 from app.core.rate_limiter import RateLimitMiddleware
 from app.api.v1.router import api_router
 from app.db.session import init_db, async_session_factory, get_db
@@ -44,6 +45,10 @@ app = FastAPI(
 
 # Middleware de compresión de respuestas HTTP (GZip) para alto rendimiento
 app.add_middleware(GZipMiddleware, minimum_size=1000)
+
+# El marcador del volumen bloquea escrituras de API sin reiniciar ni tocar SQLite.
+# Se instala dentro de los middlewares de seguridad, trazabilidad y CORS.
+app.add_middleware(MaintenanceModeMiddleware)
 
 # Middleware de observabilidad y Correlation ID
 app.add_middleware(CorrelationIdMiddleware)
