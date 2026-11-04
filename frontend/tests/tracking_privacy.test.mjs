@@ -2,6 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 
 const store = new Map();
+globalThis.document = { getElementById: () => null };
 globalThis.localStorage = {
   getItem: key => store.get(key) ?? null,
   setItem: (key, value) => store.set(key, value)

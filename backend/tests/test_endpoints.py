@@ -653,7 +653,7 @@ def test_insufficient_stock_rejection(client):
             "garment_id": "garment-polera-heavyweight-240",
             "selected_color": {"name": "Negro", "hex_code": "#121212", "in_stock": True},
             "selected_size": "XL",
-            "quantity": 99999  # Excede los 50 disponibles en seed
+            "quantity": 100  # Sigue dentro del máximo permitido, pero excede el stock (50)
         }]
     }
 
