@@ -5,7 +5,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.schemas.domain import OrderCreate, OrderResponse, OrderTrackingResponse, OrderProductionStatus
 from app.services.order_service import order_service, OrderService
 from app.core.security import require_workshop_auth, is_authenticated_workshop
-from app.core.exceptions import EntityNotFoundException, SenkaiDomainException
+from app.core.exceptions import EntityNotFoundException, SenkaiDomainException, IdempotencyConflictException
 from app.db.session import get_db
 
 router = APIRouter(prefix="/orders", tags=["Pedidos y Checkout"])
@@ -19,6 +19,11 @@ async def create_order(
 ):
     try:
         return await order_service.create_order(session, payload, idempotency_key=idempotency_key)
+    except IdempotencyConflictException as err:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail=str(err)
+        )
     except (EntityNotFoundException, ValueError) as err:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
