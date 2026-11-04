@@ -260,3 +260,11 @@ def test_idempotency_record_failure_rolls_back_order_and_stock(client, monkeypat
         assert asyncio.run(count_orders()) == original_order_count
     finally:
         set_variant_stock("XL", original_stock)
+
+
+def test_empty_checkout_is_rejected_before_persistence(client):
+    payload = make_order("No se admite orden sin prendas")
+    payload["items"] = []
+
+    response = client.post(ORDER_URL, json=payload)
+    assert response.status_code == 422, response.text
