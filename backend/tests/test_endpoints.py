@@ -14,6 +14,16 @@ from app.main import app
 from app.core.config import settings
 from app.db.session import async_session_factory
 from app.db.models import GarmentVariantModel
+from app.core.rate_limiter import limiter
+
+
+@pytest.fixture(autouse=True)
+def isolate_rate_limit_between_endpoint_tests():
+    # La suite recorre más pedidos que la cuota de un usuario real;
+    # limpiar el estado del limitador evita falsos 429 entre tests independientes.
+    limiter._history.clear()
+    yield
+    limiter._history.clear()
 
 
 @pytest.fixture(scope="module")
