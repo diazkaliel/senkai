@@ -1,17 +1,18 @@
-// Ficha Técnica de Confección y Emplazamiento Textil de Senkai Atelier.
-// Muestra el mockup de la prenda en Negro Industrial, el registro anatómico de estampas,
-// los parámetros de termofijado de taller y permite descargar la orden oficial en PDF.
+// Ficha TÃ©cnica de ConfecciÃ³n y Emplazamiento Textil de Senkai Atelier.
+// Muestra el mockup de la prenda en Negro Industrial, el registro anatÃ³mico de estampas,
+// los parÃ¡metros de termofijado de taller y permite descargar la orden oficial en PDF.
 
 import { apiService, normalizeItemPrints } from '../../services/api.js?v=20261022_v2';
 import { SVG_GARMENTS, PRESET_ARTWORKS } from '../svg_templates.js?v=20261022_v2';
 import { downloadOrderDossier } from '../../services/order_document_service.js?v=20261022_v2';
 import { notificationService } from '../../services/notification_service.js?v=20261022_v2';
+import { escapeHtml, safeColorHex, safeArtworkUrl } from '../../services/html_escape.js';
 
 const PRINT_DIMENSIONS = {
-  A6: { width: 90, height: 90, cm: "10 × 10 cm", desc: "Bolsillo" },
-  A5: { width: 130, height: 160, cm: "15 × 20 cm", desc: "Mediano" },
-  A4: { width: 185, height: 230, cm: "20 × 30 cm", desc: "Estándar Pecho" },
-  A3: { width: 245, height: 320, cm: "30 × 40 cm", desc: "Maxi Dorsal" }
+  A6: { width: 90, height: 90, cm: "10 Ã— 10 cm", desc: "Bolsillo" },
+  A5: { width: 130, height: 160, cm: "15 Ã— 20 cm", desc: "Mediano" },
+  A4: { width: 185, height: 230, cm: "20 Ã— 30 cm", desc: "EstÃ¡ndar Pecho" },
+  A3: { width: 245, height: 320, cm: "30 Ã— 40 cm", desc: "Maxi Dorsal" }
 };
 
 export class MockupModalComponent {
@@ -45,8 +46,9 @@ export class MockupModalComponent {
   }
 
   getArtworkMarkup(print) {
-    if (print.design_image_url) {
-      return `<img src="${print.design_image_url}" alt="${print.design_name || 'Arte DTF'}">`;
+    const artworkUrl = safeArtworkUrl(print.design_image_url);
+    if (artworkUrl) {
+      return `<img src="${escapeHtml(artworkUrl)}" alt="${escapeHtml(print.design_name || 'Arte DTF')}">`;
     }
     const matched = PRESET_ARTWORKS.find(a => a.name === print.design_name || a.id === print.design_name);
     if (matched) return matched.svgContent;
@@ -86,19 +88,19 @@ export class MockupModalComponent {
     const garmentType = this.getGarmentTemplateKey(currentItem.garment_name || currentItem.garment_id);
 
     const templateFn = SVG_GARMENTS[`${garmentType}_${this.activeView}`] || SVG_GARMENTS.tshirt_front;
-    const garmentSvg = templateFn(currentItem.selected_color.hex_code);
+    const garmentSvg = templateFn(safeColorHex(currentItem.selected_color.hex_code));
     const printsForCurrentView = prints.filter(p => p.view === this.activeView);
 
     this.cardEl.innerHTML = `
       <div class="mockup-modal-top">
         <div>
-          <span class="badge badge-admin" style="margin-bottom: 0.35rem;">ORDEN ${order.order_number} // FICHA TÉCNICA DE PRODUCCIÓN</span>
-          <h2>Especificación de Confección & Estampado</h2>
+          <span class="badge badge-admin" style="margin-bottom: 0.35rem;">ORDEN ${escapeHtml(order.order_number)} // FICHA TÃ‰CNICA DE PRODUCCIÃ“N</span>
+          <h2>EspecificaciÃ³n de ConfecciÃ³n & Estampado</h2>
           <div style="font-size: 0.8rem; font-family: var(--font-mono); color: var(--text-muted); margin-top: 0.35rem;">
-            Cliente: <strong>${order.customer.full_name}</strong> • ${order.customer.email} • 
+            Cliente: <strong>${escapeHtml(order.customer.full_name)}</strong> â€¢ ${escapeHtml(order.customer.email)} â€¢ 
             ${order.customer.delivery_method === 'pickup' 
               ? '<span style="color: #6ee7b7;">Retiro en Taller Providencia</span>' 
-              : `<span style="color: #93c5fd;">Despacho a ${order.customer.shipping_city || 'Santiago'}</span>`}
+              : `<span style="color: #93c5fd;">Despacho a ${escapeHtml(order.customer.shipping_city || 'Santiago')}</span>`}
           </div>
         </div>
         <div style="display: flex; gap: 0.5rem; align-items: center;">
@@ -111,7 +113,7 @@ export class MockupModalComponent {
       </div>
 
       <div class="mockup-modal-grid">
-        <!-- COLUMNA IZQUIERDA: VISUALIZADOR ANATÓMICO DE LA PRENDA -->
+        <!-- COLUMNA IZQUIERDA: VISUALIZADOR ANATÃ“MICO DE LA PRENDA -->
         <div class="mockup-stage-box">
           <div class="mockup-stage-controls">
             <!-- Conmutador Cara Frontal / Cara Trasera -->
@@ -124,18 +126,18 @@ export class MockupModalComponent {
               </button>
             </div>
 
-            <!-- Selector de Ítems en órdenes combinadas -->
+            <!-- Selector de Ãtems en Ã³rdenes combinadas -->
             ${order.items.length > 1 ? `
               <select class="mockup-item-selector" id="mockupItemSelect">
                 ${order.items.map((item, idx) => `
                   <option value="${idx}" ${idx === this.activeItemIndex ? 'selected' : ''}>
-                    Prenda ${idx + 1}: ${item.garment_name} (${item.selected_size})
+                    Prenda ${idx + 1}: ${escapeHtml(item.garment_name)} (${escapeHtml(item.selected_size)})
                   </option>
                 `).join('')}
               </select>
             ` : `
               <span style="font-size: 0.75rem; font-family: var(--font-mono); color: var(--text-muted);">
-                Talla: <strong style="color: var(--text-primary);">${currentItem.selected_size}</strong> • Negro Industrial
+                Talla: <strong style="color: var(--text-primary);">${escapeHtml(currentItem.selected_size)}</strong> â€¢ Negro Industrial
               </span>
             `}
           </div>
@@ -144,7 +146,7 @@ export class MockupModalComponent {
           <div class="mockup-stage-viewport">
             ${garmentSvg}
 
-            <!-- Límite visual de prensado térmico -->
+            <!-- LÃ­mite visual de prensado tÃ©rmico -->
             <div class="safe-print-boundary" style="pointer-events: none;"></div>
 
             ${printsForCurrentView.length === 0 ? `
@@ -157,7 +159,7 @@ export class MockupModalComponent {
                 <div class="mockup-print-overlay" 
                      style="left: ${p.offset_x_pct}%; top: ${p.offset_y_pct}%; width: ${dim.width}px; height: ${dim.height}px; transform: translate(-50%, -50%) scale(${p.scale_factor});">
                   <div class="mockup-print-badge">
-                    ${p.view === 'back' ? 'ESPALDA' : 'FRENTE'} • ${p.print_size} (${dim.cm}) • ${Math.round(p.scale_factor * 100)}%
+                    ${p.view === 'back' ? 'ESPALDA' : 'FRENTE'} â€¢ ${p.print_size} (${dim.cm}) â€¢ ${Math.round(p.scale_factor * 100)}%
                   </div>
                   <div class="mockup-print-art">
                     ${this.getArtworkMarkup(p)}
@@ -168,11 +170,11 @@ export class MockupModalComponent {
           </div>
 
           <div style="margin-top: 0.85rem; font-size: 0.725rem; font-family: var(--font-mono); color: var(--text-muted); text-align: center;">
-            <span class="material-symbols-outlined" style="font-size: 14px; vertical-align: middle;">straighten</span> Emplazamiento visual calibrado al eje anatómico del film DTF.
+            <span class="material-symbols-outlined" style="font-size: 14px; vertical-align: middle;">straighten</span> Emplazamiento visual calibrado al eje anatÃ³mico del film DTF.
           </div>
         </div>
 
-        <!-- COLUMNA DERECHA: ESPECIFICACIONES TÉCNICAS DE TALLER -->
+        <!-- COLUMNA DERECHA: ESPECIFICACIONES TÃ‰CNICAS DE TALLER -->
         <div class="mockup-specs-box">
           <div class="mockup-spec-card">
             <div class="mockup-spec-card-title">
@@ -180,15 +182,15 @@ export class MockupModalComponent {
               Prenda Base & Patronaje
             </div>
             <div class="mockup-garment-summary">
-              <div class="mockup-color-chip" style="background: ${currentItem.selected_color?.hex_code || '#121212'};" title="${currentItem.selected_color?.name || 'Negro'}"></div>
+              <div class="mockup-color-chip" style="background: ${safeColorHex(currentItem.selected_color?.hex_code)};" title="${escapeHtml(currentItem.selected_color?.name || 'Negro')}"></div>
               <div>
-                <strong style="font-size: 0.95rem; color: var(--text-primary);">${currentItem.garment_name}</strong><br>
+                <strong style="font-size: 0.95rem; color: var(--text-primary);">${escapeHtml(currentItem.garment_name)}</strong><br>
                 <span style="font-size: 0.8rem; font-family: var(--font-mono); color: var(--text-muted);">
-                  Color: <strong>${currentItem.selected_color?.name || 'Negro Industrial'}</strong> • Talla: <strong>${currentItem.selected_size}</strong> • Cantidad: <strong>${currentItem.quantity} un.</strong>
+                  Color: <strong>${escapeHtml(currentItem.selected_color?.name || 'Negro Industrial')}</strong> â€¢ Talla: <strong>${escapeHtml(currentItem.selected_size)}</strong> â€¢ Cantidad: <strong>${currentItem.quantity} un.</strong>
                 </span>
                 ${currentItem.preview_front_summary || currentItem.preview_back_summary ? `
                   <div style="font-size: 0.75rem; font-family: var(--font-mono); color: var(--text-secondary); margin-top: 0.35rem;">
-                    Frente: <strong style="color: var(--text-primary);">${currentItem.preview_front_summary || 'Cara Lisa'}</strong> • Espalda: <strong style="color: var(--text-primary);">${currentItem.preview_back_summary || 'Cara Lisa'}</strong>
+                    Frente: <strong style="color: var(--text-primary);">${escapeHtml(currentItem.preview_front_summary || 'Cara Lisa')}</strong> â€¢ Espalda: <strong style="color: var(--text-primary);">${escapeHtml(currentItem.preview_back_summary || 'Cara Lisa')}</strong>
                   </div>
                 ` : ''}
               </div>
@@ -209,8 +211,8 @@ export class MockupModalComponent {
                   <tr>
                     <th>Cara</th>
                     <th>Formato</th>
-                    <th>Posición (X, Y)</th>
-                    <th>Diseño</th>
+                    <th>PosiciÃ³n (X, Y)</th>
+                    <th>DiseÃ±o</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -222,9 +224,9 @@ export class MockupModalComponent {
                         <td><strong>${p.print_size}</strong><br><small style="color: var(--text-muted);">${dim.cm}</small></td>
                         <td>X: <strong>${Math.round(p.offset_x_pct)}%</strong><br>Y: <strong>${Math.round(p.offset_y_pct)}%</strong></td>
                         <td>
-                          <strong>${p.design_name || `Estampa #${idx + 1}`}</strong>
-                          ${p.design_image_url ? `
-                            <br><a href="${p.design_image_url}" download="senkai_art_${order.order_number}_${p.print_size}.png" target="_blank" style="display: inline-flex; align-items: center; gap: 4px; font-size: 0.7rem; font-family: var(--font-mono); color: var(--text-primary); text-decoration: underline; margin-top: 4px;">
+                          <strong>${escapeHtml(p.design_name || `Estampa #${idx + 1}`)}</strong>
+                          ${safeArtworkUrl(p.design_image_url) ? `
+                            <br><a href="${escapeHtml(safeArtworkUrl(p.design_image_url))}" download="senkai_art_${escapeHtml(order.order_number)}_${p.print_size}.png" target="_blank" style="display: inline-flex; align-items: center; gap: 4px; font-size: 0.7rem; font-family: var(--font-mono); color: var(--text-primary); text-decoration: underline; margin-top: 4px;">
                               <span class="material-symbols-outlined" style="font-size: 14px; vertical-align: middle;">download</span> Descargar Arte RIP
                             </a>
                           ` : ''}
@@ -240,24 +242,24 @@ export class MockupModalComponent {
           <div class="mockup-spec-card">
             <div class="mockup-spec-card-title">
               <span class="material-symbols-outlined" style="font-size: 18px;">local_fire_department</span>
-              Parámetros de Termofijado de Taller
+              ParÃ¡metros de Termofijado de Taller
             </div>
             <div class="mockup-thermal-grid">
               <div class="mockup-thermal-item">
                 <div class="param-label">Temperatura Prensa</div>
-                <div class="param-value">160 °C (320 °F)</div>
+                <div class="param-value">160 Â°C (320 Â°F)</div>
               </div>
               <div class="mockup-thermal-item">
                 <div class="param-label">Tiempo Prensado</div>
                 <div class="param-value">15 Segundos</div>
               </div>
               <div class="mockup-thermal-item">
-                <div class="param-label">Presión Neumática</div>
+                <div class="param-label">PresiÃ³n NeumÃ¡tica</div>
                 <div class="param-value">4.5 Bares (Media)</div>
               </div>
               <div class="mockup-thermal-item">
                 <div class="param-label">Despegue Film</div>
-                <div class="param-value" style="color: #6ee7b7;">Cold Peel (Frío)</div>
+                <div class="param-value" style="color: #6ee7b7;">Cold Peel (FrÃ­o)</div>
               </div>
             </div>
             <p style="font-size: 0.725rem; font-family: var(--font-mono); color: var(--text-muted); margin-top: 0.75rem;">
@@ -272,7 +274,7 @@ export class MockupModalComponent {
                 Nota Especial del Cliente
               </div>
               <p style="font-size: 0.85rem; color: var(--text-primary); font-style: italic;">
-                "${order.customer.notes}"
+                "${escapeHtml(order.customer.notes)}"
               </p>
             </div>
           ` : ''}
@@ -333,7 +335,7 @@ export class MockupModalComponent {
         approveBtn.textContent = "Actualizando...";
         try {
           await apiService.updateOrderStatus(this.activeOrder.id, "en_planchado_curado");
-          notificationService.success("Pedido avanzado a Planchado / Curado (160°C).");
+          notificationService.success("Pedido avanzado a Planchado / Curado (160Â°C).");
           this.close();
           this.onStatusChanged();
         } catch (err) {
