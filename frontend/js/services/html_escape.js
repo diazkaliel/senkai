@@ -14,3 +14,11 @@ export function safeColorHex(rawHex) {
     ? rawHex
     : "#121212";
 }
+
+export function safeArtworkUrl(untrustedUrl) {
+  if (typeof untrustedUrl !== "string") return "";
+  // Solo artes internos: se descartan esquemas ejecutables, URLs externas y atributos malformados.
+  return /^\/static\/assets\/[a-zA-Z0-9_./-]+$/.test(untrustedUrl) && !untrustedUrl.includes("..")
+    ? untrustedUrl
+    : "";
+}
