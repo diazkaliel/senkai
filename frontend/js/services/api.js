@@ -1,29 +1,24 @@
-// Cliente API para comunicar el frontend con el backend FastAPI (/api/v1).
-// Guardo el token de taller en sessionStorage y localStorage para que persista al refrescar.
-
+// Cliente API para comunicar el frontend con FastAPI (/api/v1).
+// El token se mantiene en memoria: no se escribe en storage persistente accesible por otros scripts.
 const API_BASE = "/api/v1";
 
-let workshopToken = sessionStorage.getItem("senkai_workshop_token") || 
-                    localStorage.getItem("senkai_workshop_token") || "";
+let workshopToken = "";
+
+// Retiramos credenciales heredadas de versiones anteriores del frontend.
+// No se leen: cualquier token retenido en el navegador debe invalidarse al recargar.
+try {
+  localStorage.removeItem("senkai_workshop_token");
+  sessionStorage.removeItem("senkai_workshop_token");
+} catch {
+  // El bloqueo de Storage no debe impedir abrir la tienda pública.
+}
 
 export const apiService = {
-  // Autenticación y credenciales de taller
   setWorkshopToken(token) {
-    workshopToken = token ? token.trim() : "";
-    if (workshopToken) {
-      sessionStorage.setItem("senkai_workshop_token", workshopToken);
-      localStorage.setItem("senkai_workshop_token", workshopToken);
-    } else {
-      sessionStorage.removeItem("senkai_workshop_token");
-      localStorage.removeItem("senkai_workshop_token");
-    }
+    workshopToken = typeof token === "string" ? token.trim() : "";
   },
 
   getWorkshopToken() {
-    if (!workshopToken) {
-      workshopToken = sessionStorage.getItem("senkai_workshop_token") || 
-                      localStorage.getItem("senkai_workshop_token") || "";
-    }
     return workshopToken;
   },
 
@@ -92,12 +87,19 @@ export const apiService = {
   },
 
   // Pedidos
-  async createOrder(orderPayload) {
+  async createOrder(orderPayload, idempotencyKey = null) {
+    const headers = { "Content-Type": "application/json" };
+    if (idempotencyKey) headers["Idempotency-Key"] = idempotencyKey;
+
     const res = await fetch(`${API_BASE}/orders/`, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers,
       body: JSON.stringify(orderPayload)
     });
+    if (res.status === 503) {
+      const rejection = await res.json().catch(() => ({}));
+      if (rejection.code === "MAINTENANCE_MODE") throw new Error("MAINTENANCE_MODE");
+    }
     if (!res.ok) throw new Error("Error al procesar el pedido");
     return await res.json();
   },

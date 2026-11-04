@@ -638,6 +638,7 @@ export function buildCatalogCartItem(item, garment) {
   return {
     garment_id: gId,
     garment_name: item.name || garment?.name || "Prenda Catálogo",
+    lookbook_item_id: item.id || null,
     selected_color: selectedColor,
     selected_size: selectedSize,
     preview_front_summary: frontSummary,

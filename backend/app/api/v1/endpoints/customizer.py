@@ -45,9 +45,14 @@ async def upload_customizer_design(
         )
 
     safe_name = f"dtf_{uuid.uuid4().hex[:14]}{ext}"
-    uploads_dir = os.path.abspath(
-        os.path.join(os.path.dirname(__file__), "..", "..", "..", "..", "..", "frontend", "assets", "uploads")
-    )
+    # En Fly.io los archivos deben ir al volumen persistente que expone main.py.
+    # En desarrollo conservamos la ubicación local para no alterar los flujos existentes.
+    if os.path.isdir("/app/storage"):
+        uploads_dir = "/app/storage/uploads"
+    else:
+        uploads_dir = os.path.abspath(
+            os.path.join(os.path.dirname(__file__), "..", "..", "..", "..", "..", "frontend", "assets", "uploads")
+        )
     os.makedirs(uploads_dir, exist_ok=True)
     destination_path = os.path.join(uploads_dir, safe_name)
 
