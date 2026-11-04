@@ -4,6 +4,15 @@ const API_BASE = "/api/v1";
 
 let workshopToken = "";
 
+// Retiramos credenciales heredadas de versiones anteriores del frontend.
+// No se leen: cualquier token retenido en el navegador debe invalidarse al recargar.
+try {
+  localStorage.removeItem("senkai_workshop_token");
+  sessionStorage.removeItem("senkai_workshop_token");
+} catch {
+  // El bloqueo de Storage no debe impedir abrir la tienda pública.
+}
+
 export const apiService = {
   setWorkshopToken(token) {
     workshopToken = typeof token === "string" ? token.trim() : "";
