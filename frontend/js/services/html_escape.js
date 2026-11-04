@@ -22,3 +22,18 @@ export function safeArtworkUrl(untrustedUrl) {
     ? untrustedUrl
     : "";
 }
+
+export function safeNavigationHref(untrustedHref) {
+  if (typeof untrustedHref !== "string") return "#personalizador";
+  const destination = untrustedHref.trim();
+  if (/^#[a-zA-Z0-9_-]+$/.test(destination)) return destination;
+  if (/^\/(?!\/)[a-zA-Z0-9_/?#&=%.-]*$/.test(destination)) return destination;
+
+  try {
+    const parsed = new URL(destination);
+    if (parsed.protocol === "https:" || parsed.protocol === "http:") return parsed.href;
+  } catch {
+    // Evitamos que esquemas como javascript: o data: alcancen atributos de navegación.
+  }
+  return "#personalizador";
+}
