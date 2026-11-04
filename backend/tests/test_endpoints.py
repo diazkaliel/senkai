@@ -350,7 +350,8 @@ def test_multi_print_order_creation_and_recalculation(client):
     assert len(saved["items"][0]["prints"]) == 2
     assert saved["items"][0]["preview_front_summary"] == "A4 (Logotipo Senkai Pecho)"
     assert saved["items"][0]["preview_back_summary"] == "A3 (Ilustración Mecha Unit)"
-    assert saved["customer"]["notes"] == "Centrar estampa frontal 4cm bajo cuello"
+    # La vista pública preserva las especificaciones DTF, pero nunca revela notas privadas.
+    assert "notes" not in saved["customer"]
 
 
 def test_admin_auth_strictly_rejects_missing_token(client):
