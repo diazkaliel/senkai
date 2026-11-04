@@ -1,19 +1,20 @@
-// Centro de Gestión de Pedidos y Operaciones de Taller (Senkai Studio).
-// Provee una vista de tabla operativa maestra con búsqueda en tiempo real, filtros por estado,
-// transiciones de máquina de estados seguras, descarga de órdenes en PDF y acceso a fichas técnicas.
+// Centro de GestiÃ³n de Pedidos y Operaciones de Taller (Senkai Studio).
+// Provee una vista de tabla operativa maestra con bÃºsqueda en tiempo real, filtros por estado,
+// transiciones de mÃ¡quina de estados seguras, descarga de Ã³rdenes en PDF y acceso a fichas tÃ©cnicas.
 
 import { apiService, normalizeItemPrints } from '../../services/api.js?v=20261022_v2';
 import { downloadOrderDossier } from '../../services/order_document_service.js?v=20261022_v2';
 import { notificationService } from '../../services/notification_service.js?v=20261022_v2';
+import { escapeHtml } from '../../services/html_escape.js';
 
-// Mapeo exhaustivo de transiciones legales autorizadas por la máquina de estados del backend
+// Mapeo exhaustivo de transiciones legales autorizadas por la mÃ¡quina de estados del backend
 const STATE_TRANSITIONS = {
   pendiente_pago: [
-    { next: "cola_impresion_dtf", label: "Aprobar Pago e Iniciar Impresión", icon: "print" },
+    { next: "cola_impresion_dtf", label: "Aprobar Pago e Iniciar ImpresiÃ³n", icon: "print" },
     { next: "cancelado", label: "Cancelar Pedido", icon: "cancel" }
   ],
   cola_impresion_dtf: [
-    { next: "en_planchado_curado", label: "A Planchado (160°C)", icon: "local_fire_department" },
+    { next: "en_planchado_curado", label: "A Planchado (160Â°C)", icon: "local_fire_department" },
     { next: "cancelado", label: "Cancelar Pedido", icon: "cancel" }
   ],
   en_planchado_curado: [
@@ -36,8 +37,8 @@ const STATE_TRANSITIONS = {
 
 const STATUS_METADATA = {
   pendiente_pago: { label: "Pendiente de Pago", badge: "badge-amber" },
-  cola_impresion_dtf: { label: "1. Impresión DTF", badge: "badge-cyan" },
-  en_planchado_curado: { label: "2. Planchado (160°C)", badge: "badge-crimson" },
+  cola_impresion_dtf: { label: "1. ImpresiÃ³n DTF", badge: "badge-cyan" },
+  en_planchado_curado: { label: "2. Planchado (160Â°C)", badge: "badge-crimson" },
   control_calidad: { label: "3. Control Calidad", badge: "badge-lime" },
   listo_despacho: { label: "4. Listo Despacho", badge: "badge-cyan" },
   entregado: { label: "5. Entregado", badge: "" },
@@ -52,11 +53,11 @@ export class KanbanBoardComponent {
     this.onOrderUpdated = options.onOrderUpdated || (() => {});
     this.onOpenMockup = options.onOpenMockup || (() => {});
 
-    // Estado reactivo de visualización: "table" (predeterminado) o "cards"
+    // Estado reactivo de visualizaciÃ³n: "table" (predeterminado) o "cards"
     this.viewMode = "table"; 
     this.searchQuery = "";
     this.fulfillmentFilter = "all"; // "all" | "pickup" | "shipping"
-    this.phaseFilter = "all"; // "all" | estado específico
+    this.phaseFilter = "all"; // "all" | estado especÃ­fico
   }
 
   updateData(orders, metrics) {
@@ -128,14 +129,14 @@ export class KanbanBoardComponent {
       <!-- Tarjetas KPI de resumen ejecutivo -->
       <div class="admin-kpi-grid">
         <div class="kpi-card">
-          <div class="kpi-label">Cola de Impresión DTF</div>
+          <div class="kpi-label">Cola de ImpresiÃ³n DTF</div>
           <div class="kpi-value">${m.pending_print_count}</div>
           <div class="kpi-sub">Listos para software RIP</div>
         </div>
         <div class="kpi-card crimson">
-          <div class="kpi-label">En Plancha Térmica</div>
+          <div class="kpi-label">En Plancha TÃ©rmica</div>
           <div class="kpi-value">${m.heat_pressing_count}</div>
-          <div class="kpi-sub">Termofijado a 160°C / 15s</div>
+          <div class="kpi-sub">Termofijado a 160Â°C / 15s</div>
         </div>
         <div class="kpi-card lime">
           <div class="kpi-label">Metros Film Consumidos</div>
@@ -143,17 +144,17 @@ export class KanbanBoardComponent {
           <div class="kpi-sub">Bobina industrial 60 cm</div>
         </div>
         <div class="kpi-card amber">
-          <div class="kpi-label">Facturación Acumulada</div>
+          <div class="kpi-label">FacturaciÃ³n Acumulada</div>
           <div class="kpi-value">$${m.total_revenue_clp.toLocaleString('es-CL')}</div>
           <div class="kpi-sub">CLP en pedidos confirmados</div>
         </div>
       </div>
 
-      <!-- Barra de herramientas: Búsqueda, Filtros y Selector de Vistas -->
+      <!-- Barra de herramientas: BÃºsqueda, Filtros y Selector de Vistas -->
       <div class="kanban-board-wrap">
         <div class="kanban-header-bar">
           <h3 class="kanban-section-title">
-            <span>Gestión de Pedidos & Fabricación</span>
+            <span>GestiÃ³n de Pedidos & FabricaciÃ³n</span>
             <span class="badge badge-admin">${this.orders.length} PEDIDOS</span>
           </h3>
 
@@ -188,11 +189,11 @@ export class KanbanBoardComponent {
               type="text" 
               id="kanbanSearchInput" 
               class="kanban-search-input" 
-              placeholder="Buscar por código (SNK-...), cliente, correo o prenda..." 
-              value="${this.searchQuery || ''}"
+              placeholder="Buscar por cÃ³digo (SNK-...), cliente, correo o prenda..." 
+              value="${escapeHtml(this.searchQuery || '')}"
             />
             ${this.searchQuery ? `
-              <button type="button" id="clearKanbanSearchBtn" class="kanban-clear-btn" title="Limpiar búsqueda">?</button>
+              <button type="button" id="clearKanbanSearchBtn" class="kanban-clear-btn" title="Limpiar bÃºsqueda">?</button>
             ` : ''}
           </div>
 
@@ -215,7 +216,7 @@ export class KanbanBoardComponent {
             Todas <span class="phase-count">${totalOrdersCount}</span>
           </button>
           <button type="button" class="kanban-phase-pill ${this.phaseFilter === 'cola_impresion_dtf' ? 'active' : ''}" data-phase="cola_impresion_dtf">
-            1. Impresión <span class="phase-count">${countByPhase.cola_impresion_dtf}</span>
+            1. ImpresiÃ³n <span class="phase-count">${countByPhase.cola_impresion_dtf}</span>
           </button>
           <button type="button" class="kanban-phase-pill ${this.phaseFilter === 'en_planchado_curado' ? 'active' : ''}" data-phase="en_planchado_curado">
             2. Planchado <span class="phase-count">${countByPhase.en_planchado_curado}</span>
@@ -236,7 +237,7 @@ export class KanbanBoardComponent {
           <div class="kanban-empty-filter-state">
             <span class="material-symbols-outlined" style="font-size: 2.5rem; color: var(--text-muted); display: block; margin-bottom: 0.5rem;">search_off</span>
             <h4 style="font-size: 1.1rem; color: var(--text-primary); text-transform: uppercase;">Sin resultados</h4>
-            <p style="font-size: 0.85rem; color: var(--text-secondary); margin: 0.25rem 0 1rem;">No hay pedidos que coincidan con la búsqueda o filtro aplicado.</p>
+            <p style="font-size: 0.85rem; color: var(--text-secondary); margin: 0.25rem 0 1rem;">No hay pedidos que coincidan con la bÃºsqueda o filtro aplicado.</p>
             <button type="button" class="btn btn-secondary" id="resetKanbanFilterBtn" style="padding: 0.5rem 1.25rem; font-size: 0.8rem;">
               Limpiar Filtros
             </button>
@@ -256,9 +257,9 @@ export class KanbanBoardComponent {
           <table class="orders-master-table">
             <thead>
               <tr>
-                <th>N° Orden</th>
+                <th>NÂ° Orden</th>
                 <th>Cliente & Entrega</th>
-                <th>Prendas & Especificación DTF</th>
+                <th>Prendas & EspecificaciÃ³n DTF</th>
                 <th>Total</th>
                 <th>Fase Operativa</th>
                 <th style="text-align: right;">Acciones</th>
@@ -283,7 +284,7 @@ export class KanbanBoardComponent {
       month: 'short',
       hour: '2-digit',
       minute: '2-digit'
-    }) : '—';
+    }) : 'Â—';
 
     const currentStatusMeta = STATUS_METADATA[order.status] || { label: order.status, badge: '' };
     const transitions = STATE_TRANSITIONS[order.status] || [];
@@ -296,26 +297,26 @@ export class KanbanBoardComponent {
         : 'Lisa';
       return `
         <div class="order-item-inline-chip">
-          <strong>${i.quantity}x</strong> ${i.garment_name} (${i.selected_size}) 
-          <span class="order-print-inline-desc">${printTag}</span>
+          <strong>${i.quantity}x</strong> ${escapeHtml(i.garment_name)} (${escapeHtml(i.selected_size)}) 
+          <span class="order-print-inline-desc">${escapeHtml(printTag)}</span>
         </div>
       `;
     }).join('');
 
     return `
-      <tr data-order-id="${order.id}">
+      <tr data-order-id="${escapeHtml(order.id)}">
         <td>
-          <div class="order-num-link">${order.order_number}</div>
-          <div class="order-date-sub">${dateFormatted} • ${timeAgo.text}</div>
+          <div class="order-num-link">${escapeHtml(order.order_number)}</div>
+          <div class="order-date-sub">${dateFormatted} Â• ${timeAgo.text}</div>
         </td>
         <td>
-          <div class="order-customer-main">${c.full_name || 'Sin especificar'}</div>
-          <div class="order-customer-sub">${c.email || '—'}</div>
+          <div class="order-customer-main">${escapeHtml(c.full_name || 'Sin especificar')}</div>
+          <div class="order-customer-sub">${escapeHtml(c.email || 'Â—')}</div>
           <div class="order-delivery-tag ${isPickup ? 'pickup' : 'shipping'}">
             <span class="material-symbols-outlined" style="font-size: 12px;">${isPickup ? 'store' : 'local_shipping'}</span>
-            <span>${isPickup ? 'Retiro Providencia' : `Despacho a ${c.shipping_city || 'Santiago'}`}</span>
+            <span>${isPickup ? 'Retiro Providencia' : `Despacho a ${escapeHtml(c.shipping_city || 'Santiago')}`}</span>
           </div>
-          ${order.tracking_code ? `<div style="font-family: var(--font-mono); font-size: 0.675rem; color: #93c5fd; margin-top: 2px;">Guía: ${order.tracking_code}</div>` : ''}
+          ${order.tracking_code ? `<div style="font-family: var(--font-mono); font-size: 0.675rem; color: #93c5fd; margin-top: 2px;">GuÃ­a: ${escapeHtml(order.tracking_code)}</div>` : ''}
         </td>
         <td>
           <div class="order-items-summary-list">
@@ -328,7 +329,7 @@ export class KanbanBoardComponent {
         </td>
         <td>
           <div class="order-status-selector-wrap">
-            <select class="order-status-select" data-order-id="${order.id}" data-current-status="${order.status}" data-delivery="${c.delivery_method}">
+            <select class="order-status-select" data-order-id="${escapeHtml(order.id)}" data-current-status="${order.status}" data-delivery="${escapeHtml(c.delivery_method)}">
               <option value="${order.status}" selected>? ${currentStatusMeta.label}</option>
               ${transitions.map(t => `
                 <option value="${t.next}">? Cambiar a: ${t.label}</option>
@@ -338,21 +339,21 @@ export class KanbanBoardComponent {
         </td>
         <td style="text-align: right;" class="order-table-actions-cell">
           <div class="order-table-action-btns">
-            <!-- Botón de Descarga Directa de la Orden Oficial -->
-            <button type="button" class="btn-table-action download-order-btn" data-order-id="${order.id}" title="Descargar Orden Completa (PDF / Documento Oficial)">
+            <!-- BotÃ³n de Descarga Directa de la Orden Oficial -->
+            <button type="button" class="btn-table-action download-order-btn" data-order-id="${escapeHtml(order.id)}" title="Descargar Orden Completa (PDF / Documento Oficial)">
               <span class="material-symbols-outlined" style="font-size: 15px;">download</span>
               <span>Descargar</span>
             </button>
 
-            <!-- Botón de Ficha Técnica de Taller -->
-            <button type="button" class="btn-table-action view-mockup-btn" data-order-id="${order.id}" title="Ver Ficha Técnica y Emplazamiento Textil">
+            <!-- BotÃ³n de Ficha TÃ©cnica de Taller -->
+            <button type="button" class="btn-table-action view-mockup-btn" data-order-id="${escapeHtml(order.id)}" title="Ver Ficha TÃ©cnica y Emplazamiento Textil">
               <span class="material-symbols-outlined" style="font-size: 15px;">receipt_long</span>
               <span>Ficha</span>
             </button>
 
-            <!-- Botón de avance rápido de estado -->
+            <!-- BotÃ³n de avance rÃ¡pido de estado -->
             ${primaryNext ? `
-              <button type="button" class="btn-table-action primary quick-advance-btn" data-order-id="${order.id}" data-next-status="${primaryNext.next}" data-delivery="${c.delivery_method}" title="${primaryNext.label}">
+              <button type="button" class="btn-table-action primary quick-advance-btn" data-order-id="${escapeHtml(order.id)}" data-next-status="${primaryNext.next}" data-delivery="${escapeHtml(c.delivery_method)}" title="${primaryNext.label}">
                 <span class="material-symbols-outlined" style="font-size: 15px;">${primaryNext.icon}</span>
                 <span>Avanzar</span>
               </button>
@@ -380,20 +381,20 @@ export class KanbanBoardComponent {
     const primaryNext = transitions.length > 0 ? transitions[0] : null;
 
     return `
-      <div class="order-card" data-order-id="${order.id}">
+      <div class="order-card" data-order-id="${escapeHtml(order.id)}">
         <div class="order-card-top">
-          <span class="order-number">${order.order_number}</span>
+          <span class="order-number">${escapeHtml(order.order_number)}</span>
           <span class="order-sla-chip ${timeAgo.isDelayed && order.status !== 'entregado' ? 'warning' : ''}">
             <span class="material-symbols-outlined" style="font-size: 13px;">schedule</span>
             <span>${timeAgo.text}</span>
           </span>
         </div>
 
-        <div class="order-customer-name">${c.full_name || 'Sin especificar'}</div>
+        <div class="order-customer-name">${escapeHtml(c.full_name || 'Sin especificar')}</div>
         <div class="order-delivery-info">
           <span class="material-symbols-outlined" style="font-size: 14px;">${isPickup ? 'store' : 'local_shipping'}</span>
-          <span>${isPickup ? 'Retiro en Taller' : `Despacho a ${c.shipping_city || 'Santiago'}`}</span>
-          ${order.tracking_code ? `<br><span class="order-tracking-badge">${order.tracking_code}</span>` : ''}
+          <span>${isPickup ? 'Retiro en Taller' : `Despacho a ${escapeHtml(c.shipping_city || 'Santiago')}`}</span>
+          ${order.tracking_code ? `<br><span class="order-tracking-badge">${escapeHtml(order.tracking_code)}</span>` : ''}
         </div>
 
         ${(order.items || []).map(i => {
@@ -404,8 +405,8 @@ export class KanbanBoardComponent {
           }
           return `
             <div class="order-item-chip">
-              <strong>${i.quantity}x ${i.garment_name}</strong> (${i.selected_size})<br>
-              <span class="order-item-print-spec">${printSpec}</span>
+              <strong>${i.quantity}x ${escapeHtml(i.garment_name)}</strong> (${escapeHtml(i.selected_size)})<br>
+              <span class="order-item-print-spec">${escapeHtml(printSpec)}</span>
             </div>
           `;
         }).join('')}
@@ -416,16 +417,16 @@ export class KanbanBoardComponent {
         </div>
 
         <div class="order-card-actions" style="margin-top: 1rem; display: flex; gap: 0.4rem; flex-wrap: wrap;">
-          <button class="order-action-btn download-order-btn" data-order-id="${order.id}" style="flex: 1 1 auto; justify-content: center;">
+          <button class="order-action-btn download-order-btn" data-order-id="${escapeHtml(order.id)}" style="flex: 1 1 auto; justify-content: center;">
             <span class="material-symbols-outlined" style="font-size: 16px;">download</span>
             <span>Descargar</span>
           </button>
-          <button class="order-action-btn view-mockup-btn" data-order-id="${order.id}" style="flex: 1 1 auto; justify-content: center;">
+          <button class="order-action-btn view-mockup-btn" data-order-id="${escapeHtml(order.id)}" style="flex: 1 1 auto; justify-content: center;">
             <span class="material-symbols-outlined" style="font-size: 16px;">receipt_long</span>
-            <span>Ficha Técnica</span>
+            <span>Ficha TÃ©cnica</span>
           </button>
           ${primaryNext ? `
-            <button class="order-action-btn quick-advance-btn" data-order-id="${order.id}" data-next-status="${primaryNext.next}" data-delivery="${c.delivery_method}" style="flex: 2 1 100%; justify-content: center; background: rgba(255,255,255,0.08); border-color: rgba(255,255,255,0.25);">
+            <button class="order-action-btn quick-advance-btn" data-order-id="${escapeHtml(order.id)}" data-next-status="${primaryNext.next}" data-delivery="${escapeHtml(c.delivery_method)}" style="flex: 2 1 100%; justify-content: center; background: rgba(255,255,255,0.08); border-color: rgba(255,255,255,0.25);">
               <span class="material-symbols-outlined" style="font-size: 16px;">${primaryNext.icon}</span>
               <span>${primaryNext.label}</span>
             </button>
@@ -447,7 +448,7 @@ export class KanbanBoardComponent {
       });
     });
 
-    // 2. Búsqueda instantánea
+    // 2. BÃºsqueda instantÃ¡nea
     const searchInput = this.container.querySelector('#kanbanSearchInput');
     if (searchInput) {
       searchInput.addEventListener('input', (e) => {
@@ -520,7 +521,7 @@ export class KanbanBoardComponent {
       });
     });
 
-    // 6. Abrir modal con la Ficha Técnica
+    // 6. Abrir modal con la Ficha TÃ©cnica
     this.container.querySelectorAll('.view-mockup-btn').forEach(btn => {
       btn.addEventListener('click', (e) => {
         const orderId = e.currentTarget.dataset.orderId;
@@ -543,7 +544,7 @@ export class KanbanBoardComponent {
 
         let trackingCode = null;
         if (newStatus === 'listo_despacho' && deliveryMethod !== 'pickup') {
-          const entered = prompt("Ingresa el código de seguimiento de la encomienda (Chilexpress/Starken):");
+          const entered = prompt("Ingresa el cÃ³digo de seguimiento de la encomienda (Chilexpress/Starken):");
           if (entered !== null) trackingCode = entered.trim() || null;
         }
 
@@ -560,7 +561,7 @@ export class KanbanBoardComponent {
       });
     });
 
-    // 8. Botón de avance rápido de etapa
+    // 8. BotÃ³n de avance rÃ¡pido de etapa
     this.container.querySelectorAll('.quick-advance-btn').forEach(btn => {
       btn.addEventListener('click', async (e) => {
         const orderId = e.currentTarget.dataset.orderId;
@@ -569,7 +570,7 @@ export class KanbanBoardComponent {
 
         let trackingCode = null;
         if (nextStatus === 'listo_despacho' && deliveryMethod !== 'pickup') {
-          const entered = prompt("Ingresa el código de seguimiento de la encomienda (Chilexpress/Starken):");
+          const entered = prompt("Ingresa el cÃ³digo de seguimiento de la encomienda (Chilexpress/Starken):");
           if (entered !== null) trackingCode = entered.trim() || null;
         }
 
@@ -578,7 +579,7 @@ export class KanbanBoardComponent {
 
         try {
           await apiService.updateOrderStatus(orderId, nextStatus, trackingCode);
-          notificationService.success("Pedido avanzado con éxito.");
+          notificationService.success("Pedido avanzado con Ã©xito.");
           this.onOrderUpdated();
         } catch (err) {
           notificationService.error(err.message || "Error al avanzar pedido.");
