@@ -225,7 +225,7 @@ class CustomerTrackingInfo(BaseModel):
 class OrderCreate(BaseModel):
     """Payload de creación de orden. Los montos finales son determinados por el backend."""
     customer: CustomerInfo
-    items: List[OrderItemCreate]
+    items: List[OrderItemCreate] = Field(..., min_length=1)
     total_amount: Optional[int] = None
     shipping_cost: Optional[int] = None
 
