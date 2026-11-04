@@ -87,10 +87,13 @@ export const apiService = {
   },
 
   // Pedidos
-  async createOrder(orderPayload) {
+  async createOrder(orderPayload, idempotencyKey = null) {
+    const headers = { "Content-Type": "application/json" };
+    if (idempotencyKey) headers["Idempotency-Key"] = idempotencyKey;
+
     const res = await fetch(`${API_BASE}/orders/`, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers,
       body: JSON.stringify(orderPayload)
     });
     if (!res.ok) throw new Error("Error al procesar el pedido");

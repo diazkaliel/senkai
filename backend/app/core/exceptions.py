@@ -30,6 +30,11 @@ class PricingCalculationException(SenkaiDomainException):
     pass
 
 
+class IdempotencyConflictException(SenkaiDomainException):
+    """La misma llave se utilizó antes para una solicitud de compra distinta."""
+    pass
+
+
 class InsufficientStockException(SenkaiDomainException):
     """Se lanza cuando no hay existencias suficientes para satisfacer la orden."""
     def __init__(self, garment_name: str, size: str, color: str, requested: int, available: int):

@@ -12,6 +12,9 @@ export class CartController {
     this.items = [];
     this.shippingCost = 3990;
     this.deliveryMethod = "shipping";
+    // Reutilizamos la misma llave si una petición fue procesada pero se perdió su respuesta.
+    this.pendingCheckoutKey = null;
+    this.pendingCheckoutPayload = null;
     this.onOrderSuccess = options.onOrderSuccess || (() => {});
     
     this.drawerEl = document.getElementById('cartDrawer');
@@ -298,7 +301,15 @@ export class CartController {
     };
 
     try {
-      const createdOrder = await apiService.createOrder(orderPayload);
+      const serializedPayload = JSON.stringify(orderPayload);
+      if (this.pendingCheckoutPayload !== serializedPayload) {
+        this.pendingCheckoutPayload = serializedPayload;
+        this.pendingCheckoutKey = crypto.randomUUID();
+      }
+
+      const createdOrder = await apiService.createOrder(orderPayload, this.pendingCheckoutKey);
+      this.pendingCheckoutPayload = null;
+      this.pendingCheckoutKey = null;
       this.closeCheckoutModal();
       this.clear();
       this.onOrderSuccess(createdOrder);
