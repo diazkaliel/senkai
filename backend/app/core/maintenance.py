@@ -1,15 +1,24 @@
 """Puerta de mantenimiento de escrituras para ventanas de publicación con SQLite."""
 
 import logging
+import os
 from pathlib import Path
 
 from starlette.responses import JSONResponse
+
+from app.core.config import settings
 
 logger = logging.getLogger("senkai.maintenance")
 
 # El marcador reside en el volumen persistente para sobrevivir a un cambio de imagen.
 # No se expone ningún endpoint HTTP para activarlo o desactivarlo.
-MAINTENANCE_FLAG_PATH = Path("/app/storage/.senkai-maintenance")
+PRODUCTION_FLAG_PATH = Path("/app/storage/.senkai-maintenance")
+# Solo QA/desarrollo acepta una ruta alternativa; producción siempre consulta el volumen.
+MAINTENANCE_FLAG_PATH = (
+    PRODUCTION_FLAG_PATH
+    if settings.ENVIRONMENT == "production"
+    else Path(os.environ.get("SENKAI_QA_MAINTENANCE_FLAG", str(PRODUCTION_FLAG_PATH)))
+)
 SAFE_METHODS = frozenset({"GET", "HEAD", "OPTIONS"})
 
 

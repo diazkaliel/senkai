@@ -33,3 +33,35 @@ test("checkout uses Idempotency-Key and preserves request body", async () => {
     globalThis.fetch = originalFetch;
   }
 });
+
+
+test("maintenance response is distinct from a transient server failure", async () => {
+  const originalFetch = globalThis.fetch;
+  globalThis.fetch = async () => ({
+    ok: false,
+    status: 503,
+    json: async () => ({ code: "MAINTENANCE_MODE" })
+  });
+  try {
+    await assert.rejects(
+      apiService.createOrder({ customer: {}, items: [] }, "retry-same-idempotency-key"),
+      { message: "MAINTENANCE_MODE" }
+    );
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
+});
+
+test("other 503 errors do not impersonate maintenance mode", async () => {
+  const originalFetch = globalThis.fetch;
+  globalThis.fetch = async () => ({
+    ok: false,
+    status: 503,
+    json: async () => ({ detail: "upstream unavailable" })
+  });
+  try {
+    await assert.rejects(apiService.createOrder({ items: [] }), { message: "Error al procesar el pedido" });
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
+});

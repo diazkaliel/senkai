@@ -70,3 +70,32 @@ Este mecanismo cubre las escrituras HTTP del backend actual. No bloquea
 scripts por SSH, herramientas de migración ni procesos ajenos al servidor.
 No asegura tiempo de inactividad cero: el servicio usa una máquina y un volumen
 SQLite. La operativa debe verificarse en QA antes de utilizarse en producción.
+
+## Ensayo manual en Windows (solo `senkai-qa`)
+
+La ruta de producción permanece fija en el volumen Fly. Para un proceso local
+con `ENVIRONMENT=development` se puede definir una ruta de marcador distinta
+**antes de iniciar Uvicorn**:
+
+```powershell
+$env:ENVIRONMENT = "development"
+$env:SENKAI_QA_MAINTENANCE_FLAG = Join-Path $env:TEMP "senkai_qa_maintenance.flag"
+python -m uvicorn app.main:app --app-dir backend --host 127.0.0.1 --port 8000
+```
+
+En otra ventana PowerShell, sin reiniciar Uvicorn, crear el archivo del marcador:
+
+```powershell
+New-Item -ItemType File -Path (Join-Path $env:TEMP "senkai_qa_maintenance.flag") -Force
+```
+
+Comprobar que `GET /health` devuelve 200 y que un POST inválido a
+`/api/v1/orders/` devuelve 503. Comprobar también el bloqueo del upload y
+la conservación del carrito. Finalmente retirar el marcador:
+
+```powershell
+Remove-Item -Path (Join-Path $env:TEMP "senkai_qa_maintenance.flag")
+```
+
+Un POST inválido a checkout debe volver a devolver 422 sin crear un pedido.
+El override `SENKAI_QA_MAINTENANCE_FLAG` está deshabilitado en producción.
