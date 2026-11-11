@@ -6,6 +6,7 @@ import { apiService, normalizeItemPrints } from '../../services/api.js?v=2026102
 import { SVG_GARMENTS, PRESET_ARTWORKS } from '../svg_templates.js?v=20261022_v2';
 import { downloadOrderDossier } from '../../services/order_document_service.js?v=20261022_v2';
 import { notificationService } from '../../services/notification_service.js?v=20261022_v2';
+import { formatOrderDelivery } from '../../services/order_delivery.js';
 import { escapeHtml, safeColorHex, safeArtworkUrl } from '../../services/html_escape.js';
 
 const PRINT_DIMENSIONS = {
@@ -98,9 +99,7 @@ export class MockupModalComponent {
           <h2>Especificación de Confección & Estampado</h2>
           <div style="font-size: 0.8rem; font-family: var(--font-mono); color: var(--text-muted); margin-top: 0.35rem;">
             Cliente: <strong>${escapeHtml(order.customer.full_name)}</strong> • ${escapeHtml(order.customer.email)} • 
-            ${order.customer.delivery_method === 'pickup' 
-              ? '<span style="color: #6ee7b7;">Retiro en Taller Providencia</span>' 
-              : `<span style="color: #93c5fd;">Despacho a ${escapeHtml(order.customer.shipping_city || 'Santiago')}</span>`}
+            ${escapeHtml(formatOrderDelivery(order.customer))}
           </div>
         </div>
         <div style="display: flex; gap: 0.5rem; align-items: center;">

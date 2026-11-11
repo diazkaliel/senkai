@@ -194,14 +194,14 @@ class OrderService:
         # Verificación y reserva atómica de existencias físicas (falla rápido sin inconsistencias)
         await self.catalog_repo.verify_and_deduct_stock_atomic(session, items_to_deduct)
 
-        # Cálculo autoritativo de despacho (0 retiro en taller, 3990 envío)
-        shipping_cost = 0 if payload.customer.delivery_method == "pickup" else 3990
+        delivery_method = payload.customer.delivery_method
+        shipping_cost = 3990 if delivery_method == "shipping" else 0
         total_authorized = subtotal_accumulated + shipping_cost
 
         # Generación de número de orden secuencial resistente a condiciones de carrera
         now = datetime.now(timezone.utc)
         order_number = await self.repository.get_next_order_number(session, year=now.year)
-        estimated_date = (now + timedelta(days=2)).strftime("%d/%m/%Y")
+        estimated_date = "" if delivery_method == "pending" else (now + timedelta(days=2)).strftime("%d/%m/%Y")
         order_id = str(uuid.uuid4())
 
         db_order = OrderModel(
@@ -210,9 +210,9 @@ class OrderService:
             customer_name=payload.customer.full_name,
             customer_email=payload.customer.email,
             customer_phone=payload.customer.phone,
-            delivery_method=payload.customer.delivery_method,
-            shipping_address=payload.customer.shipping_address,
-            shipping_city=payload.customer.shipping_city,
+            delivery_method=delivery_method,
+            shipping_address=payload.customer.shipping_address if delivery_method != "pending" else None,
+            shipping_city=payload.customer.shipping_city if delivery_method != "pending" else None,
             notes=payload.customer.notes,
             total_amount=total_authorized,
             shipping_cost=shipping_cost,

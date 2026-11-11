@@ -24,8 +24,8 @@ const PRODUCTION_STAGES = [
   {
     key: 'listo_despacho',
     code: 'FASE 03',
-    label: 'Listo para Despacho / Retiro',
-    desc: 'Prenda empacada y lista para retiro en taller o entrega a courier express.',
+    label: 'Listo para entrega',
+    desc: 'El taller terminó el pedido y lo preparó para su entrega.',
     icon: 'inventory_2'
   },
   {
@@ -59,7 +59,7 @@ const STATUS_META = {
     badgeClass: 'status-active'
   },
   listo_despacho: {
-    label: 'Listo para Despacho / Retiro en Taller',
+    label: 'Listo para entrega',
     stageIndex: 2,
     badgeClass: 'status-ready'
   },
@@ -219,9 +219,6 @@ export class OrderTrackerComponent {
     };
 
     const isCancelled = statusKey === 'cancelado';
-    const deliveryLabel = order.customer?.delivery_method === 'pickup'
-      ? 'Retiro en Taller Senkai (Providencia, Santiago)'
-      : `Despacho Express a Domicilio${order.customer?.shipping_city ? ` (${this.escapeHtml(order.customer.shipping_city)})` : ''}`;
 
     return `
       <div class="tracker-result-panel">

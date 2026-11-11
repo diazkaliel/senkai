@@ -209,7 +209,7 @@ export class AnalyticsDashboardComponent {
 
               <div class="logistics-callout">
                 <span class="material-symbols-outlined" style="font-size: 16px; color: var(--accent-admin);">info</span>
-                <span>El retiro en taller agiliza los tiempos de entrega eliminando la espera de courier externo.</span>
+                <span>Pedidos por coordinar: ${d.logistics.pending_count ?? 0}. El reparto porcentual incluye solo pedidos con modalidad registrada.</span>
               </div>
             </div>
           </div>
@@ -423,7 +423,8 @@ export class AnalyticsDashboardComponent {
     csvContent += `Ticket Promedio (AOV),$${d.average_order_value_clp} CLP\n`;
     csvContent += `Prendas Producidas,${d.total_units_period}\n`;
     csvContent += `Retiro en Taller,${d.logistics.pickup_count} (${d.logistics.pickup_percentage}%)\n`;
-    csvContent += `Despacho a Domicilio,${d.logistics.shipping_count} (${d.logistics.shipping_percentage}%)\n\n`;
+    csvContent += `Despacho a Domicilio,${d.logistics.shipping_count} (${d.logistics.shipping_percentage}%)\n`;
+    csvContent += `Entrega por coordinar,${d.logistics.pending_count ?? 0}\n\n`;
 
     // Tabla Serie Temporal
     csvContent += `SERIE TEMPORAL DIARIA\n`;

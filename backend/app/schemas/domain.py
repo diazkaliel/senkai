@@ -4,7 +4,7 @@ Contratos estrictos para prendas base, configuración DTF, pedidos y métricas d
 """
 
 from enum import Enum
-from typing import List, Optional, Dict, Union, Any
+from typing import List, Optional, Dict, Union, Any, Literal
 from pydantic import BaseModel, Field
 
 
@@ -209,7 +209,7 @@ class CustomerInfo(BaseModel):
     full_name: str = Field(..., min_length=1, max_length=120)
     email: str = Field(..., min_length=3, max_length=150)
     phone: str = Field(..., min_length=3, max_length=40)
-    delivery_method: str = Field(..., pattern="^(pickup|shipping)$")
+    delivery_method: Literal["pickup", "shipping", "pending"] = "pending"
     shipping_address: Optional[str] = Field(default=None, max_length=255)
     shipping_city: Optional[str] = Field(default=None, max_length=100)
     notes: Optional[str] = Field(default=None, max_length=1000)
@@ -277,6 +277,7 @@ class LogisticsBreakdown(BaseModel):
     """Distribución de métodos de entrega para planificación operativa."""
     pickup_count: int
     shipping_count: int
+    pending_count: int = 0
     pickup_percentage: float
     shipping_percentage: float
 
