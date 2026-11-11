@@ -1,5 +1,5 @@
-// Orquestador principal de la vitrina y navegaciÛn SPA de Senkai DTF Studio.
-// Inicializo los componentes del storefront (carrito, mesa de diseÒo, lookbook y cat·logo),
+// Orquestador principal de la vitrina y navegaci√≥n SPA de Senkai DTF Studio.
+// Inicializo los componentes del storefront (carrito, mesa de dise√±o, lookbook y cat√°logo),
 // coordino las rutas por hash (#inicio vs #admin) y sincronizo los cambios del CMS en vivo.
 
 import { apiService } from './services/api.js?v=20261022_v3';
@@ -8,9 +8,10 @@ import { FALLBACK_GARMENTS } from './data/fallback_garments.js?v=20261022_v3';
 import { CustomizerStudio } from './components/customizer.js?v=20261022_v3';
 import { CatalogComponent } from './components/catalog.js?v=20261022_v3';
 import { ProductCarousel } from './components/carousel.js?v=20261022_v3';
-import { CartController } from './components/cart.js?v=20261022_v3';
+import { CartController } from './components/cart.js?v=20261110_v1';
 import { OrderTrackerComponent } from './components/order_tracker.js?v=20261022_v3';
 import { AdminWorkshopPortal } from './components/admin.js?v=20261022_v3';
+import { escapeHtml } from './services/html_escape.js';
 import './components/motion_effects.js?v=20261022_v3';
 
 class SenkaiApp {
@@ -19,12 +20,12 @@ class SenkaiApp {
     this.adminView = document.getElementById('adminView');
     this.garments = [];
 
-    // Inicializo el carrito y conecto el callback para cuando una orden se crea con Èxito
+    // Inicializo el carrito y conecto el callback para cuando una orden se crea con √©xito
     this.cart = new CartController({
       onOrderSuccess: (order) => this.showOrderSuccessModal(order)
     });
 
-    // Mesa de personalizaciÛn tÈcnica DTF
+    // Mesa de personalizaci√≥n t√©cnica DTF
     this.customizer = new CustomizerStudio('customizerContainer', {
       onAddToCart: (item) => this.cart.addItem(item)
     });
@@ -39,7 +40,7 @@ class SenkaiApp {
       onAddToCart: (item) => this.cart.addItem(item)
     });
 
-    // Cat·logo general de prendas base
+    // Cat√°logo general de prendas base
     this.catalog = new CatalogComponent('catalogContainer', {
       onSelectForCustomizer: (garmentId, options = {}) => {
         this.customizer.setGarmentById(garmentId, options);
@@ -49,10 +50,10 @@ class SenkaiApp {
       onAddToCart: (item) => this.cart.addItem(item)
     });
 
-    // MÛdulo p˙blico de rastreo de pedidos por n˙mero de orden
+    // M√≥dulo p√∫blico de rastreo de pedidos por n√∫mero de orden
     this.orderTracker = new OrderTrackerComponent('orderTrackerContainer');
 
-    // Portal administrativo de taller (Kanban, AnalÌtica, CMS y Stock)
+    // Portal administrativo de taller (Kanban, Anal√≠tica, CMS y Stock)
     this.admin = new AdminWorkshopPortal('adminViewContainer');
   }
 
@@ -64,7 +65,7 @@ class SenkaiApp {
         this.garments = FALLBACK_GARMENTS;
       }
 
-      // 2. Inicializo los componentes visuales con el cat·logo activo
+      // 2. Inicializo los componentes visuales con el cat√°logo activo
       await this.customizer.init(this.garments);
       this.catalog.init(this.garments);
       this.carousel.init(this.garments);
@@ -76,7 +77,7 @@ class SenkaiApp {
       // 4. Aviso al sistema de animaciones para calcular observadores del DOM
       window.dispatchEvent(new CustomEvent('senkai:dom-updated'));
 
-      // 5. Manejo de navegaciÛn por hash (#inicio, #catalogo, #personalizador, #rastreo, #admin)
+      // 5. Manejo de navegaci√≥n por hash (#inicio, #catalogo, #personalizador, #rastreo, #admin)
       window.addEventListener('hashchange', () => this.handleRouting());
       this.handleRouting();
 
@@ -95,7 +96,7 @@ class SenkaiApp {
           await this.hydrateSiteContent();
           window.dispatchEvent(new CustomEvent('senkai:dom-updated'));
         } catch (err) {
-          console.error("Error al refrescar cat·logo en vivo:", err);
+          console.error("Error al refrescar cat√°logo en vivo:", err);
         }
       });
 
@@ -105,7 +106,7 @@ class SenkaiApp {
     }
   }
 
-  // Conmuto entre la vitrina p˙blica y el panel privado de taller seg˙n el hash
+  // Conmuto entre la vitrina p√∫blica y el panel privado de taller seg√∫n el hash
   handleRouting() {
     const hash = window.location.hash || "#inicio";
 
@@ -130,7 +131,7 @@ class SenkaiApp {
       this.adminView.style.display = "none";
       this.storefrontView.style.display = "block";
 
-      // Actualizo el estado visual de los links activos en la barra de navegaciÛn
+      // Actualizo el estado visual de los links activos en la barra de navegaci√≥n
       document.querySelectorAll('.nav-link, .mobile-nav-link').forEach(link => {
         if (link.getAttribute('href') === hash) {
           link.classList.add('active');
@@ -146,19 +147,19 @@ class SenkaiApp {
     }
   }
 
-  // Pido los contenidos editoriales a la API y delego la inyecciÛn al hydrator
+  // Pido los contenidos editoriales a la API y delego la inyecci√≥n al hydrator
   async hydrateSiteContent() {
     try {
       const content = await apiService.getSiteContent();
       if (!content) return;
       contentHydrator.apply(content);
 
-      // Sincronizo encabezados din·micos con el componente de cat·logo
+      // Sincronizo encabezados din√°micos con el componente de cat√°logo
       if (content.headers && this.catalog && typeof this.catalog.setHeaders === 'function') {
         this.catalog.setHeaders(content.headers.catalog_title, content.headers.catalog_desc, content.headers.catalog_tag);
       }
 
-      // Sincronizo las prendas destacadas y categorÌas del Lookbook con el carrusel y el cat·logo
+      // Sincronizo las prendas destacadas y categor√≠as del Lookbook con el carrusel y el cat√°logo
       if (content.lookbook && Array.isArray(content.lookbook.items)) {
         if (this.carousel && typeof this.carousel.updateItems === 'function') {
           this.carousel.updateItems(content.lookbook.items);
@@ -168,11 +169,11 @@ class SenkaiApp {
         }
       }
     } catch (err) {
-      console.warn("Fallo leve de hidrataciÛn CMS:", err);
+      console.warn("Fallo leve de hidrataci√≥n CMS:", err);
     }
   }
 
-  // Eventos globales: buscador r·pido en tiempo real y cierre de modales
+  // Eventos globales: buscador r√°pido en tiempo real y cierre de modales
   setupGlobalEvents() {
     const adminToggleBtn = document.getElementById('adminToggleBtn');
     if (adminToggleBtn) {
@@ -218,34 +219,36 @@ class SenkaiApp {
     }
     if (trackOrderFromSuccessBtn && successModal) {
       trackOrderFromSuccessBtn.addEventListener('click', () => {
-        const orderCode = document.getElementById('successOrderNumber')?.textContent?.trim();
+        const trackingToken = successModal.dataset.trackingId;
         successModal.classList.remove('open');
         window.location.hash = '#rastreo';
-        if (orderCode && this.orderTracker) {
-          this.orderTracker.trackOrder(orderCode);
+        if (trackingToken && this.orderTracker) {
+          this.orderTracker.trackOrder(trackingToken);
         }
       });
     }
   }
 
-  // Muestro el modal de confirmaciÛn con el resumen de la orden generada
+  // Muestro el modal de confirmaci√≥n con el resumen de la orden generada
   showOrderSuccessModal(order) {
     const modal = document.getElementById('orderSuccessModal');
     const orderNumEl = document.getElementById('successOrderNumber');
     const orderDetailsEl = document.getElementById('successOrderDetails');
 
-    if (this.orderTracker && order.order_number) {
-      this.orderTracker.saveLastOrderNumber(order.order_number);
+    if (this.orderTracker && order.id && order.order_number) {
+      this.orderTracker.saveLastTrackingToken(order.id, order.order_number);
     }
+    if (modal) modal.dataset.trackingId = order.id || '';
 
     if (orderNumEl) orderNumEl.textContent = order.order_number;
     if (orderDetailsEl) {
       orderDetailsEl.innerHTML = `
         <div class="success-details-box">
-          <p style="font-size: 0.9rem; color: var(--text-primary); margin-bottom: 0.35rem;"><strong>Cliente:</strong> ${order.customer.full_name}</p>
+          <p style="font-size: 0.9rem; color: var(--text-primary); margin-bottom: 0.35rem;"><strong>Cliente:</strong> ${escapeHtml(order.customer.full_name)}</p>
           <p style="font-size: 0.9rem; color: var(--text-primary); margin-bottom: 0.35rem;"><strong>Modalidad:</strong> ${order.customer.delivery_method === 'pickup' ? 'Retiro en Taller Senkai (Providencia)' : 'Despacho Express a Domicilio'}</p>
-          <p style="font-size: 0.9rem; color: var(--text-primary); margin-bottom: 0.35rem;"><strong>Fecha estimada:</strong> ${order.estimated_delivery}</p>
-          <p style="font-size: 0.9rem; color: var(--accent-primary); margin-top: 0.5rem; font-family: var(--font-mono);"><strong>Estado de ProducciÛn:</strong> ${order.status.toUpperCase()}</p>
+          <p style="font-size: 0.9rem; color: var(--text-primary); margin-bottom: 0.35rem;"><strong>Fecha estimada:</strong> ${escapeHtml(order.estimated_delivery)}</p>
+          <p style="font-size: 0.9rem; color: var(--accent-primary); margin-top: 0.5rem; font-family: var(--font-mono);"><strong>Estado de Producci√≥n:</strong> ${escapeHtml(order.status.toUpperCase())}</p>
+          <p style="font-size: 0.75rem; margin-top: 0.5rem; overflow-wrap: anywhere;"><strong>C√≥digo privado de seguimiento (gu√°rdalo):</strong> <code>${escapeHtml(order.id)}</code></p>
         </div>
       `;
     }
@@ -256,7 +259,7 @@ class SenkaiApp {
   }
 }
 
-// Arranco la aplicaciÛn cuando el navegador termina de parsear el HTML
+// Arranco la aplicaci√≥n cuando el navegador termina de parsear el HTML
 document.addEventListener('DOMContentLoaded', () => {
   const app = new SenkaiApp();
   app.start();

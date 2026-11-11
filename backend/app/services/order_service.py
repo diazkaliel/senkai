@@ -13,14 +13,14 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.schemas.domain import (
     OrderCreate, OrderResponse, OrderItemResponse, OrderProductionStatus,
-    DTFPrintItem, DTFPrintPosition, OrderTrackingResponse, CustomerTrackingInfo
+    DTFPrintItem, DTFPrintPosition, OrderTrackingResponse
 )
 from app.db.models import OrderModel, OrderItemModel, IdempotencyRecordModel
 from app.repositories.order_repository import order_repository, OrderRepository
 from app.repositories.catalog_repository import catalog_repository, CatalogRepository
 from app.services.catalog_service import catalog_service, CatalogService
 from app.services.pricing_service import pricing_service, PricingService
-from app.core.exceptions import EntityNotFoundException
+from app.core.exceptions import EntityNotFoundException, IdempotencyConflictException
 
 
 class OrderService:
@@ -48,11 +48,23 @@ class OrderService:
         Crea y persiste un nuevo pedido tras recalcular todos los costos de forma autoritativa.
         Soporta Idempotency-Key para prevenir duplicación por doble clic.
         """
-        # 1. Verificación de Idempotencia
-        if idempotency_key:
+        # La exclusión mutua debe obtenerse antes de la PRIMERA lectura de folios,
+        # idempotencia o stock. El bloqueo transaccional cubre toda la compra.
+        await self.repository.lock_order_creation(session)
+
+        request_hash = hashlib.sha256(payload.model_dump_json().encode("utf-8")).hexdigest()
+        if idempotency_key is not None:
+            idempotency_key = idempotency_key.strip()
+            if not 1 <= len(idempotency_key) <= 128:
+                raise ValueError("Idempotency-Key debe tener entre 1 y 128 caracteres.")
+
             existing_record = await self.repository.get_idempotency_record(session, idempotency_key)
             if existing_record:
-                # Retornar la orden original sin duplicar cobros ni descontar inventario
+                if existing_record.request_hash != request_hash:
+                    raise IdempotencyConflictException(
+                        "Idempotency-Key ya utilizada para un pedido con contenido diferente."
+                    )
+                # La repetición devuelve la respuesta original y no reserva stock.
                 return OrderResponse.model_validate_json(existing_record.response_payload)
 
         verified_items: List[OrderItemResponse] = []
@@ -61,17 +73,17 @@ class OrderService:
         subtotal_accumulated = 0
 
         # Consultar precios oficiales de vitrina (Lookbook) por si el ítem proviene directamente del catálogo
-        lookbook_prices_by_name: Dict[str, int] = {}
-        lookbook_prices_by_id: Dict[str, int] = {}
+        lookbook_by_name: Dict[str, Any] = {}
+        lookbook_by_id: Dict[str, Any] = {}
         try:
             from app.services.content_service import content_service
             consolidated = await content_service.get_consolidated_content(session)
             if consolidated and consolidated.lookbook and consolidated.lookbook.items:
                 for lb_it in consolidated.lookbook.items:
                     if lb_it.name and lb_it.price:
-                        lookbook_prices_by_name[lb_it.name.strip().lower()] = int(lb_it.price)
+                        lookbook_by_name[lb_it.name.strip().casefold()] = lb_it
                     if lb_it.id and lb_it.price:
-                        lookbook_prices_by_id[lb_it.id.strip().lower()] = int(lb_it.price)
+                        lookbook_by_id[lb_it.id.strip()] = lb_it
         except Exception:
             pass
 
@@ -117,12 +129,20 @@ class OrderService:
             # Si la prenda fue agregada directamente desde el Catálogo Lookbook, usar su precio oficial
             raw_item_name = (item.garment_name or "").strip()
             resolved_garment_name = garment.name
-            lb_price = lookbook_prices_by_name.get(raw_item_name.lower()) or lookbook_prices_by_id.get(item.garment_id.lower())
-            if lb_price is not None:
-                lb_base_price = lb_price
-                size_delta = (size_prices_map[size_key] - garment.base_price) if size_key in size_prices_map else 0
-                effective_garment_price = max(1000, lb_base_price + size_delta)
-                resolved_garment_name = raw_item_name
+            if item.lookbook_item_id:
+                lookbook_entry = lookbook_by_id.get(item.lookbook_item_id)
+                if not lookbook_entry or lookbook_entry.garment_id != garment.id:
+                    raise ValueError("El artículo del Lookbook no corresponde a la prenda seleccionada.")
+            else:
+                # Carritos guardados antes de incorporar IDs: solo se permite un precio
+                # de Lookbook cuando el nombre y la prenda física coinciden.
+                candidate = lookbook_by_name.get(raw_item_name.casefold())
+                lookbook_entry = candidate if candidate and candidate.garment_id == garment.id else None
+
+            if lookbook_entry:
+                size_delta = size_prices_map.get(size_key, garment.base_price) - garment.base_price
+                effective_garment_price = max(1000, int(lookbook_entry.price) + size_delta)
+                resolved_garment_name = lookbook_entry.name
 
             unit_price = effective_garment_price
             item_subtotal = unit_price * item.quantity
@@ -207,18 +227,19 @@ class OrderService:
         saved_order = await self.repository.create(session, db_order, items=relational_items)
         response_dto = self.to_response_dto(saved_order)
 
-        # 2. Registrar llave de idempotencia si fue suministrada
         if idempotency_key:
-            req_hash = hashlib.sha256(payload.model_dump_json().encode()).hexdigest()
             idemp_record = IdempotencyRecordModel(
                 key=idempotency_key,
-                request_hash=req_hash,
+                request_hash=request_hash,
                 response_payload=response_dto.model_dump_json(),
                 status_code=201,
                 created_at=now
             )
             await self.repository.save_idempotency_record(session, idemp_record)
 
+        # Único punto de confirmación: stock, orden, líneas e idempotencia.
+        # Un fallo previo dispara rollback desde get_db y no genera ventas parciales.
+        await session.commit()
         return response_dto
 
     async def get_by_identifier(
@@ -268,34 +289,11 @@ class OrderService:
         )
 
     @staticmethod
-    def _mask_name(name: str) -> str:
-        parts = name.strip().split()
-        if not parts:
-            return "Cliente Senkai"
-        if len(parts) == 1:
-            return parts[0]
-        return f"{parts[0]} {parts[1][0]}."
-
-    @classmethod
-    def to_tracking_dto(cls, o: OrderModel) -> OrderTrackingResponse:
-        """Mapeo a contrato de tracking público sanitizado sin datos de contacto directos."""
-        created_str = o.created_at.isoformat() if isinstance(o.created_at, datetime) else str(o.created_at)
-        updated_str = o.updated_at.isoformat() if isinstance(o.updated_at, datetime) else str(o.updated_at)
+    def to_tracking_dto(o: OrderModel) -> OrderTrackingResponse:
+        """Exponer solo el estado operativo; ni identidad, ni diseños, ni importes."""
         return OrderTrackingResponse(
-            id=o.id,
             order_number=o.order_number,
-            customer=CustomerTrackingInfo(
-                full_name=cls._mask_name(o.customer_name),
-                delivery_method=o.delivery_method,
-                shipping_city=o.shipping_city,
-                notes=o.notes
-            ),
-            items=o.items,
-            total_amount=o.total_amount,
-            shipping_cost=o.shipping_cost,
             status=OrderProductionStatus(o.status),
-            created_at=created_str,
-            updated_at=updated_str,
             estimated_delivery=o.estimated_delivery,
             tracking_code=o.tracking_code
         )

@@ -1,16 +1,18 @@
 // Carrito de compras y pasarela de checkout.
-// Manejo los productos seleccionados, cálculo de totales (con o sin envío) y envío del pedido a taller.
 
 import { apiService } from '../services/api.js?v=20261022_v2';
 import { notificationService } from '../services/notification_service.js?v=20261022_v2';
+import { escapeHtml, safeColorHex } from '../services/html_escape.js';
 
 const CART_STORAGE_KEY = 'senkai_cart_items_v1';
+const SHIPPING_COST_CLP = 3990;
 
 export class CartController {
   constructor(options = {}) {
     this.items = [];
-    this.shippingCost = 3990;
-    this.deliveryMethod = "shipping";
+    // Reutilizamos la misma llave si una petición fue procesada pero se perdió su respuesta.
+    this.pendingCheckoutKey = null;
+    this.pendingCheckoutPayload = null;
     this.onOrderSuccess = options.onOrderSuccess || (() => {});
     
     this.drawerEl = document.getElementById('cartDrawer');
@@ -80,8 +82,7 @@ export class CartController {
   }
 
   getTotal() {
-    const shipping = this.deliveryMethod === "pickup" ? 0 : this.shippingCost;
-    return this.getSubtotal() + shipping;
+    return this.getSubtotal() + SHIPPING_COST_CLP;
   }
 
   openDrawer() {
@@ -136,15 +137,15 @@ export class CartController {
     } else {
       this.itemsListEl.innerHTML = this.items.map((item, idx) => `
         <div class="cart-item">
-          <div class="cart-item-preview" style="background: ${item.selected_color.hex_code};">
+          <div class="cart-item-preview" style="background: ${safeColorHex(item.selected_color.hex_code)};">
             <span style="font-size: 0.75rem; color: ${item.selected_color.hex_code === '#F4F4F0' || item.selected_color.hex_code === '#FFFFFF' ? '#000' : '#fff'}; font-weight: 800; font-family: var(--font-mono);">
-              ${item.selected_size}
+              ${escapeHtml(item.selected_size)}
             </span>
           </div>
           <div class="cart-item-details">
-            <div class="cart-item-title">${item.garment_name}</div>
+            <div class="cart-item-title">${escapeHtml(item.garment_name)}</div>
             <div class="cart-item-specs">
-              Color: <strong>${item.selected_color.name}</strong> • Talla: <strong>${item.selected_size}</strong><br>
+              Color: <strong>${escapeHtml(item.selected_color.name)}</strong> • Talla: <strong>${escapeHtml(item.selected_size)}</strong><br>
               ${this.formatItemPrintsSpecs(item)}
             </div>
             <div style="display: flex; justify-content: space-between; align-items: center;">
@@ -180,8 +181,8 @@ export class CartController {
       const back = item.preview_back_summary || 'Cara Lisa';
       return `
         <div style="font-size: 0.775rem; margin-top: 3px; line-height: 1.4;">
-          <span style="color: var(--text-primary); font-weight: 700;">Frente:</span> ${front} &bull; 
-          <span style="color: var(--text-primary); font-weight: 700;">Espalda:</span> ${back}
+          <span style="color: var(--text-primary); font-weight: 700;">Frente:</span> ${escapeHtml(front)} &bull; 
+          <span style="color: var(--text-primary); font-weight: 700;">Espalda:</span> ${escapeHtml(back)}
         </div>
       `;
     }
@@ -192,8 +193,8 @@ export class CartController {
       const back = backPrints.length > 0 ? backPrints.map(p => p.print_size).join(', ') : 'Cara Lisa';
       return `
         <div style="font-size: 0.775rem; margin-top: 3px; line-height: 1.4;">
-          <span style="color: var(--text-primary); font-weight: 700;">Frente:</span> ${front} &bull; 
-          <span style="color: var(--text-primary); font-weight: 700;">Espalda:</span> ${back}
+          <span style="color: var(--text-primary); font-weight: 700;">Frente:</span> ${escapeHtml(front)} &bull; 
+          <span style="color: var(--text-primary); font-weight: 700;">Espalda:</span> ${escapeHtml(back)}
         </div>
       `;
     }
@@ -222,7 +223,7 @@ export class CartController {
         return `
           <div style="display: flex; justify-content: space-between; font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 0.5rem; padding-bottom: 0.5rem; border-bottom: 1px dashed rgba(255,255,255,0.06);">
             <div>
-              <div style="color: var(--text-primary); font-weight: 600;">${i.quantity}x ${i.garment_name} (${i.selected_size}) - ${i.selected_color.name}</div>
+              <div style="color: var(--text-primary); font-weight: 600;">${i.quantity}x ${escapeHtml(i.garment_name)} (${escapeHtml(i.selected_size)}) - ${escapeHtml(i.selected_color.name)}</div>
               <div style="font-size: 0.75rem; color: var(--text-muted); font-family: var(--font-mono);">
                 Frente: [${frontSpec}] &bull; Espalda: [${backSpec}]
               </div>
@@ -233,8 +234,7 @@ export class CartController {
       }).join('');
     }
 
-    const shipping = this.deliveryMethod === "pickup" ? 0 : this.shippingCost;
-    if (shippingEl) shippingEl.textContent = shipping === 0 ? "GRATIS" : `$${shipping.toLocaleString('es-CL')} CLP`;
+    if (shippingEl) shippingEl.textContent = `$${SHIPPING_COST_CLP.toLocaleString('es-CL')} CLP`;
     if (totalEl) totalEl.textContent = `$${this.getTotal().toLocaleString('es-CL')} CLP`;
   }
 
@@ -250,19 +250,6 @@ export class CartController {
     if (goToCheckoutBtn) goToCheckoutBtn.addEventListener('click', () => this.openCheckoutModal());
     if (closeCheckoutBtn) closeCheckoutBtn.addEventListener('click', () => this.closeCheckoutModal());
 
-    const deliveryMethodSelect = document.getElementById('deliveryMethodSelect');
-    const shippingAddressGroup = document.getElementById('shippingAddressGroup');
-
-    if (deliveryMethodSelect) {
-      deliveryMethodSelect.addEventListener('change', (e) => {
-        this.deliveryMethod = e.target.value;
-        if (shippingAddressGroup) {
-          shippingAddressGroup.style.display = this.deliveryMethod === 'pickup' ? 'none' : 'block';
-        }
-        this.renderCheckoutSummary();
-      });
-    }
-
     const checkoutForm = document.getElementById('checkoutForm');
     if (checkoutForm) {
       checkoutForm.addEventListener('submit', async (e) => {
@@ -273,6 +260,13 @@ export class CartController {
   }
 
   async handleCheckoutSubmit(formData) {
+    const shippingAddress = formData.get('shippingAddress')?.trim();
+    const shippingCity = formData.get('shippingCity')?.trim();
+    if (!shippingAddress || !shippingCity) {
+      notificationService.warning('Ingresa la dirección y la comuna o ciudad para el despacho.');
+      return;
+    }
+
     const submitBtn = document.getElementById('confirmOrderBtn');
     if (submitBtn) {
       submitBtn.disabled = true;
@@ -283,9 +277,9 @@ export class CartController {
       full_name: formData.get('fullName'),
       email: formData.get('email'),
       phone: formData.get('phone'),
-      delivery_method: this.deliveryMethod,
-      shipping_address: formData.get('shippingAddress') || null,
-      shipping_city: formData.get('shippingCity') || null,
+      delivery_method: 'shipping',
+      shipping_address: shippingAddress,
+      shipping_city: shippingCity,
       notes: formData.get('notes') || null
     };
 
@@ -293,18 +287,31 @@ export class CartController {
       customer,
       items: this.items,
       total_amount: this.getTotal(),
-      shipping_cost: this.deliveryMethod === 'pickup' ? 0 : this.shippingCost
+      shipping_cost: SHIPPING_COST_CLP
     };
 
     try {
-      const createdOrder = await apiService.createOrder(orderPayload);
+      const serializedPayload = JSON.stringify(orderPayload);
+      if (this.pendingCheckoutPayload !== serializedPayload) {
+        this.pendingCheckoutPayload = serializedPayload;
+        this.pendingCheckoutKey = crypto.randomUUID();
+      }
+
+      const createdOrder = await apiService.createOrder(orderPayload, this.pendingCheckoutKey);
+      this.pendingCheckoutPayload = null;
+      this.pendingCheckoutKey = null;
       this.closeCheckoutModal();
       this.clear();
       this.onOrderSuccess(createdOrder);
       notificationService.success(`Pedido #${createdOrder.order_number} ingresado con éxito a cola de taller.`);
     } catch (err) {
-      notificationService.error("Hubo un problema al procesar tu pedido. Por favor intenta nuevamente.");
-      console.error(err);
+      if (err.message === "MAINTENANCE_MODE") {
+        // Conservamos el carrito y la clave de idempotencia para reintentar tras la reapertura.
+        notificationService.warning("Estamos realizando mantenimiento. Tu carrito sigue guardado; vuelve a intentarlo más tarde.");
+      } else {
+        notificationService.error("Hubo un problema al procesar tu pedido. Por favor intenta nuevamente.");
+        console.error(err);
+      }
     } finally {
       if (submitBtn) {
         submitBtn.disabled = false;

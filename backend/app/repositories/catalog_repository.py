@@ -5,7 +5,7 @@ Repositorio de persistencia para el catálogo textil e inventario físico (SQLAl
 import re
 import uuid
 from typing import List, Optional, Dict, Any
-from sqlalchemy import select, or_, func
+from sqlalchemy import select, or_, func, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.db.models import GarmentModel, GarmentVariantModel
@@ -56,41 +56,79 @@ class CatalogRepository:
         items_to_deduct: List[Dict[str, Any]]
     ) -> None:
         """
-        Garantiza consistencia transaccional en dos fases:
-        1. Pre-validación: Verifica que cada variante solicitada exista y cuente con existencias suficientes.
-        2. Descuento atómico: Si todas cumplen, descuenta las unidades solicitadas.
-        Si alguna variante no tiene stock suficiente, lanza InsufficientStockException sin modificar el estado.
+        Reserva unidades por variante mediante UPDATE condicionado al stock actual.
+        El servicio de órdenes confirma la transacción solo después de guardar pedido
+        e idempotencia: cualquier fallo revierte también los descuentos anteriores.
         """
-        variants_to_update = []
-        for it in items_to_deduct:
+        requested_by_variant: Dict[str, Dict[str, Any]] = {}
+
+        for order_item in items_to_deduct:
+            quantity = order_item["quantity"]
+            if quantity < 1:
+                raise ValueError("La cantidad solicitada debe ser positiva.")
+
             variant = await self.get_variant(
                 session=session,
-                garment_id=it["garment_id"],
-                color_name=it["color_name"],
-                size=it["size"],
-                color_hex=it.get("color_hex")
+                garment_id=order_item["garment_id"],
+                color_name=order_item["color_name"],
+                size=order_item["size"],
+                color_hex=order_item.get("color_hex")
             )
-            g_name = it.get("garment_name") or it["garment_id"]
-            if not variant:
+
+            garment_name = order_item.get("garment_name") or order_item["garment_id"]
+            if variant is None:
                 raise InsufficientStockException(
-                    garment_name=g_name,
-                    size=it["size"],
-                    color=it["color_name"],
-                    requested=it["quantity"],
+                    garment_name=garment_name,
+                    size=order_item["size"],
+                    color=order_item["color_name"],
+                    requested=quantity,
                     available=0
                 )
-            if variant.stock_quantity < it["quantity"]:
-                raise InsufficientStockException(
-                    garment_name=g_name,
-                    size=it["size"],
-                    color=it["color_name"],
-                    requested=it["quantity"],
-                    available=variant.stock_quantity
-                )
-            variants_to_update.append((variant, it["quantity"]))
 
-        for variant, qty in variants_to_update:
-            variant.stock_quantity -= qty
+            # Dos líneas del carrito pueden resolver a la misma variante física.
+            # Agrupamos por ID persistido, no por el nombre/color enviados por el cliente.
+            if variant.id not in requested_by_variant:
+                requested_by_variant[variant.id] = {
+                    "variant": variant,
+                    "quantity": 0,
+                    "garment_name": garment_name,
+                }
+            requested_by_variant[variant.id]["quantity"] += quantity
+
+        # Un orden fijo de actualización reduce la probabilidad de deadlocks si
+        # la base cambia de SQLite a PostgreSQL.
+        for variant_id in sorted(requested_by_variant):
+            demand = requested_by_variant[variant_id]
+            quantity = demand["quantity"]
+            variant = demand["variant"]
+
+            statement = (
+                update(GarmentVariantModel)
+                .where(
+                    GarmentVariantModel.id == variant_id,
+                    GarmentVariantModel.is_active.is_(True),
+                    GarmentVariantModel.stock_quantity >= quantity
+                )
+                .values(stock_quantity=GarmentVariantModel.stock_quantity - quantity)
+            )
+            result = await session.execute(statement)
+            if result.rowcount == 1:
+                continue
+
+            # El UPDATE condicional revalida la existencia en la propia escritura;
+            # no confiamos en el stock leído previamente bajo concurrencia.
+            available = await session.scalar(
+                select(GarmentVariantModel.stock_quantity).where(
+                    GarmentVariantModel.id == variant_id
+                )
+            )
+            raise InsufficientStockException(
+                garment_name=demand["garment_name"],
+                size=variant.size,
+                color=variant.color_name,
+                requested=quantity,
+                available=max(0, available or 0)
+            )
 
     async def deduct_stock(
         self,

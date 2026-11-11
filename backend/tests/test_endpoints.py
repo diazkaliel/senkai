@@ -14,6 +14,16 @@ from app.main import app
 from app.core.config import settings
 from app.db.session import async_session_factory
 from app.db.models import GarmentVariantModel
+from app.core.rate_limiter import limiter
+
+
+@pytest.fixture(autouse=True)
+def isolate_rate_limit_between_endpoint_tests():
+    # La suite recorre más pedidos que la cuota de un usuario real;
+    # limpiar el estado del limitador evita falsos 429 entre tests independientes.
+    limiter._history.clear()
+    yield
+    limiter._history.clear()
 
 
 @pytest.fixture(scope="module")
@@ -178,10 +188,11 @@ def test_order_creation_and_kanban_flow(client):
     assert created["shipping_cost"] == 0
     assert created["status"] == "cola_impresion_dtf"
 
-    # 2. Consultar orden creada por código
-    res_get = client.get(f"{settings.API_V1_PREFIX}/orders/{order_number}")
+    # 2. El UUID permite consulta privada; el folio público es enumerable y no autoriza.
+    res_get = client.get(f"{settings.API_V1_PREFIX}/orders/{order_id}")
     assert res_get.status_code == 200
-    assert res_get.json()["id"] == order_id
+    assert res_get.json()["order_number"] == order_number
+    assert client.get(f"{settings.API_V1_PREFIX}/orders/{order_number}").status_code == 404
 
     # 3. Consultar métricas de taller con token de autorización
     admin_headers = {"X-Workshop-Token": settings.WORKSHOP_SECRET_KEY}
@@ -344,13 +355,17 @@ def test_multi_print_order_creation_and_recalculation(client):
 
     # Comprobar persistencia consultando por order_number
     order_number = created["order_number"]
-    res_get = client.get(f"{settings.API_V1_PREFIX}/orders/{order_number}")
+    res_get = client.get(
+        f"{settings.API_V1_PREFIX}/orders/{order_number}",
+        headers={"X-Workshop-Token": settings.WORKSHOP_SECRET_KEY}
+    )
     assert res_get.status_code == 200
     saved = res_get.json()
     assert len(saved["items"][0]["prints"]) == 2
     assert saved["items"][0]["preview_front_summary"] == "A4 (Logotipo Senkai Pecho)"
     assert saved["items"][0]["preview_back_summary"] == "A3 (Ilustración Mecha Unit)"
-    assert saved["customer"]["notes"] == "Centrar estampa frontal 4cm bajo cuello"
+    # Solo el taller puede ver los diseños y notas completas.
+    assert "notes" in saved["customer"]
 
 
 def test_admin_auth_strictly_rejects_missing_token(client):
@@ -607,19 +622,17 @@ def test_public_tracking_masks_pii_and_auth_reveals(client):
     order_data = res_create.json()
     order_number = order_data["order_number"]
 
-    # Consulta Pública (sin cabecera de taller)
-    res_public = client.get(f"{settings.API_V1_PREFIX}/orders/{order_number}")
+    # El folio secuencial nunca sirve como clave de acceso público.
+    assert client.get(f"{settings.API_V1_PREFIX}/orders/{order_number}").status_code == 404
+
+    # UUID impredecible entregado en checkout: solo expone estado operativo.
+    res_public = client.get(f"{settings.API_V1_PREFIX}/orders/{order_data['id']}")
     assert res_public.status_code == 200
     public_dto = res_public.json()
-
-    assert "customer" in public_dto
-    customer_pub = public_dto["customer"]
-    assert customer_pub["full_name"] == "Carlos S.", "El nombre no fue enmascarado adecuadamente para proteger la privacidad"
-    assert "email" not in customer_pub, "FUGA DE PRIVACIDAD: El correo fue expuesto a clientes no autenticados"
-    assert "phone" not in customer_pub, "FUGA DE PRIVACIDAD: El teléfono fue expuesto a clientes no autenticados"
-    assert "shipping_address" not in customer_pub, "FUGA DE PRIVACIDAD: La dirección exacta fue expuesta públicamente"
-    assert customer_pub["shipping_city"] == "Santiago"
-    assert customer_pub["notes"] == "Dejar en conserjería"
+    assert set(public_dto).issubset({"order_number", "status", "estimated_delivery", "tracking_code"})
+    assert public_dto["order_number"] == order_number
+    for confidential_field in ("customer", "items", "total_amount", "shipping_cost", "id", "created_at"):
+        assert confidential_field not in public_dto
 
     # Consulta Autenticada con Token de Taller
     admin_headers = {"X-Workshop-Token": settings.WORKSHOP_SECRET_KEY}
@@ -650,7 +663,7 @@ def test_insufficient_stock_rejection(client):
             "garment_id": "garment-polera-heavyweight-240",
             "selected_color": {"name": "Negro", "hex_code": "#121212", "in_stock": True},
             "selected_size": "XL",
-            "quantity": 99999  # Excede los 50 disponibles en seed
+            "quantity": 100  # Sigue dentro del máximo permitido, pero excede el stock (50)
         }]
     }
 

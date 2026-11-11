@@ -56,11 +56,8 @@ class RateLimitMiddleware(BaseHTTPMiddleware):
         if not getattr(settings, "RATE_LIMIT_ENABLED", True):
             return await call_next(request)
 
-        # En entorno de pruebas unitarias o desarrollo con bypass explícito, no aplicamos freno
-        if request.headers.get("X-Bypass-Rate-Limit") == "true":
-            return await call_next(request)
-
-        path = request.url.path
+        # El cliente nunca decide si se aplica el limitador, ni siquiera en desarrollo.
+        path = request.url.path.rstrip("/") or "/"
         method = request.method
         client_ip = request.client.host if request.client else "127.0.0.1"
 

@@ -1,3 +1,5 @@
+import { safeNavigationHref } from './html_escape.js';
+
 // Servicio de hidratación del DOM con el contenido dinámico del CMS.
 // Separo toda esta lógica acá para no saturar app.js. Cada función se encarga de
 // una sección de la vitrina, verificando que los elementos existan antes de tocarlos.
@@ -59,7 +61,7 @@ export class ContentHydrator {
     }
     if (sub && hero.subtitle) sub.textContent = hero.subtitle;
     if (ctaText && hero.cta_text) ctaText.textContent = hero.cta_text;
-    if (ctaLink && hero.cta_url) ctaLink.setAttribute('href', hero.cta_url);
+    if (ctaLink && hero.cta_url) ctaLink.setAttribute('href', safeNavigationHref(hero.cta_url));
     if (sideTop && hero.side_card_top_tag) sideTop.textContent = hero.side_card_top_tag;
     if (sideBottom && hero.side_card_bottom_tag) sideBottom.textContent = hero.side_card_bottom_tag;
 

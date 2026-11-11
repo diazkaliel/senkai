@@ -132,9 +132,9 @@ class GarmentCreatePayload(BaseModel):
 class DTFConfiguration(BaseModel):
     position: DTFPrintPosition
     print_size: DTFPrintSize
-    design_name: Optional[str] = "Diseño Personalizado"
-    design_image_url: Optional[str] = None
-    design_preview_base64: Optional[str] = None
+    design_name: Optional[str] = Field(default="Diseño Personalizado", max_length=120)
+    design_image_url: Optional[str] = Field(default=None, max_length=512)
+    design_preview_base64: Optional[str] = Field(default=None, max_length=1_500_000)
     scale_factor: float = Field(default=1.0, ge=0.5, le=2.0)
     offset_x_pct: float = Field(default=50.0, description="Posición X porcentual en la prenda")
     offset_y_pct: float = Field(default=40.0, description="Posición Y porcentual en la prenda")
@@ -149,9 +149,9 @@ class DTFPrintItem(BaseModel):
     id: Optional[str] = None
     view: str = Field(default="front", description="'front' (frontal) o 'back' (trasera)")
     print_size: DTFPrintSize = Field(default=DTFPrintSize.A4, description="Formato industrial de transfer (A6, A5, A4, A3)")
-    design_name: Optional[str] = "Estampa Personalizada"
-    design_image_url: Optional[str] = None
-    design_preview_base64: Optional[str] = None
+    design_name: Optional[str] = Field(default="Estampa Personalizada", max_length=120)
+    design_image_url: Optional[str] = Field(default=None, max_length=512)
+    design_preview_base64: Optional[str] = Field(default=None, max_length=1_500_000)
     offset_x_pct: float = Field(default=50.0, ge=5.0, le=95.0, description="Posición X libre porcentual (5% a 95%)")
     offset_y_pct: float = Field(default=40.0, ge=5.0, le=95.0, description="Posición Y libre porcentual (5% a 95%)")
     scale_factor: float = Field(default=1.0, ge=0.4, le=2.5, description="Factor de escala visual")
@@ -175,15 +175,16 @@ class MultiPrintQuoteResponse(BaseModel):
 
 class OrderItemCreate(BaseModel):
     """Contrato de entrada para ítems de orden enviados por el cliente."""
-    garment_id: str
-    garment_name: Optional[str] = None
+    garment_id: str = Field(..., min_length=1, max_length=100)
+    garment_name: Optional[str] = Field(default=None, max_length=120)
+    lookbook_item_id: Optional[str] = Field(default=None, max_length=100)
     selected_color: ColorVariant
     selected_size: GarmentSize
-    prints: List[DTFPrintItem] = Field(default_factory=list, description="Lista de estampados personalizados sobre la prenda")
+    prints: List[DTFPrintItem] = Field(default_factory=list, max_length=8, description="Lista de estampados personalizados sobre la prenda")
     dtf_config: Optional[DTFConfiguration] = Field(default=None, description="Compatibilidad hacia atrás con estampas únicas")
-    preview_front_summary: Optional[str] = Field(default=None, description="Resumen descriptivo de la cara frontal (ej. A4 Pecho o Cara Lisa)")
-    preview_back_summary: Optional[str] = Field(default=None, description="Resumen descriptivo de la cara dorsal (ej. A3 Maxi o Cara Lisa)")
-    quantity: int = Field(default=1, ge=1)
+    preview_front_summary: Optional[str] = Field(default=None, max_length=255, description="Resumen descriptivo de la cara frontal")
+    preview_back_summary: Optional[str] = Field(default=None, max_length=255, description="Resumen descriptivo de la cara dorsal")
+    quantity: int = Field(default=1, ge=1, le=100)
     # Campos opcionales del cliente: el servidor siempre recalcula los montos oficiales
     unit_price: Optional[int] = None
     subtotal: Optional[int] = None
@@ -205,27 +206,19 @@ class OrderItemResponse(BaseModel):
 
 
 class CustomerInfo(BaseModel):
-    full_name: str
-    email: str
-    phone: str
-    delivery_method: str = Field(..., description="'pickup' (Retiro en Taller) o 'shipping' (Envío a Domicilio)")
-    shipping_address: Optional[str] = None
-    shipping_city: Optional[str] = None
-    notes: Optional[str] = None
-
-
-class CustomerTrackingInfo(BaseModel):
-    """Información sanitizada del cliente para consulta pública de tracking (cero fuga de PII)."""
-    full_name: str = Field(..., description="Nombre protegido/enmascarado para privacidad")
-    delivery_method: str = Field(..., description="'pickup' o 'shipping'")
-    shipping_city: Optional[str] = None
-    notes: Optional[str] = None
+    full_name: str = Field(..., min_length=1, max_length=120)
+    email: str = Field(..., min_length=3, max_length=150)
+    phone: str = Field(..., min_length=3, max_length=40)
+    delivery_method: str = Field(..., pattern="^(pickup|shipping)$")
+    shipping_address: Optional[str] = Field(default=None, max_length=255)
+    shipping_city: Optional[str] = Field(default=None, max_length=100)
+    notes: Optional[str] = Field(default=None, max_length=1000)
 
 
 class OrderCreate(BaseModel):
     """Payload de creación de orden. Los montos finales son determinados por el backend."""
     customer: CustomerInfo
-    items: List[OrderItemCreate]
+    items: List[OrderItemCreate] = Field(..., min_length=1, max_length=20)
     total_amount: Optional[int] = None
     shipping_cost: Optional[int] = None
 
@@ -245,19 +238,9 @@ class OrderResponse(BaseModel):
 
 
 class OrderTrackingResponse(BaseModel):
-    """
-    Vista pública de seguimiento. Protege la información personal identificable (PII)
-    del cliente (omite email, teléfono y dirección física exacta).
-    """
-    id: str
+    """Estado mínimo, accesible solo mediante el UUID aleatorio del pedido."""
     order_number: str
-    customer: CustomerTrackingInfo
-    items: List[OrderItemResponse]
-    total_amount: int
-    shipping_cost: int
     status: OrderProductionStatus
-    created_at: str
-    updated_at: str
     estimated_delivery: str
     tracking_code: Optional[str] = None
 
