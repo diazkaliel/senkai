@@ -4,6 +4,7 @@
 
 import { normalizeItemPrints } from './api.js?v=20261022_v2';
 import { escapeHtml } from './html_escape.js';
+import { formatOrderDelivery } from './order_delivery.js';
 
 export function generateOrderHtmlDocument(order) {
   if (!order) return "";
@@ -19,6 +20,7 @@ export function generateOrderHtmlDocument(order) {
   }) : "Fecha no registrada";
 
   const isPickup = c.delivery_method === "pickup";
+  const isShipping = c.delivery_method === "shipping";
 
   const statusLabels = {
     pendiente_pago: "PENDIENTE DE PAGO",
@@ -311,15 +313,16 @@ export function generateOrderHtmlDocument(order) {
         <div class="client-field">
           <strong>Modalidad:</strong> 
           <span style="font-weight: bold; background: #eee; padding: 2px 6px; font-size: 11px;">
-            ${isPickup ? 'RETIRO EN TALLER PROVIDENCIA' : 'DESPACHO A DOMICILIO'}
+            ${escapeHtml(formatOrderDelivery(c).toUpperCase())}
           </span>
         </div>
-        ${!isPickup ? `
+        ${isShipping ? `
           <div class="client-field"><strong>Dirección:</strong> ${escapeHtml(c.shipping_address || '—')}</div>
-          <div class="client-field"><strong>Ciudad/Comuna:</strong> ${escapeHtml(c.shipping_city || 'Santiago')}</div>
-        ` : `
+          <div class="client-field"><strong>Ciudad/Comuna:</strong> ${escapeHtml(c.shipping_city || '—')}</div>
+        ` : ''}
+        ${isPickup ? `
           <div class="client-field" style="color: #666; font-size: 11.5px;">Listo para entrega en taller central una vez completado el control de calidad.</div>
-        `}
+        ` : ''}
         ${c.notes ? `
           <div class="client-field" style="margin-top: 6px; padding: 6px; background: #fff8e6; border: 1px solid #ffd591; font-size: 11.5px;">
             <strong>Nota Cliente:</strong> "${escapeHtml(c.notes)}"
@@ -350,10 +353,12 @@ export function generateOrderHtmlDocument(order) {
         <span>Subtotal Prendas & DTF:</span>
         <span style="font-family: monospace;">$${((order.total_amount || 0) - (order.shipping_cost || 0)).toLocaleString('es-CL')}</span>
       </div>
-      <div class="totals-row">
-        <span>Costo de Despacho:</span>
-        <span style="font-family: monospace;">$${(order.shipping_cost || 0).toLocaleString('es-CL')}</span>
-      </div>
+      ${isShipping ? `
+        <div class="totals-row">
+          <span>Costo de Despacho:</span>
+          <span style="font-family: monospace;">$${(order.shipping_cost || 0).toLocaleString('es-CL')}</span>
+        </div>
+      ` : ''}
       <div class="totals-total">
         <span>TOTAL ORDEN:</span>
         <span style="font-family: monospace;">$${(order.total_amount || 0).toLocaleString('es-CL')} CLP</span>

@@ -193,7 +193,8 @@ class WorkshopService:
         # Desglose logístico
         orders_for_logistics = period_orders if period_orders else valid_orders
         pickup_count = len([o for o in orders_for_logistics if o.delivery_method == "pickup"])
-        shipping_count = len([o for o in orders_for_logistics if o.delivery_method != "pickup"])
+        shipping_count = len([o for o in orders_for_logistics if o.delivery_method == "shipping"])
+        pending_count = len([o for o in orders_for_logistics if o.delivery_method == "pending"])
         tot_log = pickup_count + shipping_count
         pickup_pct = round((pickup_count / tot_log * 100) if tot_log > 0 else 0.0, 1)
         shipping_pct = round((shipping_count / tot_log * 100) if tot_log > 0 else 0.0, 1)
@@ -213,6 +214,7 @@ class WorkshopService:
             logistics=LogisticsBreakdown(
                 pickup_count=pickup_count,
                 shipping_count=shipping_count,
+                pending_count=pending_count,
                 pickup_percentage=pickup_pct,
                 shipping_percentage=shipping_pct
             )

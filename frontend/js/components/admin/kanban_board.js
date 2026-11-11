@@ -6,6 +6,7 @@ import { apiService, normalizeItemPrints } from '../../services/api.js?v=2026102
 import { downloadOrderDossier } from '../../services/order_document_service.js?v=20261022_v2';
 import { notificationService } from '../../services/notification_service.js?v=20261022_v2';
 import { escapeHtml } from '../../services/html_escape.js';
+import { formatOrderDelivery } from '../../services/order_delivery.js';
 
 // Mapeo exhaustivo de transiciones legales autorizadas por la máquina de estados del backend
 const STATE_TRANSITIONS = {
@@ -45,6 +46,11 @@ const STATUS_METADATA = {
   cancelado: { label: "Cancelado", badge: "badge-crimson" }
 };
 
+const DELIVERY_ICONS = new Map([
+  ['pickup', 'store'],
+  ['shipping', 'local_shipping']
+]);
+
 export class KanbanBoardComponent {
   constructor(container, options = {}) {
     this.container = container;
@@ -56,7 +62,7 @@ export class KanbanBoardComponent {
     // Estado reactivo de visualización: "table" (predeterminado) o "cards"
     this.viewMode = "table"; 
     this.searchQuery = "";
-    this.fulfillmentFilter = "all"; // "all" | "pickup" | "shipping"
+    this.fulfillmentFilter = "all";
     this.phaseFilter = "all"; // "all" | estado específico
   }
 
@@ -93,13 +99,13 @@ export class KanbanBoardComponent {
     const q = (this.searchQuery || "").toLowerCase().trim();
     const fFilter = this.fulfillmentFilter;
     const totalOrdersCount = this.orders.length;
-    const pickupOrdersCount = this.orders.filter(o => o.customer && o.customer.delivery_method === "pickup").length;
-    const shippingOrdersCount = this.orders.filter(o => o.customer && o.customer.delivery_method !== "pickup").length;
+    const pickupOrdersCount = this.orders.filter(order => order.customer?.delivery_method === 'pickup').length;
+    const shippingOrdersCount = this.orders.filter(order => order.customer?.delivery_method === 'shipping').length;
+    const pendingOrdersCount = this.orders.filter(order => order.customer?.delivery_method === 'pending').length;
 
     // Filtro por texto y tipo de despacho
     const filteredOrders = this.orders.filter(order => {
-      if (fFilter === "pickup" && order.customer && order.customer.delivery_method !== "pickup") return false;
-      if (fFilter === "shipping" && order.customer && order.customer.delivery_method === "pickup") return false;
+      if (fFilter !== 'all' && order.customer?.delivery_method !== fFilter) return false;
 
       if (this.phaseFilter !== "all" && order.status !== this.phaseFilter) return false;
 
@@ -207,6 +213,9 @@ export class KanbanBoardComponent {
             <button type="button" class="kanban-filter-pill ${fFilter === 'shipping' ? 'active' : ''}" data-fulfillment="shipping">
               <span class="material-symbols-outlined" style="font-size: 13px; vertical-align: middle;">local_shipping</span> Despacho (${shippingOrdersCount})
             </button>
+            <button type="button" class="kanban-filter-pill ${fFilter === 'pending' ? 'active' : ''}" data-fulfillment="pending">
+              <span class="material-symbols-outlined" style="font-size: 13px; vertical-align: middle;">schedule</span> Por coordinar (${pendingOrdersCount})
+            </button>
           </div>
         </div>
 
@@ -277,7 +286,7 @@ export class KanbanBoardComponent {
   // Fila individual de la tabla de pedidos
   _renderTableRow(order) {
     const c = order.customer || {};
-    const isPickup = c.delivery_method === 'pickup';
+    const deliveryIcon = DELIVERY_ICONS.get(c.delivery_method) ?? 'schedule';
     const timeAgo = this.formatTimeAgo(order.updated_at || order.created_at);
     const dateFormatted = order.created_at ? new Date(order.created_at).toLocaleDateString('es-CL', {
       day: '2-digit',
@@ -312,9 +321,9 @@ export class KanbanBoardComponent {
         <td>
           <div class="order-customer-main">${escapeHtml(c.full_name || 'Sin especificar')}</div>
           <div class="order-customer-sub">${escapeHtml(c.email || '')}</div>
-          <div class="order-delivery-tag ${isPickup ? 'pickup' : 'shipping'}">
-            <span class="material-symbols-outlined" style="font-size: 12px;">${isPickup ? 'store' : 'local_shipping'}</span>
-            <span>${isPickup ? 'Retiro Providencia' : `Despacho a ${escapeHtml(c.shipping_city || 'Santiago')}`}</span>
+          <div class="order-delivery-tag ${escapeHtml(c.delivery_method)}">
+            <span class="material-symbols-outlined" style="font-size: 12px;">${deliveryIcon}</span>
+            <span>${escapeHtml(formatOrderDelivery(c))}</span>
           </div>
           ${order.tracking_code ? `<div style="font-family: var(--font-mono); font-size: 0.675rem; color: #93c5fd; margin-top: 2px;">Guía: ${escapeHtml(order.tracking_code)}</div>` : ''}
         </td>
@@ -375,7 +384,7 @@ export class KanbanBoardComponent {
 
   _renderSingleCard(order) {
     const c = order.customer || {};
-    const isPickup = c.delivery_method === 'pickup';
+    const deliveryIcon = DELIVERY_ICONS.get(c.delivery_method) ?? 'schedule';
     const timeAgo = this.formatTimeAgo(order.updated_at || order.created_at);
     const transitions = STATE_TRANSITIONS[order.status] || [];
     const primaryNext = transitions.length > 0 ? transitions[0] : null;
@@ -392,8 +401,8 @@ export class KanbanBoardComponent {
 
         <div class="order-customer-name">${escapeHtml(c.full_name || 'Sin especificar')}</div>
         <div class="order-delivery-info">
-          <span class="material-symbols-outlined" style="font-size: 14px;">${isPickup ? 'store' : 'local_shipping'}</span>
-          <span>${isPickup ? 'Retiro en Taller' : `Despacho a ${escapeHtml(c.shipping_city || 'Santiago')}`}</span>
+          <span class="material-symbols-outlined" style="font-size: 14px;">${deliveryIcon}</span>
+          <span>${escapeHtml(formatOrderDelivery(c))}</span>
           ${order.tracking_code ? `<br><span class="order-tracking-badge">${escapeHtml(order.tracking_code)}</span>` : ''}
         </div>
 
@@ -544,7 +553,7 @@ export class KanbanBoardComponent {
 
         let trackingCode = null;
         if (newStatus === 'listo_despacho' && deliveryMethod !== 'pickup') {
-          const entered = prompt("Ingresa el código de seguimiento de la encomienda (Chilexpress/Starken):");
+          const entered = prompt("Si la entrega es por courier, ingresa el código de seguimiento:");
           if (entered !== null) trackingCode = entered.trim() || null;
         }
 
@@ -570,7 +579,7 @@ export class KanbanBoardComponent {
 
         let trackingCode = null;
         if (nextStatus === 'listo_despacho' && deliveryMethod !== 'pickup') {
-          const entered = prompt("Ingresa el código de seguimiento de la encomienda (Chilexpress/Starken):");
+          const entered = prompt("Si la entrega es por courier, ingresa el código de seguimiento:");
           if (entered !== null) trackingCode = entered.trim() || null;
         }
 

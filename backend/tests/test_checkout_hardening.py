@@ -60,6 +60,32 @@ def test_official_lookbook_id_prices_only_its_own_garment():
         assert response.json()["items"][0]["unit_price"] == 16990
 
 
+def test_checkout_without_delivery_charges_only_the_items():
+    with TestClient(app) as client:
+        payload = checkout_payload()
+        del payload["customer"]["delivery_method"]
+        payload["shipping_cost"] = 3990
+        response = client.post(ORDER_URL, json=payload)
+
+        assert response.status_code == 201, response.text
+        order = response.json()
+        assert order["customer"]["delivery_method"] == "pending"
+        assert order["customer"]["shipping_address"] is None
+        assert order["customer"]["shipping_city"] is None
+        assert order["shipping_cost"] == 0
+        assert order["total_amount"] == order["items"][0]["subtotal"]
+        assert not order["estimated_delivery"]
+
+        tracking = client.get(f"{ORDER_URL}{order['id']}")
+        assert tracking.status_code == 200
+        assert not tracking.json()["estimated_delivery"]
+
+        admin_headers = {"X-Workshop-Token": settings.WORKSHOP_SECRET_KEY}
+        analytics = client.get(f"{settings.API_V1_PREFIX}/admin/analytics", headers=admin_headers)
+        assert analytics.status_code == 200
+        assert analytics.json()["logistics"]["pending_count"] >= 1
+
+
 def test_payload_limits_refuse_excessive_items_and_prints():
     with TestClient(app) as client:
         payload = checkout_payload()

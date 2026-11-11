@@ -5,7 +5,6 @@ import { notificationService } from '../services/notification_service.js?v=20261
 import { escapeHtml, safeColorHex } from '../services/html_escape.js';
 
 const CART_STORAGE_KEY = 'senkai_cart_items_v1';
-const SHIPPING_COST_CLP = 3990;
 
 export class CartController {
   constructor(options = {}) {
@@ -79,10 +78,6 @@ export class CartController {
 
   getSubtotal() {
     return this.items.reduce((acc, item) => acc + item.subtotal, 0);
-  }
-
-  getTotal() {
-    return this.getSubtotal() + SHIPPING_COST_CLP;
   }
 
   openDrawer() {
@@ -165,10 +160,8 @@ export class CartController {
       });
     }
 
-    const drawerSubtotal = document.getElementById('drawerSubtotal');
     const drawerTotal = document.getElementById('drawerTotal');
-    if (drawerSubtotal) drawerSubtotal.textContent = `$${this.getSubtotal().toLocaleString('es-CL')} CLP`;
-    if (drawerTotal) drawerTotal.textContent = `$${this.getTotal().toLocaleString('es-CL')} CLP`;
+    if (drawerTotal) drawerTotal.textContent = `$${this.getSubtotal().toLocaleString('es-CL')} CLP`;
   }
 
   /**
@@ -207,7 +200,6 @@ export class CartController {
   renderCheckoutSummary() {
     const summaryEl = document.getElementById('checkoutItemsSummary');
     const totalEl = document.getElementById('checkoutTotalVal');
-    const shippingEl = document.getElementById('checkoutShippingVal');
 
     if (summaryEl) {
       summaryEl.innerHTML = this.items.map(i => {
@@ -234,8 +226,7 @@ export class CartController {
       }).join('');
     }
 
-    if (shippingEl) shippingEl.textContent = `$${SHIPPING_COST_CLP.toLocaleString('es-CL')} CLP`;
-    if (totalEl) totalEl.textContent = `$${this.getTotal().toLocaleString('es-CL')} CLP`;
+    if (totalEl) totalEl.textContent = `$${this.getSubtotal().toLocaleString('es-CL')} CLP`;
   }
 
   attachDOMEvents() {
@@ -260,13 +251,6 @@ export class CartController {
   }
 
   async handleCheckoutSubmit(formData) {
-    const shippingAddress = formData.get('shippingAddress')?.trim();
-    const shippingCity = formData.get('shippingCity')?.trim();
-    if (!shippingAddress || !shippingCity) {
-      notificationService.warning('Ingresa la dirección y la comuna o ciudad para el despacho.');
-      return;
-    }
-
     const submitBtn = document.getElementById('confirmOrderBtn');
     if (submitBtn) {
       submitBtn.disabled = true;
@@ -277,17 +261,12 @@ export class CartController {
       full_name: formData.get('fullName'),
       email: formData.get('email'),
       phone: formData.get('phone'),
-      delivery_method: 'shipping',
-      shipping_address: shippingAddress,
-      shipping_city: shippingCity,
       notes: formData.get('notes') || null
     };
 
     const orderPayload = {
       customer,
-      items: this.items,
-      total_amount: this.getTotal(),
-      shipping_cost: SHIPPING_COST_CLP
+      items: this.items
     };
 
     try {

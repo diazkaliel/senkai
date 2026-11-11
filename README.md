@@ -18,7 +18,7 @@ Plataforma e-commerce y estudio de personalización textil industrial especializ
   - Monitoreo de pedidos en flujo productivo: Cola de Impresión RIP, Termofijado (160°C / 15s), Control de Calidad y Despacho.
   - Métricas de consumo de insumos (cálculo de metros lineales de film DTF de 60cm) y facturación acumulada.
 - **Carrito & Checkout Integrado**:
-  - Despacho a domicilio con tarifa fija de $3.990 CLP en la tienda.
+  - Entrega coordinada por el taller después de confirmar el pedido, sin cargo de envío en el carrito.
   - Trazabilidad con números de seguimiento de pedidos.
 
 ---

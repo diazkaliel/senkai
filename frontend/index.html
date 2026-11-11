@@ -475,16 +475,8 @@
     <div class="cart-items-list" id="cartItemsList"></div>
 
     <div class="drawer-footer">
-      <div class="drawer-summary-row">
-        <span>SUBTOTAL PRENDA + DTF</span>
-        <span id="drawerSubtotal" style="font-family: var(--font-mono); font-weight: 700; color: var(--text-primary);">$0 CLP</span>
-      </div>
-      <div class="drawer-summary-row">
-        <span>DESPACHO</span>
-        <span style="font-family: var(--font-mono);">$3.990 CLP</span>
-      </div>
       <div class="drawer-total-row">
-        <span>TOTAL ESTIMADO</span>
+        <span>TOTAL DEL PEDIDO</span>
         <span class="total-amount" id="drawerTotal">$0 CLP</span>
       </div>
       <button class="btn btn-primary" id="goToCheckoutBtn" style="width: 100%;">
@@ -494,15 +486,15 @@
   </aside>
 
   <!-- =========================================================================
-       MODAL DE CHECKOUT Y DATOS DE ENVÍO
+       MODAL DE CHECKOUT
        ========================================================================= -->
   <div class="modal-backdrop" id="checkoutModal">
     <div class="modal-card">
       <div class="checkout-modal-header">
         <span class="badge badge-accent">FINALIZAR PEDIDO DTF</span>
-        <h2 class="checkout-modal-title">Datos de contacto y despacho</h2>
+        <h2 class="checkout-modal-title">Datos de contacto</h2>
         <p class="checkout-modal-desc">
-          Tu pedido ingresará directo al pipeline de impresión y curado térmico de nuestro taller.
+          El taller te contactará para coordinar la entrega después de confirmar el pedido.
         </p>
       </div>
 
@@ -511,10 +503,6 @@
           Resumen de Producción:
         </div>
         <div id="checkoutItemsSummary"></div>
-        <div class="checkout-shipping-row">
-          <span>Despacho a domicilio:</span>
-          <span id="checkoutShippingVal" style="font-weight: 700;">$3.990 CLP</span>
-        </div>
         <div class="checkout-total-row">
           <span>Total del pedido:</span>
           <span id="checkoutTotalVal">$0 CLP</span>
@@ -536,19 +524,6 @@
             <label class="form-label">Teléfono / WhatsApp *</label>
             <input type="tel" name="phone" class="form-input" placeholder="+56 9 8765 4321" required>
           </div>
-        </div>
-
-        <div class="form-group">
-          <label class="form-label" for="checkoutShippingAddress">Dirección de despacho *</label>
-          <input type="text" id="checkoutShippingAddress" name="shippingAddress" class="form-input"
-                 placeholder="Calle, número, departamento u oficina" autocomplete="street-address"
-                 maxlength="255" required>
-        </div>
-        <div class="form-group">
-          <label class="form-label" for="checkoutShippingCity">Comuna / ciudad *</label>
-          <input type="text" id="checkoutShippingCity" name="shippingCity" class="form-input"
-                 placeholder="Ej: Providencia, Santiago" autocomplete="address-level2"
-                 maxlength="100" required>
         </div>
 
         <div class="form-group">
@@ -612,6 +587,6 @@
   <div class="toast-container" id="toastContainer"></div>
 
   <!-- Script Principal -->
-  <script type="module" src="/static/js/app.js?v=20261110_v1"></script>
+  <script type="module" src="/static/js/app.js?v=20261110_v2"></script>
 </body>
 </html>

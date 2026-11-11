@@ -8,10 +8,11 @@ import { FALLBACK_GARMENTS } from './data/fallback_garments.js?v=20261022_v3';
 import { CustomizerStudio } from './components/customizer.js?v=20261022_v3';
 import { CatalogComponent } from './components/catalog.js?v=20261022_v3';
 import { ProductCarousel } from './components/carousel.js?v=20261022_v3';
-import { CartController } from './components/cart.js?v=20261110_v1';
+import { CartController } from './components/cart.js?v=20261110_v2';
 import { OrderTrackerComponent } from './components/order_tracker.js?v=20261022_v3';
 import { AdminWorkshopPortal } from './components/admin.js?v=20261022_v3';
 import { escapeHtml } from './services/html_escape.js';
+import { formatOrderDelivery } from './services/order_delivery.js';
 import './components/motion_effects.js?v=20261022_v3';
 
 class SenkaiApp {
@@ -245,8 +246,8 @@ class SenkaiApp {
       orderDetailsEl.innerHTML = `
         <div class="success-details-box">
           <p style="font-size: 0.9rem; color: var(--text-primary); margin-bottom: 0.35rem;"><strong>Cliente:</strong> ${escapeHtml(order.customer.full_name)}</p>
-          <p style="font-size: 0.9rem; color: var(--text-primary); margin-bottom: 0.35rem;"><strong>Modalidad:</strong> ${order.customer.delivery_method === 'pickup' ? 'Retiro en Taller Senkai (Providencia)' : 'Despacho Express a Domicilio'}</p>
-          <p style="font-size: 0.9rem; color: var(--text-primary); margin-bottom: 0.35rem;"><strong>Fecha estimada:</strong> ${escapeHtml(order.estimated_delivery)}</p>
+          <p style="font-size: 0.9rem; color: var(--text-primary); margin-bottom: 0.35rem;">${escapeHtml(formatOrderDelivery(order.customer))}</p>
+          ${order.estimated_delivery ? `<p style="font-size: 0.9rem; color: var(--text-primary); margin-bottom: 0.35rem;"><strong>Fecha estimada:</strong> ${escapeHtml(order.estimated_delivery)}</p>` : ''}
           <p style="font-size: 0.9rem; color: var(--accent-primary); margin-top: 0.5rem; font-family: var(--font-mono);"><strong>Estado de Producción:</strong> ${escapeHtml(order.status.toUpperCase())}</p>
           <p style="font-size: 0.75rem; margin-top: 0.5rem; overflow-wrap: anywhere;"><strong>Código privado de seguimiento (guárdalo):</strong> <code>${escapeHtml(order.id)}</code></p>
         </div>
