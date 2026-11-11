@@ -1,17 +1,15 @@
 // Carrito de compras y pasarela de checkout.
-// Manejo los productos seleccionados, cálculo de totales (con o sin envío) y envío del pedido a taller.
 
 import { apiService } from '../services/api.js?v=20261022_v2';
 import { notificationService } from '../services/notification_service.js?v=20261022_v2';
 import { escapeHtml, safeColorHex } from '../services/html_escape.js';
 
 const CART_STORAGE_KEY = 'senkai_cart_items_v1';
+const SHIPPING_COST_CLP = 3990;
 
 export class CartController {
   constructor(options = {}) {
     this.items = [];
-    this.shippingCost = 3990;
-    this.deliveryMethod = "shipping";
     // Reutilizamos la misma llave si una petición fue procesada pero se perdió su respuesta.
     this.pendingCheckoutKey = null;
     this.pendingCheckoutPayload = null;
@@ -84,8 +82,7 @@ export class CartController {
   }
 
   getTotal() {
-    const shipping = this.deliveryMethod === "pickup" ? 0 : this.shippingCost;
-    return this.getSubtotal() + shipping;
+    return this.getSubtotal() + SHIPPING_COST_CLP;
   }
 
   openDrawer() {
@@ -237,8 +234,7 @@ export class CartController {
       }).join('');
     }
 
-    const shipping = this.deliveryMethod === "pickup" ? 0 : this.shippingCost;
-    if (shippingEl) shippingEl.textContent = shipping === 0 ? "GRATIS" : `$${shipping.toLocaleString('es-CL')} CLP`;
+    if (shippingEl) shippingEl.textContent = `$${SHIPPING_COST_CLP.toLocaleString('es-CL')} CLP`;
     if (totalEl) totalEl.textContent = `$${this.getTotal().toLocaleString('es-CL')} CLP`;
   }
 
@@ -254,19 +250,6 @@ export class CartController {
     if (goToCheckoutBtn) goToCheckoutBtn.addEventListener('click', () => this.openCheckoutModal());
     if (closeCheckoutBtn) closeCheckoutBtn.addEventListener('click', () => this.closeCheckoutModal());
 
-    const deliveryMethodSelect = document.getElementById('deliveryMethodSelect');
-    const shippingAddressGroup = document.getElementById('shippingAddressGroup');
-
-    if (deliveryMethodSelect) {
-      deliveryMethodSelect.addEventListener('change', (e) => {
-        this.deliveryMethod = e.target.value;
-        if (shippingAddressGroup) {
-          shippingAddressGroup.style.display = this.deliveryMethod === 'pickup' ? 'none' : 'block';
-        }
-        this.renderCheckoutSummary();
-      });
-    }
-
     const checkoutForm = document.getElementById('checkoutForm');
     if (checkoutForm) {
       checkoutForm.addEventListener('submit', async (e) => {
@@ -277,6 +260,13 @@ export class CartController {
   }
 
   async handleCheckoutSubmit(formData) {
+    const shippingAddress = formData.get('shippingAddress')?.trim();
+    const shippingCity = formData.get('shippingCity')?.trim();
+    if (!shippingAddress || !shippingCity) {
+      notificationService.warning('Ingresa la dirección y la comuna o ciudad para el despacho.');
+      return;
+    }
+
     const submitBtn = document.getElementById('confirmOrderBtn');
     if (submitBtn) {
       submitBtn.disabled = true;
@@ -287,9 +277,9 @@ export class CartController {
       full_name: formData.get('fullName'),
       email: formData.get('email'),
       phone: formData.get('phone'),
-      delivery_method: this.deliveryMethod,
-      shipping_address: formData.get('shippingAddress') || null,
-      shipping_city: formData.get('shippingCity') || null,
+      delivery_method: 'shipping',
+      shipping_address: shippingAddress,
+      shipping_city: shippingCity,
       notes: formData.get('notes') || null
     };
 
@@ -297,7 +287,7 @@ export class CartController {
       customer,
       items: this.items,
       total_amount: this.getTotal(),
-      shipping_cost: this.deliveryMethod === 'pickup' ? 0 : this.shippingCost
+      shipping_cost: SHIPPING_COST_CLP
     };
 
     try {

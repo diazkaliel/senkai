@@ -8,7 +8,7 @@ import { FALLBACK_GARMENTS } from './data/fallback_garments.js?v=20261022_v3';
 import { CustomizerStudio } from './components/customizer.js?v=20261022_v3';
 import { CatalogComponent } from './components/catalog.js?v=20261022_v3';
 import { ProductCarousel } from './components/carousel.js?v=20261022_v3';
-import { CartController } from './components/cart.js?v=20261022_v3';
+import { CartController } from './components/cart.js?v=20261110_v1';
 import { OrderTrackerComponent } from './components/order_tracker.js?v=20261022_v3';
 import { AdminWorkshopPortal } from './components/admin.js?v=20261022_v3';
 import { escapeHtml } from './services/html_escape.js';
